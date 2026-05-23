@@ -96,7 +96,6 @@ Current repository assets:
 - [Splunk Setup](./docs/SPLUNK_SETUP.md)
 - [Architecture](./docs/ARCHITECTURE.md)
 - [Demo Runbook](./docs/DEMO_RUNBOOK.md)
-- [Contributing](./docs/CONTRIBUTING.md)
 
 ## Vision
 
