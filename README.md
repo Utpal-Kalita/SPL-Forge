@@ -83,12 +83,20 @@ Current repository assets:
 
 - Product requirements in [`docs/PRD.md`](./docs/PRD.md)
 - Delivery roadmap in [`docs/ROADMAP.md`](./docs/ROADMAP.md)
+- Setup guides for VS Code, Splunk, and first-run workflow
+- Supporting docs for architecture, demo flow, and contribution expectations
 - Brand banner and repository presentation assets
 
 ## Documentation
 
 - [Product Requirements Document](./docs/PRD.md)
 - [Roadmap](./docs/ROADMAP.md)
+- [Quickstart](./docs/QUICKSTART.md)
+- [VS Code Setup](./docs/VS_CODE_SETUP.md)
+- [Splunk Setup](./docs/SPLUNK_SETUP.md)
+- [Architecture](./docs/ARCHITECTURE.md)
+- [Demo Runbook](./docs/DEMO_RUNBOOK.md)
+- [Contributing](./docs/CONTRIBUTING.md)
 
 ## Vision
 
