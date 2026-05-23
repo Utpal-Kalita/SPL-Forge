@@ -91,6 +91,7 @@ Current repository assets:
 
 - [Product Requirements Document](./docs/PRD.md)
 - [Roadmap](./docs/ROADMAP.md)
+- [Progress](./docs/PROGRESS.md)
 - [Quickstart](./docs/QUICKSTART.md)
 - [VS Code Setup](./docs/VS_CODE_SETUP.md)
 - [Splunk Setup](./docs/SPLUNK_SETUP.md)
