@@ -25,8 +25,6 @@ SPL-Forge/
 ├── assets/                     # Brand assets and images
 │   └── spl-forge-banner.png    # Project banner
 ├── docs/                       # Documentation directory
-│   ├── PRD.md                  # Product Requirements Document
-│   ├── ROADMAP.md              # Development roadmap
 │   ├── PROGRESS.md             # Progress tracking
 │   ├── QUICKSTART.md           # Quick start guide
 │   ├── VS_CODE_SETUP.md        # VS Code extension setup
