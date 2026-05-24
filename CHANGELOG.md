@@ -1,11 +1,11 @@
 # Changelog
 
-All notable changes to **SPL FORGE** will be documented in this file.
+All notable changes to **SPL Forge** will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-> **Project status:** SPL FORGE is currently a pre-release hackathon project for the Splunk Agentic Ops Hackathon 2026. Until a public repository is tagged, version numbers represent documented product, architecture, and implementation milestones.
+> **Project status:** SPL Forge is a pre-release hackathon project for the Splunk Agentic Ops Hackathon 2026. Currently in the **Foundation/MVP Planning phase** with VS Code extension scaffolding complete. Core implementation work (backend API, agentic logic, Splunk connectors) is in progress.
 
 ---
 
@@ -13,64 +13,62 @@ and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.ht
 
 ### Added
 
-- Implementation backlog for the first working SPL FORGE MVP.
-- Frontend workspace for natural-language operational requests, SPL preview, validation results, execution status, generated artifacts, and approval prompts.
-- SPL editor experience using Monaco Editor or an equivalent code editor with syntax highlighting, copy/export actions, and before/after query comparison.
-- Backend API routes for the core forge pipeline:
-  - `POST /api/intent/analyze`
-  - `POST /api/spl/generate`
-  - `POST /api/spl/validate`
-  - `POST /api/spl/execute`
-  - `POST /api/spl/optimize`
-  - `POST /api/artifacts/dashboard`
-  - `POST /api/artifacts/alert`
-  - `POST /api/artifacts/runbook`
-  - `GET /api/jobs/:jobId`
-  - `GET /api/splunk/metadata`
-- Splunk MCP adapter layer for search execution, search result retrieval, index discovery, sourcetype discovery, field discovery, saved-search discovery, and dashboard discovery.
-- Initial MCP gateway design for connecting multiple tool servers without tightly coupling every agent directly to each integration.
-- Prompt templates for intent classification, SPL generation, SPL validation, SPL optimization, incident analysis, dashboard generation, alert generation, and runbook generation.
-- Structured response schemas for generated SPL, validation warnings, risk levels, execution metadata, optimized SPL, artifact recommendations, and final user-facing explanations.
-- Local development plan using Docker Compose for the web app, API server, Redis queue, optional PostgreSQL state store, and MCP-related services.
-- Example demo scenarios for observability, security, platform engineering, and developer productivity:
-  - Checkout latency spike investigation.
-  - Failed-login spike detection.
-  - Kubernetes pod restart monitoring.
-  - Conversion of vague investigation questions into multiple SPL searches.
-- Test fixture plan for synthetic logs, security authentication events, application latency events, deployment events, and Kubernetes events.
-- Audit-log event model for recording user prompts, generated SPL, validation results, approval decisions, executed searches, generated artifacts, and exported assets.
-- Product telemetry plan to send SPL FORGE usage and safety events back into Splunk for self-observability.
-- Human approval workflow for high-risk actions such as running broad searches, creating alerts, modifying saved searches, writing Splunk app files, sending notifications, or creating tickets.
-- Documentation tasks for `README.md`, `SETUP.md`, `DEMO.md`, `SECURITY.md`, `ARCHITECTURE.md`, and `CONTRIBUTING.md`.
+- VS Code extension scaffold with TypeScript and esbuild configuration.
+- Extension activation command infrastructure: `spl-forge.openPanel` for launching the assistant panel.
+- Build pipeline with esbuild for fast bundling and development watch mode.
+- Development tools stack: TypeScript (5.9.3), ESLint (9.39.3), npm-run-all for parallel task execution.
+- Testing framework setup with VS Code test CLI and Mocha support.
+- Type definitions for VS Code API, Node.js, and Mocha testing framework.
+- VS Code SecretStorage API integration ready for secure token management.
+- Documentation structure and initial guides:
+  - QUICKSTART.md for first-time setup
+  - VS_CODE_SETUP.md for extension development environment
+  - SPLUNK_SETUP.md for Splunk connectivity prerequisites
+  - ARCHITECTURE.md for system design overview
+  - DEMO_RUNBOOK.md for demo scenario walkthrough
+  - PROGRESS.md for development tracking
+- Extension configuration in package.json with proper contribution points.
+- Build scripts for development, testing, and production packaging.
+- Git configuration with .gitignore and .vscodeignore for clean version control and packaging.
+
+### In Progress (Planned for 0.5.0)
+
+- Backend API routes for the forge pipeline (intent analysis, SPL generation, validation, execution, optimization, artifact generation).
+- Splunk connectivity layer:
+  - MCP Server connector for Splunk integration
+  - REST API fallback connector
+  - Mock connector for demo reliability
+- Agent orchestrator for multi-stage workflow (Intent → Generate → Validate → Execute → Repair → Optimize → Package).
+- LLM provider abstraction for OpenAI, Anthropic, or Splunk Hosted Models.
+- Schema service for caching and discovering Splunk metadata (indexes, sourcetypes, fields).
+- Self-debugging repair loop with error detection and automatic query correction.
+- Result preview and visualization support.
+- Artifact generators:
+  - Dashboard XML/JSON generation
+  - Alert configuration generation
+  - Saved search creation
+  - Splunk app scaffolding
+- Webview UI for VS Code extension with:
+  - Natural language prompt input
+  - Agent activity timeline
+  - SPL editor/output display
+  - Results preview panel
+  - Artifact export interface
 
 ### Changed
 
-- Refined the project direction from a single-purpose SPL generator into a full lifecycle **agentic Splunk operations workbench**.
-- Expanded the product scope to cover SPL generation, explanation, validation, execution, optimization, dashboard creation, alert creation, runbook generation, incident timelines, and Splunk app scaffolding.
-- Prioritized a safe, human-in-the-loop agent workflow over fully autonomous production changes.
-- Standardized the project around the term **forge pipeline**, where every generated operational artifact is drafted, validated, tested, explained, optimized, and packaged before use.
-- Shifted the MVP authentication plan toward token-based Splunk authentication because Splunk MCP OAuth support is still treated as a later-stage capability.
-- Reframed the system as a multi-track hackathon submission that can align with Observability, Security, and Platform instead of being limited to one category.
+- Repositioned from monolithic design concept to modular, MVP-focused VS Code extension approach.
+- Standardized development stack on TypeScript and Node.js for consistency with VS Code ecosystem.
+- Shifted authentication strategy toward token-based approach with VS Code SecretStorage for security.
 
 ### Fixed
 
-- Clarified that SPL FORGE should not pretend a query is correct when Splunk returns empty, weak, or suspicious results.
-- Clarified that generated SPL must be environment-aware and should use actual indexes, sourcetypes, fields, saved searches, dashboards, lookups, macros, and knowledge objects when available.
-- Clarified that broad, expensive, or risky SPL searches should be flagged before execution.
-- Clarified that generated alerts and dashboards should remain drafts until reviewed or approved by a human user.
+- Clarified that the extension should gracefully handle missing Splunk configuration with helpful error messages.
 
 ### Security
 
-- Added planned least-privilege MCP role separation:
-  - Read-only search role.
-  - Metadata discovery role.
-  - Saved-search author role.
-  - Dashboard author role.
-  - Admin-only deployment role.
-- Added planned SPL safety scanner rules for missing index constraints, overly broad time ranges, leading wildcards, expensive joins, risky commands, sensitive field exposure, and high-cardinality aggregations.
-- Added planned approval gates for production-impacting actions.
-- Added planned audit logging for every agent decision and Splunk operation.
-- Added planned PII and sensitive-field handling rules before query execution and artifact export.
+- Established VS Code SecretStorage as the mechanism for secure token and credential storage (no plaintext files).
+- Planned least-privilege MCP role architecture for Splunk connectivity.
 
 ---
 
@@ -78,95 +76,129 @@ and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.ht
 
 ### Added
 
-- Created the detailed `ABOUT.md` product specification for SPL FORGE.
-- Documented SPL FORGE as an agentic Splunk operations workbench that turns natural-language operational intent into safe, validated, production-ready Splunk assets.
-- Added the complete nine-stage forge pipeline:
-  - Intent capture.
-  - Context discovery.
-  - SPL drafting.
-  - Static validation.
-  - Controlled execution through Splunk MCP Server.
-  - Result analysis.
-  - Query optimization.
-  - Artifact generation.
-  - Human review and approval.
-- Added the main feature set:
-  - Natural language to SPL.
-  - SPL explainer.
-  - SPL safety scanner.
-  - SPL optimizer.
-  - Agentic incident investigation.
-  - Alert and detection builder.
-  - Dashboard Forge.
-  - Runbook generator.
-  - Splunk app builder.
-  - Knowledge object reuse.
-- Added detailed explanation of how SPL FORGE uses Splunk:
-  - Splunk Enterprise or Splunk Cloud as the operational data platform.
-  - SPL Search Engine as the execution layer.
-  - Splunk MCP Server as the secure agent-to-Splunk bridge.
-  - Splunk AI Assistant for SPL as a helper for SPL generation, editing, explanation, and refinement.
-  - Splunk AI Toolkit for anomaly detection, forecasting, clustering, classification, and custom ML workflows.
-  - Splunk Hosted Models for security reasoning, time-series analysis, alert enrichment, and incident summarization.
-  - Splunk Python SDK and app framework for packaging SPL FORGE capabilities inside Splunk.
-- Added the modular MCP server architecture:
-  - Splunk MCP Server.
-  - Documentation MCP Server.
-  - GitHub MCP Server.
-  - Ticketing MCP Server.
-  - CI/CD MCP Server.
-  - Notification MCP Server.
-- Added agent responsibilities for:
-  - Intent Agent.
-  - Schema Discovery Agent.
-  - SPL Generator Agent.
-  - Validator Agent.
-  - Execution Agent.
-  - Analyst Agent.
-  - Optimizer Agent.
-  - Artifact Agent.
-- Added recommended tech stack:
-  - React or Next.js.
-  - TypeScript.
-  - Tailwind CSS.
-  - Monaco Editor.
-  - Recharts or Apache ECharts.
-  - Python FastAPI or Node.js/NestJS.
-  - LangGraph, OpenAI Agents SDK, or similar orchestration framework.
-  - Pydantic or Zod for schema validation.
-  - Redis for queues and short-lived cache.
-  - PostgreSQL for app state.
-  - Docker and Docker Compose for local development.
-  - GitHub Actions for CI.
-  - OpenTelemetry and Splunk ingestion for self-monitoring.
-- Added core data flow from user prompt to final Splunk artifact.
-- Added security and safety model covering human approval, query guardrails, least-privilege MCP access, and audit logging.
-- Added scalability plan covering stateless APIs, async search execution, job queues, environment-aware caching, and multi-tenant design.
-- Added example use cases across Observability, Security, Platform Engineering, and Developer Productivity.
-- Added recommended demo flow for a checkout latency spike investigation after a deployment.
-- Added proposed repository structure for apps, agents, MCP servers, Splunk app files, guardrails, prompts, tests, and local configuration.
-- Added sample `.env` configuration for Splunk, MCP, OpenAI, Redis, and database connections.
-- Added example API design for intent analysis, SPL generation, validation, execution, optimization, and artifact creation.
-- Added example agent output JSON showing intent, risk level, generated SPL, explanation, validation warnings, and recommended artifacts.
-- Added originality statement explaining the **forge model** as the main differentiator.
-- Added future product vision for team workspaces, approval workflows, version control for SPL assets, regression tests, GitHub pull requests, Jira, ServiceNow, Slack, PagerDuty, RBAC, policy packs, marketplace recipes, and continuous learning from past incidents.
-- Added success metrics for time saved, query quality, incident speed, alert quality, artifact approval rate, and user trust.
+- Comprehensive product specification in `ABOUT.md` detailing SPL Forge as an agentic Splunk operations workbench.
+- Complete nine-stage forge pipeline architecture:
+  - Intent capture from natural language
+  - Context discovery via Splunk metadata
+  - SPL drafting with LLM assistance
+  - Static validation before execution
+  - Controlled execution through Splunk MCP Server
+  - Result analysis and quality assessment
+  - Query optimization for production use
+  - Artifact generation (dashboards, alerts, runbooks, apps)
+  - Human review and approval workflows
+- Feature set documentation:
+  - Natural language to SPL conversion
+  - SPL explainer and documentation generation
+  - SPL safety scanner for risk detection
+  - SPL optimizer for performance improvements
+  - Agentic incident investigation workflows
+  - Alert and detection rule builder
+  - Dashboard generation ("Dashboard Forge")
+  - Runbook and operational guide generator
+  - Splunk app builder for packaging
+  - Knowledge object discovery and reuse
+- Detailed explanation of Splunk platform integration:
+  - Splunk Enterprise/Cloud as operational data platform
+  - SPL Search Engine as execution layer
+  - Splunk MCP Server as secure agent-to-Splunk bridge
+  - Splunk AI Assistant for SPL generation and refinement
+  - Splunk AI Toolkit for advanced analytics
+  - Splunk Hosted Models for specialized reasoning tasks
+  - Splunk Python SDK for app development
+- Modular MCP server architecture design:
+  - Primary: Splunk MCP Server (search, metadata, knowledge objects)
+  - Secondary: Documentation MCP Server (runbooks, procedures)
+  - Secondary: GitHub MCP Server (repo inspection, PR generation)
+  - Secondary: Ticketing MCP Server (incident creation)
+  - Secondary: CI/CD MCP Server (deployment correlation)
+  - Secondary: Notification MCP Server (alert distribution)
+- Agent specialization design with 8 distinct agent responsibilities:
+  - Intent Agent for goal classification
+  - Schema Discovery Agent for metadata introspection
+  - SPL Generator Agent for query drafting
+  - Validator Agent for safety/syntax checking
+  - Execution Agent for search execution
+  - Analyst Agent for result interpretation
+  - Optimizer Agent for performance tuning
+  - Artifact Agent for asset generation
+- Recommended tech stack documentation:
+  - Frontend: React/Next.js, TypeScript, Tailwind CSS, Monaco Editor, Recharts/ECharts
+  - Backend: Python FastAPI or Node.js/NestJS
+  - Orchestration: LangGraph or OpenAI Agents SDK
+  - Validation: Pydantic or Zod schemas
+  - Queue/Cache: Redis
+  - State: PostgreSQL
+  - Containers: Docker and Docker Compose
+  - CI: GitHub Actions
+  - Observability: OpenTelemetry + Splunk ingestion
+- Core data flow documentation from user prompt to final Splunk artifact.
+- Security and safety model covering:
+  - Human-in-the-loop approval gates
+  - Query guardrails and validation rules
+  - Least-privilege MCP access control
+  - Audit logging for compliance
+  - PII and sensitive field handling
+- Scalability plan with:
+  - Stateless API design for horizontal scaling
+  - Async search execution with job queues
+  - Environment-aware metadata caching
+  - Multi-tenant isolation support
+- Use case examples across four domains:
+  - Observability: latency investigation and dashboards
+  - Security: detection engineering and threat hunting
+  - Platform Engineering: Splunk app generation and governance
+  - Developer Productivity: query generation and refinement
+- Demo flow blueprint for checkout latency investigation scenario.
+- Proposed repository structure for production-ready codebase organization.
+- Sample .env configuration template for Splunk, MCP, OpenAI, Redis, and database settings.
+- Example API design specification with request/response schemas.
+- Agent output JSON examples showing expected data structures.
+- Originality statement explaining the "forge model" as core differentiator.
+- Future vision document covering:
+  - Team workspaces and collaboration features
+  - Version control for SPL assets
+  - Regression testing for saved searches
+  - GitHub and CI/CD integration
+  - Jira, ServiceNow, Slack, PagerDuty connectors
+  - RBAC and policy packs
+  - Enterprise audit logging
+  - Marketplace for reusable workflows
+  - Continuous learning from incident history
+- Success metrics framework for:
+  - Time savings measurement
+  - Query quality scoring
+  - Incident investigation acceleration
+  - Alert accuracy improvement
+  - Artifact approval rates
+  - User trust indicators
 
 ### Changed
 
-- Expanded SPL FORGE from a concept into a complete product architecture.
-- Repositioned the project from “AI that writes SPL” to “AI that operationalizes Splunk workflows.”
-- Changed the system design to require real Splunk environment context before generating final SPL.
-- Changed generated assets from one-off outputs into reviewable, exportable, and versionable artifacts.
-- Changed the safety posture from passive warnings to an explicit validation and approval model.
-- Changed the Splunk MCP Server role from an optional integration to the core controlled execution bridge.
+- Expanded project scope from single-purpose "SPL generator" to full-lifecycle "agentic Splunk operations workbench".
+- Repositioned product narrative from "AI that writes SPL" to "AI that operationalizes Splunk workflows".
+- Changed system architecture to require real Splunk environment context before final SPL generation.
+- Changed generated assets from one-time outputs to reviewable, exportable, versionable artifacts.
+- Changed safety model from passive warnings to explicit validation and human approval gates.
+- Positioned Splunk MCP Server from optional integration to core controlled execution bridge.
 
 ### Security
 
-- Added human approval requirements before creating alerts, modifying saved searches, writing to Splunk KV Store, creating tickets, sending notifications, or running broad searches.
-- Added validation checks for risky SPL patterns before any controlled execution.
-- Added audit logging as a first-class design requirement.
-- Added least-privilege MCP access as the default permission model.
+- Added human approval requirements before high-risk actions:
+  - Creating or modifying alerts
+  - Changing saved searches
+  - Writing to Splunk KV Store
+  - Creating incident tickets
+  - Sending notifications
+  - Running broad or expensive searches
+- Added comprehensive validation checks for risky SPL patterns.
+- Established audit logging as first-class design requirement.
+- Defined least-privilege MCP access model with role separation:
+  - Read-only search role
+  - Metadata discovery role
+  - Saved-search author role
+  - Dashboard author role
+  - Admin-only deployment role
 
 ---
 
@@ -174,50 +206,63 @@ and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.ht
 
 ### Added
 
-- Completed research phase for the Splunk Agentic Ops Hackathon 2026.
-- Added hackathon timeline awareness:
-  - Registration period.
-  - Submission period.
-  - Feedback period.
-  - Judging period.
-  - Winner announcement window.
-- Added eligibility and team-size awareness for planning the submission.
-- Added judging criteria alignment:
-  - Technological implementation.
-  - Design.
-  - Potential impact.
-  - Quality of the idea.
-- Added prize and track context for shaping the project strategy.
-- Added project-track mapping for Observability, Security, and Platform.
-- Added technology inventory for the Splunk AI ecosystem:
-  - AI for Splunk Apps.
-  - Splunk MCP Server.
-  - Splunk AI Assistant for SPL.
-  - Splunk AI Toolkit.
-  - Splunk Hosted Models.
-  - Splunk Python SDK.
-  - Splunk app framework.
-- Added Splunk access plan:
-  - Create a free Splunk account.
-  - Install the Splunk Enterprise free trial.
-  - Request a Splunk Developer License.
-  - Use token-based authentication for MCP-based development.
-- Added resource plan for using official Splunk documentation, Splunkbase apps, MCP configuration guides, AI Assistant setup guides, AI Toolkit resources, and hosted model references.
-- Added support-channel awareness for the Splunk Community Slack and the hackathon channel.
-- Added initial ecosystem strategy for building a scalable product rather than only a narrow hackathon demo.
+- Completed hackathon research and ecosystem analysis phase.
+- Hackathon timeline awareness:
+  - Registration period understanding
+  - Submission period requirements
+  - Feedback, judging, and announcement windows
+- Eligibility and team-size planning considerations.
+- Judging criteria alignment documentation:
+  - Technological implementation expectations
+  - Design quality benchmarks
+  - Potential impact assessment
+  - Idea originality standards
+- Prize and track context for strategic planning.
+- Project-track mapping for:
+  - Observability track alignment
+  - Security track alignment
+  - Platform track alignment
+- Technology inventory of Splunk AI ecosystem:
+  - AI for Splunk Apps
+  - Splunk MCP Server capabilities
+  - Splunk AI Assistant for SPL
+  - Splunk AI Toolkit
+  - Splunk Hosted Models
+  - Splunk Python SDK
+  - Splunk app framework
+- Splunk access plan:
+  - Free account creation pathway
+  - Splunk Enterprise free trial installation
+  - Developer License request process
+  - Token-based authentication setup
+- Resource planning for:
+  - Official Splunk documentation
+  - Splunkbase app repository
+  - MCP configuration guides
+  - AI Assistant setup resources
+  - AI Toolkit resources
+  - Hosted Models reference materials
+- Support channel awareness for:
+  - Splunk Community Slack
+  - Official hackathon support channels
+- Initial ecosystem strategy for building beyond hackathon scope.
 
 ### Changed
 
-- Shifted the research focus from collecting project ideas to understanding the Splunk platform, hackathon rules, available AI capabilities, and high-value integration areas.
-- Prioritized Splunk-native capabilities over unrelated external tooling.
-- Prioritized agentic workflows that can be demonstrated inside or alongside Splunk.
-- Prioritized solutions that improve operational teams’ real workflows: monitoring, detection, investigation, response, and Splunk app development.
+- Shifted research focus from generic project ideas to deep Splunk platform understanding.
+- Prioritized Splunk-native capabilities over external tool dependencies.
+- Prioritized agentic workflows demonstrable within Splunk ecosystem.
+- Prioritized solutions addressing real operational team workflows:
+  - Monitoring and observability
+  - Threat detection and investigation
+  - Incident response automation
+  - Splunk app development productivity
 
 ### Security
 
-- Identified MCP access control and authentication as a major design concern.
-- Identified token-based authentication as the practical MVP route for Splunk MCP integration.
-- Identified OAuth support as a future enhancement once broader availability matures.
+- Identified MCP access control and authentication as critical design concern.
+- Selected token-based authentication as practical MVP approach.
+- Identified OAuth support as future enhancement pending broader availability.
 
 ---
 
@@ -225,19 +270,32 @@ and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.ht
 
 ### Added
 
-- Added the project identity **SPL FORGE**.
-- Added the core brand metaphor: a forge that turns rough operational intent into production-grade Splunk intelligence.
-- Added the product positioning as a professional-level agentic operations platform for Splunk users.
-- Added the short submission-ready project description under 350 characters.
-- Added early branding direction for a logo and visual identity.
-- Added initial narrative around making the project original, scalable, and enterprise-ready.
-- Added the idea that SPL FORGE should generate more than SPL queries, including dashboards, alerts, detections, runbooks, reports, and app components.
+- Project identity: **SPL Forge**
+- Core brand metaphor: "a forge that turns rough operational intent into production-grade Splunk intelligence"
+- Product positioning as professional-level agentic operations platform for Splunk users.
+- Submission-ready project description (under 350 characters).
+- Early branding and visual identity direction.
+- Narrative framework emphasizing originality, scalability, and enterprise readiness.
+- Product vision of generating beyond SPL queries:
+  - Dashboards and visualizations
+  - Alerts and detections
+  - Runbooks and procedures
+  - Reports and summaries
+  - Splunk app components
 
 ### Changed
 
-- Changed the project framing from a generic AI hackathon idea to a named, branded product concept.
-- Changed the output goal from a simple demo to a polished professional submission with product story, architecture, and growth path.
-- Changed the pitch to emphasize developer productivity, observability, security, platform extensibility, and Splunk-native workflows.
+- Reframed project from generic AI hackathon concept to named, branded product.
+- Changed output goal from basic demo to polished professional submission with:
+  - Compelling product story
+  - Complete architecture documentation
+  - Clear growth and scalability path
+- Refined pitch to emphasize:
+  - Developer productivity improvements
+  - Observability capabilities
+  - Security workflow automation
+  - Platform extensibility
+  - Splunk-native design
 
 ---
 
@@ -245,23 +303,22 @@ and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.ht
 
 ### Added
 
-- Started the SPL FORGE project exploration inside the Splunk Agentic Ops Hackathon context.
-- Added the initial requirement to deeply research:
-  - Hackathon rules.
-  - Tools.
-  - Technologies.
-  - Splunk platform capabilities.
-  - Possible integration areas.
-  - Product scalability around the Splunk ecosystem.
-- Added the requirement to create something original rather than a common or low-effort hackathon clone.
-- Added the requirement to avoid premature project ideas until the platform research was complete.
-- Added the ambition level for a highly complex, professional-grade project.
+- SPL Forge project exploration initiation within hackathon context.
+- Research requirements established for:
+  - Hackathon rules and constraints
+  - Available tools and technologies
+  - Splunk platform capabilities analysis
+  - Integration opportunity identification
+  - Product scalability assessment
+- Requirement to create original solution avoiding common hackathon approaches.
+- Requirement to defer project ideas until comprehensive platform research complete.
+- High ambition level setting: complex, professional-grade implementation.
 
 ### Changed
 
-- Established the project’s direction as research-first and architecture-first.
-- Established that the project should be capable of growing beyond the hackathon into a scalable product.
-- Established that the project should use current Splunk AI capabilities instead of treating Splunk as only a log-search database.
+- Established research-first and architecture-first project direction.
+- Set expectation for product capability beyond hackathon scope.
+- Focused on leveraging current Splunk AI capabilities vs. treating Splunk as basic search engine.
 
 ---
 
@@ -269,109 +326,200 @@ and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.ht
 
 ### Added
 
-- Created the initial project workspace for Splunk Agentic Ops Hackathon planning.
-- Added source context files for:
-  - Hackathon rules.
-  - Hackathon resources.
-  - Challenge overview.
-- Added the first project direction: use AI and Splunk together to improve observability, security, platform operations, and developer productivity.
+- Initial project workspace creation for Splunk Agentic Ops Hackathon planning.
+- Source context files ingestion:
+  - Hackathon rules and requirements
+  - Available resources and tools
+  - Challenge overview and scope
+  - Platform guidelines
+- GitHub repository initialization with foundational configuration.
+- VS Code extension project scaffolding:
+  - TypeScript configuration (tsconfig.json)
+  - ESLint setup for code quality (eslint.config.mjs)
+  - esbuild bundler configuration for fast compilation
+  - Package.json with NPM dependency management
+  - Build scripts for development and production
+- Extension entry point: `src/extension.ts` with minimal activation logic.
+- Test infrastructure setup:
+  - Mocha test framework integration
+  - VS Code test CLI configuration
+  - Electron testing environment
+- Initial project direction statement: leverage AI and Splunk together to improve observability, security, platform operations, and developer productivity.
+- Project branding assets directory (assets/).
+- Documentation structure with docs/ directory for future content.
 
 ---
 
 ## Release Notes Policy
 
-SPL FORGE changelog entries should remain useful to builders, judges, maintainers, and future users. Each release should describe what changed at the product, architecture, implementation, documentation, and safety levels.
+SPL Forge changelog entries prioritize usefulness for builders, judges, maintainers, and future users. Each release describes changes at these levels:
 
-Recommended categories:
+- **Product**: User-facing features and capabilities
+- **Architecture**: Design changes and system improvements
+- **Implementation**: Code structure and technical decisions
+- **Documentation**: Updated guides and specifications
+- **Safety**: Security, permissions, and reliability improvements
 
-- `Added` for new features, docs, architecture, APIs, agents, integrations, demo flows, and assets.
-- `Changed` for updates to product direction, architecture, workflows, dependencies, or user experience.
-- `Deprecated` for features or APIs that will be removed later.
-- `Removed` for deleted features, files, integrations, or abandoned approaches.
-- `Fixed` for corrections to docs, prompts, SPL generation behavior, validation rules, or UI/API bugs.
-- `Security` for guardrails, authentication, authorization, audit logging, PII handling, MCP permissions, and safe execution changes.
+### Recommended Categories
+
+- **Added**: New features, documentation, architecture components, APIs, agents, integrations, demo flows, and assets
+- **Changed**: Updates to product direction, architecture, workflows, dependencies, or user experience
+- **Deprecated**: Features or APIs scheduled for removal in future versions
+- **Removed**: Deleted features, files, integrations, or abandoned approaches
+- **Fixed**: Corrections to documentation, prompts, SPL behavior, validation logic, or bugs
+- **Security**: Guardrails, authentication, authorization, audit logging, PII handling, MCP permissions, and controlled execution improvements
+
+---
 
 ## Versioning Policy
 
-Before the first production release, SPL FORGE uses `0.x.y` versions:
+Before the first production release (1.0.0), SPL Forge uses `0.x.y` semantic versioning:
 
-- `0.0.x` for initial setup and repository preparation.
-- `0.1.x` for research and concept definition.
-- `0.2.x` for branding, pitch, and submission narrative.
-- `0.3.x` for hackathon ecosystem research and track alignment.
-- `0.4.x` for architecture and documentation.
-- `0.5.x` for first working MVP implementation.
-- `0.6.x` for Splunk MCP integration.
-- `0.7.x` for dashboard, alert, and runbook generation.
-- `0.8.x` for security hardening and test coverage.
-- `0.9.x` for demo polish and submission readiness.
-- `1.0.0` for the first stable release after the hackathon prototype is validated.
+- **0.0.x** – Initial setup and repository preparation
+- **0.1.x** – Research and concept definition
+- **0.2.x** – Branding, pitch, and submission narrative
+- **0.3.x** – Hackathon ecosystem research and track alignment
+- **0.4.x** – Complete product specification and architecture
+- **0.5.x** – First working MVP implementation
+- **0.6.x** – Splunk MCP integration and connectivity
+- **0.7.x** – Artifact generation (dashboards, alerts, runbooks)
+- **0.8.x** – Security hardening and test coverage
+- **0.9.x** – Demo polish and submission readiness
+- **1.0.0** – First stable release after hackathon prototype validation
+
+---
 
 ## Future Release Targets
 
-### [0.5.0] - MVP Workspace
+### [0.5.0] - MVP Workspace (10 days)
+
+**Goal**: Working VS Code extension that can accept natural language prompts, generate SPL, execute against Splunk, and export basic artifacts.
 
 Planned scope:
 
-- Working frontend.
-- Working backend API.
-- Intent analysis endpoint.
-- SPL generation endpoint.
-- SPL validation endpoint.
-- Local state model.
-- Basic approval UI.
-- Example generated SPL explanations.
+- Working webview UI for prompt input and result display
+- Backend API server (FastAPI or NestJS)
+- Intent analysis endpoint and agent
+- SPL generation endpoint with LLM integration
+- SPL validation endpoint with safety checks
+- Local state model for session management
+- Basic approval UI for high-risk actions
+- Example generated SPL explanations
+- Demo-ready mock data and scenarios
+
+Success criteria: Judges can watch a 3-minute demo seeing natural-language prompt → generated SPL → execution → error repair → result preview → exported artifact.
 
 ### [0.6.0] - Splunk MCP Integration
 
 Planned scope:
 
-- Splunk MCP Server connection.
-- Token-based authentication.
-- Metadata discovery.
-- Controlled SPL execution.
-- Search result retrieval.
-- Job status polling.
-- MCP error handling.
+- Splunk MCP Server connection and authentication
+- Token-based credential management
+- Metadata discovery (indexes, sourcetypes, fields)
+- Controlled SPL execution via MCP
+- Search result retrieval and streaming
+- Job status polling and monitoring
+- MCP error handling and graceful fallbacks
+- Mock connector for demo reliability
 
 ### [0.7.0] - Artifact Forge
 
 Planned scope:
 
-- Dashboard draft generation.
-- Alert draft generation.
-- Runbook draft generation.
-- Incident timeline generation.
-- Splunk app file scaffolding.
-- Exportable Markdown and JSON artifacts.
+- Dashboard draft generation (XML/JSON)
+- Alert configuration generation
+- Runbook and procedure generation
+- Incident timeline generation
+- Splunk app file scaffolding
+- Exportable Markdown and JSON artifacts
+- Multi-format export options (zip, folder, Splunkbase-ready)
 
 ### [0.8.0] - Guardrails and Quality
 
 Planned scope:
 
-- Expanded SPL safety scanner.
-- Query cost heuristics.
-- Sensitive-field detection.
-- Approval policy configuration.
-- Audit-log ingestion into Splunk.
-- Unit tests for agents and validators.
-- Integration tests against a local Splunk environment.
+- Expanded SPL safety scanner with comprehensive rule set
+- Query cost estimation and optimization heuristics
+- Sensitive field detection and PII handling
+- Approval policy configuration framework
+- Audit log ingestion into Splunk for self-observability
+- Comprehensive unit tests for agents
+- Integration tests against local Splunk environment
+- Error recovery and resilience testing
 
 ### [0.9.0] - Hackathon Submission Candidate
 
 Planned scope:
 
-- Final demo script.
-- Final project description.
-- Final screenshots or video assets.
-- Deployment instructions.
-- Security notes.
-- Judge-facing explanation of technical implementation, design, potential impact, and originality.
-- Clean repository structure and reproducible setup.
+- Final demo script and talking points
+- Final project description and value proposition
+- Demo screenshots and video assets
+- Deployment and setup instructions
+- Security considerations documentation
+- Judge-facing technical implementation summary
+- Design, impact, and originality explanation
+- Clean repository structure with reproducible setup
+- Comprehensive README and getting started guide
 
-[Unreleased]: https://github.com/your-org/spl-forge/compare/v0.4.0...HEAD
-[0.4.0]: https://github.com/your-org/spl-forge/releases/tag/v0.4.0
-[0.3.0]: https://github.com/your-org/spl-forge/releases/tag/v0.3.0
-[0.2.0]: https://github.com/your-org/spl-forge/releases/tag/v0.2.0
-[0.1.0]: https://github.com/your-org/spl-forge/releases/tag/v0.1.0
-[0.0.1]: https://github.com/your-org/spl-forge/releases/tag/v0.0.1
+### [1.0.0] - Stable Release (Post-Hackathon)
+
+Expected scope (contingent on hackathon results):
+
+- Production-ready codebase with performance optimization
+- Enterprise security features (RBAC, SSO, audit trails)
+- Team collaboration and approval workflows
+- Multi-environment support (dev, staging, production)
+- Advanced LLM model options and fine-tuning
+- Splunkbase app marketplace availability
+- Ongoing support and community engagement
+
+---
+
+## Development Status
+
+### Current Phase: Foundation/MVP Planning (0.0.1 → 0.5.0)
+
+**Completed:**
+- ✅ Project research and planning (0.1.0 → 0.3.0)
+- ✅ Branding and product definition (0.2.0)
+- ✅ Complete product specification (0.4.0)
+- ✅ VS Code extension scaffolding with TypeScript and build pipeline
+- ✅ Documentation structure and initial guides
+- ✅ GitHub repository initialization
+- ✅ Development environment setup
+
+**In Progress:**
+- 🔄 Backend API implementation
+- 🔄 Splunk connector and MCP integration
+- 🔄 Agent orchestration framework
+- 🔄 LLM provider integration
+- 🔄 Webview UI development
+
+**Planned:**
+- ⏳ Self-debugging loop implementation
+- ⏳ Dashboard and alert generation
+- ⏳ Artifact packaging and export
+- ⏳ Comprehensive testing and validation
+- ⏳ Demo scenario execution and polish
+
+---
+
+## Links and References
+
+- **Product Requirements**: [PRD.md](./PRD.md)
+- **Roadmap**: [ROADMAP.md](./ROADMAP.md)
+- **Architecture**: [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md)
+- **Getting Started**: [docs/QUICKSTART.md](./docs/QUICKSTART.md)
+- **Full Specification**: [docs/ABOUT.md](./docs/ABOUT.md)
+
+---
+
+**Last Updated**: 2026-05-24  
+**Maintainer**: Utpal-Kalita and Contributors
+
+[Unreleased]: https://github.com/Utpal-Kalita/SPL-Forge/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/Utpal-Kalita/SPL-Forge/compare/v0.3.0...v0.4.0
+[0.3.0]: https://github.com/Utpal-Kalita/SPL-Forge/compare/v0.2.0...v0.3.0
+[0.2.0]: https://github.com/Utpal-Kalita/SPL-Forge/compare/v0.1.0...v0.2.0
+[0.1.0]: https://github.com/Utpal-Kalita/SPL-Forge/compare/v0.0.1...v0.1.0
+[0.0.1]: https://github.com/Utpal-Kalita/SPL-Forge/releases/tag/v0.0.1
