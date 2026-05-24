@@ -146,5 +146,6 @@ SPL_FORGE_SPLUNK_SOURCE=self_hosted_trial
 ## Related Docs
 
 - [`SPLUNK_SETUP.md`](./SPLUNK_SETUP.md)
+- [`SAMPLE_DATA.md`](./SAMPLE_DATA.md)
 - [`VS_CODE_SETUP.md`](./VS_CODE_SETUP.md)
 - [`DEMO_RUNBOOK.md`](./DEMO_RUNBOOK.md)

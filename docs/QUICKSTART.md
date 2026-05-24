@@ -19,8 +19,9 @@ Core docs:
 2. Complete [`VS_CODE_SETUP.md`](./VS_CODE_SETUP.md).
 3. Complete [`FREE_TRIAL_SETUP.md`](./FREE_TRIAL_SETUP.md).
 4. Review [`SPLUNK_SETUP.md`](./SPLUNK_SETUP.md) for MCP, REST, or mock integration mode.
-5. Review [`ARCHITECTURE.md`](./ARCHITECTURE.md) before implementation work.
-6. Use [`DEMO_RUNBOOK.md`](./DEMO_RUNBOOK.md) if preparing hackathon walkthrough.
+5. Load [`SAMPLE_DATA.md`](./SAMPLE_DATA.md) fixture into Splunk.
+6. Review [`ARCHITECTURE.md`](./ARCHITECTURE.md) before implementation work.
+7. Use [`DEMO_RUNBOOK.md`](./DEMO_RUNBOOK.md) if preparing hackathon walkthrough.
 
 ## MVP Demo Goal
 

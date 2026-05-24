@@ -1,15 +1,21 @@
 import * as assert from 'assert';
-
-// You can import and use all API from the 'vscode' module
-// as well as import your extension to test it
 import * as vscode from 'vscode';
-// import * as myExtension from '../../extension';
+import { getPanelHtml } from '../panels/assistant';
 
 suite('Extension Test Suite', () => {
 	vscode.window.showInformationMessage('Start all tests.');
 
-	test('Sample test', () => {
-		assert.strictEqual(-1, [1, 2, 3].indexOf(5));
-		assert.strictEqual(-1, [1, 2, 3].indexOf(0));
+	test('panel html shows day 1 scaffold state', () => {
+		const html = getPanelHtml({
+			cspSource: 'vscode-resource:',
+			extensionUri: 'file:///tmp/spl-forge',
+			mode: 'mock',
+			source: 'self_hosted_trial',
+			workspaceName: 'SPL-Forge',
+		});
+
+		assert.ok(html.includes('Day 1 scaffold ready'));
+		assert.ok(html.includes('failed_login_auth.csv'));
+		assert.ok(html.includes('Mode: mock'));
 	});
 });

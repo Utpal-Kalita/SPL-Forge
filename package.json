@@ -22,7 +22,8 @@
     "commands": [
       {
         "command": "spl-forge.openPanel",
-        "title": "SPL Forge: Open Panel"
+        "title": "SPL Forge: Open Panel",
+        "category": "SPL Forge"
       }
     ]
   },

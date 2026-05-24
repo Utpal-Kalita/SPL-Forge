@@ -12,6 +12,18 @@ Turn natural-language intent into validated Splunk artifacts inside development 
 User intent -> LLM generation -> Splunk execution -> Error/result inspection -> Repair -> Preview -> Export
 ```
 
+## Day 1 Diagram Draft
+
+```mermaid
+flowchart LR
+    U[User Prompt] --> P[VS Code Panel]
+    P --> G[LLM Generate]
+    G --> X[Splunk Adapter]
+    X -->|results or errors| R[Repair Logic]
+    R --> P
+    P --> E[Export Artifacts]
+```
+
 ## Primary Components
 
 ### 1. VS Code Extension Layer
@@ -75,6 +87,8 @@ Responsible for:
 ```text
 src/
 ├─ extension.ts
+├─ config/
+│  └─ env.ts
 ├─ agent/
 │  ├─ generate.ts
 │  ├─ repair.ts
@@ -90,6 +104,17 @@ src/
 │  └─ package.ts
 └─ panels/
    └─ assistant.ts
+```
+
+## Current Day 1 Scaffold
+
+```text
+src/
+├─ extension.ts
+├─ panels/
+│  └─ assistant.ts
+└─ test/
+   └─ extension.test.ts
 ```
 
 ## Runtime Modes

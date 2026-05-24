@@ -1,8 +1,9 @@
 import * as vscode from 'vscode';
+import { SPLForgePanel } from './panels/assistant';
 
 export function activate(context: vscode.ExtensionContext) {
   const disposable = vscode.commands.registerCommand('spl-forge.openPanel', () => {
-    vscode.window.showInformationMessage('SPL Forge panel coming next.');
+    SPLForgePanel.createOrShow(context.extensionUri);
   });
 
   context.subscriptions.push(disposable);

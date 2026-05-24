@@ -1,0 +1,11 @@
+timestamp,user,src,country,user_agent,action,sourcetype,index
+2026-05-24T10:15:23Z,jdoe,192.168.1.100,US,Mozilla/5.0,failure,auth,main
+2026-05-24T10:16:45Z,msmith,203.45.67.89,India,Mozilla/5.0,failure,auth,main
+2026-05-24T10:17:12Z,kchen,150.23.45.67,China,Chrome/91.0,failure,auth,main
+2026-05-24T10:18:03Z,jdoe,192.168.1.100,US,Safari/14.0,success,auth,main
+2026-05-24T10:19:27Z,agarcia,45.67.89.123,Brazil,Firefox/89.0,failure,auth,main
+2026-05-24T10:20:14Z,admin,88.24.11.200,Germany,Chrome/123.0,failure,auth,main
+2026-05-24T10:22:39Z,svc-ci,10.1.5.22,Singapore,curl/8.5.0,success,auth,main
+2026-05-24T10:24:10Z,jdoe,192.168.1.100,US,Mozilla/5.0,failure,auth,main
+2026-05-24T10:24:48Z,msmith,203.45.67.89,India,Edge/124.0,failure,auth,main
+2026-05-24T10:25:51Z,admin,88.24.11.200,Germany,Chrome/123.0,failure,auth,main

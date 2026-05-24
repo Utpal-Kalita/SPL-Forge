@@ -92,6 +92,7 @@ Install these extensions for the best development experience:
 ### Recommended for SPL Forge
 
 - **Markdown All in One** — better documentation editing.
+- **Splunk Extension** — official Splunk VS Code extension for app and search workflows.
 - **REST Client** — useful for testing Splunk REST API calls from `.http` files.
 - **GitLens** — better Git history, blame, and branch review.
 - **Error Lens** — shows TypeScript and ESLint issues inline.
@@ -105,6 +106,7 @@ code --install-extension GitHub.vscode-pull-request-github
 code --install-extension christian-kohler.npm-intellisense
 code --install-extension christian-kohler.path-intellisense
 code --install-extension yzhang.markdown-all-in-one
+code --install-extension Splunk.splunk
 code --install-extension humao.rest-client
 code --install-extension eamodio.gitlens
 code --install-extension usernamehw.errorlens

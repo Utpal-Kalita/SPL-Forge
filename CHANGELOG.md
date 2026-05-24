@@ -12,6 +12,7 @@ All notable changes to **SPL Forge** will be documented in this file.
 
 - VS Code extension scaffold with TypeScript and esbuild configuration.
 - Extension activation command infrastructure: `spl-forge.openPanel` for launching the assistant panel.
+- First working webview panel scaffold in `src/panels/assistant.ts`.
 - Build pipeline with esbuild for fast bundling and development watch mode.
 - Development tools stack: TypeScript (5.9.3), ESLint (9.39.3), npm-run-all for parallel task execution.
 - Testing framework setup with VS Code test CLI and Mocha support.
@@ -20,6 +21,9 @@ All notable changes to **SPL Forge** will be documented in this file.
 - Documentation structure and initial guides:
   - QUICKSTART.md for first-time setup
   - VS_CODE_SETUP.md for extension development environment
+  - FREE_TRIAL_SETUP.md for Splunk Enterprise free trial + Developer License path
+  - SAMPLE_DATA.md for Day 1 data import flow
+  - DAY1_STATUS.md for roadmap checkpoint status
   - SPLUNK_SETUP.md for Splunk connectivity prerequisites
   - ARCHITECTURE.md for system design overview
   - DEMO_RUNBOOK.md for demo scenario walkthrough
@@ -27,6 +31,8 @@ All notable changes to **SPL Forge** will be documented in this file.
 - Extension configuration in package.json with proper contribution points.
 - Build scripts for development, testing, and production packaging.
 - Git configuration with .gitignore and .vscodeignore for clean version control and packaging.
+- Sample failed-login fixture in `samples/failed_login_auth.csv`.
+- Workspace recommendation for official `Splunk.splunk` VS Code extension.
 
 ### In Progress (Planned for 0.5.0)
 
@@ -57,15 +63,23 @@ All notable changes to **SPL Forge** will be documented in this file.
 - Repositioned from monolithic design concept to modular, MVP-focused VS Code extension approach.
 - Standardized development stack on TypeScript and Node.js for consistency with VS Code ecosystem.
 - Shifted authentication strategy toward token-based approach with VS Code SecretStorage for security.
+- Replaced Docker-first local setup path with Splunk Enterprise free trial + Developer License flow.
 
 ### Fixed
 
 - Clarified that the extension should gracefully handle missing Splunk configuration with helpful error messages.
+- Corrected docs and repo guidance to reflect Day 1 scaffold status instead of pure planning-only state.
 
 ### Security
 
 - Established VS Code SecretStorage as the mechanism for secure token and credential storage (no plaintext files).
 - Planned least-privilege MCP role architecture for Splunk connectivity.
+
+### Manual Milestones
+
+- Installed local Splunk Enterprise free trial.
+- Installed official `Splunk.splunk` VS Code extension.
+- Requested and applied Splunk Developer License.
 
 ---
 
