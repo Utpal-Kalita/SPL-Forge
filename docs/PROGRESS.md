@@ -14,6 +14,7 @@ SPL Forge currently exists as product definition, setup documentation, and demo 
 - [x] Roadmap added in [`ROADMAP.md`](./ROADMAP.md)
 - [x] Quickstart guide added in [`QUICKSTART.md`](./QUICKSTART.md)
 - [x] VS Code setup guide added in [`VS_CODE_SETUP.md`](./VS_CODE_SETUP.md)
+- [x] Free trial setup guide added in [`FREE_TRIAL_SETUP.md`](./FREE_TRIAL_SETUP.md)
 - [x] Splunk setup guide added in [`SPLUNK_SETUP.md`](./SPLUNK_SETUP.md)
 - [x] Architecture overview added in [`ARCHITECTURE.md`](./ARCHITECTURE.md)
 - [x] Demo runbook added in [`DEMO_RUNBOOK.md`](./DEMO_RUNBOOK.md)

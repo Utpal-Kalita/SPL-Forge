@@ -11,7 +11,6 @@
 [![Built for Splunk](https://img.shields.io/badge/Built%20for-Splunk-00B140?style=flat-square)](#)
 [![VS Code](https://img.shields.io/badge/VS%20Code-Extension-007ACC?style=flat-square)](#)
 [![TypeScript](https://img.shields.io/badge/TypeScript-Ready-3178C6?style=flat-square)](#)
-[![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?style=flat-square)](#)
 [![MCP](https://img.shields.io/badge/MCP-Agentic%20Ops-111827?style=flat-square)](#)
 
 </div>
@@ -47,7 +46,7 @@ SPL Forge addresses that gap with agentic, execution-aware development loop buil
 - Export flows for dashboards, alerts, reports, and lightweight app packaging
 - Human-in-the-loop approvals before execution and export
 - Demo-safe support for MCP, REST fallback, or mock environments
-- Docker-ready local development environment for rapid iteration
+- Local Splunk Enterprise development environment for rapid iteration
 
 ## Product Direction
 
@@ -57,7 +56,7 @@ According to PRD, SPL Forge is being designed as:
 - Practical agentic IDE for Splunk developers and analysts
 - Hackathon-ready MVP focused on one polished end-to-end workflow
 - Foundation for broader AI-native Splunk development operations
-- Docker-supported local development for team consistency
+- Self-hosted local development path aligned with Splunk free trial and Developer License flow
 
 Initial demo scenario is centered on failed-login monitoring, where system generates query, detects or simulates error, repairs it with schema context, previews results, and exports dashboard and alert package.
 
@@ -67,7 +66,7 @@ Initial demo scenario is centered on failed-login monitoring, where system gener
 - Security analysts creating detection searches and dashboards
 - SRE and DevOps teams building operational monitoring views under time pressure
 - Splunk admins and platform engineers supporting repeatable content creation
-- Development teams looking for reproducible, containerized Splunk environments
+- Development teams who need repeatable local Splunk validation during build and demo work
 
 ## Architecture Snapshot
 
@@ -78,13 +77,13 @@ Initial demo scenario is centered on failed-login monitoring, where system gener
 | UI | Webview-based interface, with optional web dashboard |
 | Validation | Structured schema and artifact validation |
 | Splunk connectivity | Splunk MCP Server, REST fallback, or mock connector |
-| Local Splunk | Docker container (development) or self-hosted (production) |
+| Local Splunk | Self-hosted Splunk Enterprise free trial with Developer License |
 | AI layer | Hosted models or provider adapters |
 | Export | Dashboard, alert, report, and app-ready artifact generation |
 
 ## Quick Start
 
-Fastest path with Docker:
+Fastest path with Splunk Enterprise free trial:
 
 ```bash
 # 1. Clone and install
@@ -92,8 +91,8 @@ git clone https://github.com/Utpal-Kalita/SPL-Forge SPL-Forge
 cd SPL-Forge
 npm install
 
-# 2. Start Splunk via Docker
-docker-compose up -d
+# 2. Install Splunk Enterprise free trial and apply Developer License
+# Follow docs/FREE_TRIAL_SETUP.md
 
 # 3. Configure environment
 cp .env.example .env.local
@@ -103,7 +102,7 @@ npm run watch
 # Then press F5 in VS Code
 ```
 
-See [`docs/DOCKER_SETUP.md`](./docs/DOCKER_SETUP.md) for full Docker instructions.
+See [`docs/FREE_TRIAL_SETUP.md`](./docs/FREE_TRIAL_SETUP.md) for full Splunk setup instructions.
 
 ## Current Status
 
@@ -113,9 +112,8 @@ Current repository assets:
 
 - Product requirements in [`PRD.md`](./PRD.md)
 - Delivery roadmap in [`ROADMAP.md`](./ROADMAP.md)
-- Setup guides for VS Code, Splunk, Docker, and first-run workflow
+- Setup guides for VS Code, Splunk, and first-run workflow
 - Supporting docs for architecture, demo flow, and contribution expectations
-- Docker Compose configuration for reproducible local environments
 - Brand banner and repository presentation assets
 
 ## Documentation
@@ -126,13 +124,13 @@ Current repository assets:
 - [Quickstart](./docs/QUICKSTART.md)
 - [VS Code Setup](./docs/VS_CODE_SETUP.md)
 - [Splunk Setup](./docs/SPLUNK_SETUP.md)
-- [Docker Setup](./docs/DOCKER_SETUP.md)
+- [Free Trial Setup](./docs/FREE_TRIAL_SETUP.md)
 - [Architecture](./docs/ARCHITECTURE.md)
 - [Demo Runbook](./docs/DEMO_RUNBOOK.md)
 
 ## Vision
 
-SPL Forge is built around one clear idea: Splunk development should feel more like describing intent and less like manually stitching together query syntax, dashboard configs, and packaging steps. With Docker integration, teams can maintain consistent, reproducible development environments across machines.
+SPL Forge is built around one clear idea: Splunk development should feel more like describing intent and less like manually stitching together query syntax, dashboard configs, and packaging steps. For hackathon and MVP work, repository now assumes a self-hosted Splunk Enterprise free trial upgraded with a Developer License.
 
 Long-term opportunity is AI-native development layer for Splunk that can help teams generate, verify, explain, and operationalize Splunk content with less friction and more trust.
 
@@ -141,6 +139,6 @@ Long-term opportunity is AI-native development layer for Splunk that can help te
 <div align="center">
 
 **SPL Forge**  
-From natural-language intent to validated Splunk artifacts, with Docker-powered local development.
+From natural-language intent to validated Splunk artifacts, with Splunk-native local development.
 
 </div>

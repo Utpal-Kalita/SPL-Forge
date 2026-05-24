@@ -15,7 +15,7 @@ Install the following before cloning the project:
 - **npm** — included with Node.js and used for dependency management.
 - **Visual Studio Code** — primary development environment.
 - **Splunk environment** — local Splunk Enterprise, Splunk Cloud access, or a prepared demo/search-head environment.
-- **Optional: Docker Desktop** — useful if running Splunk, mock services, or future MCP-related services locally.
+- **Splunk Enterprise free trial** — recommended local Splunk base before applying Developer License.
 
 Verify the basics:
 
@@ -92,7 +92,6 @@ Install these extensions for the best development experience:
 ### Recommended for SPL Forge
 
 - **Markdown All in One** — better documentation editing.
-- **Docker** — useful for local Splunk or mock service containers.
 - **REST Client** — useful for testing Splunk REST API calls from `.http` files.
 - **GitLens** — better Git history, blame, and branch review.
 - **Error Lens** — shows TypeScript and ESLint issues inline.
@@ -106,7 +105,6 @@ code --install-extension GitHub.vscode-pull-request-github
 code --install-extension christian-kohler.npm-intellisense
 code --install-extension christian-kohler.path-intellisense
 code --install-extension yzhang.markdown-all-in-one
-code --install-extension ms-azuretools.vscode-docker
 code --install-extension humao.rest-client
 code --install-extension eamodio.gitlens
 code --install-extension usernamehw.errorlens

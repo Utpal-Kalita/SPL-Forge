@@ -736,8 +736,7 @@ Outputs:
 
 ### DevOps
 
-- Docker.
-- Docker Compose for local development.
+- Local Splunk Enterprise free trial with Developer License.
 - GitHub Actions.
 - Terraform for optional infrastructure.
 - OpenTelemetry for app telemetry.
@@ -1004,7 +1003,6 @@ spl-forge/
 │   ├── unit/
 │   ├── integration/
 │   └── fixtures/
-├── docker-compose.yml
 ├── README.md
 └── ABOUT.md
 ```
@@ -1160,4 +1158,3 @@ SPL FORGE can be evaluated using:
 SPL FORGE is an AI-powered, Splunk-native forge for operational intelligence. It helps teams move from vague operational questions to validated SPL, actionable insights, dashboards, alerts, runbooks, and Splunk app components.
 
 By using Splunk MCP Server, Splunk AI capabilities, controlled agentic workflows, and human approval gates, SPL FORGE demonstrates how AI can safely accelerate observability, security, and platform engineering.
-

@@ -22,11 +22,15 @@ Choose one:
 
 ## Recommended Development Options
 
+Start with [`FREE_TRIAL_SETUP.md`](./FREE_TRIAL_SETUP.md) if you need local Splunk Enterprise for hackathon or MVP work.
+
 ### Option 1: Splunk Enterprise Dev Instance
 
 Best for local hands-on testing.
 
-- Install local Splunk Enterprise dev build
+- Install local Splunk Enterprise free trial
+- Request Splunk Developer License
+- Apply Developer License to trial instance
 - Create admin user
 - Load sample logs
 - Enable management port access
@@ -133,6 +137,7 @@ If live Splunk fails during demo:
 
 ## Related Docs
 
+- [`FREE_TRIAL_SETUP.md`](./FREE_TRIAL_SETUP.md)
 - [`VS_CODE_SETUP.md`](./VS_CODE_SETUP.md)
 - [`DEMO_RUNBOOK.md`](./DEMO_RUNBOOK.md)
 - [`PRD.md`](./PRD.md)

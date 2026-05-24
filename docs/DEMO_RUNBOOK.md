@@ -87,6 +87,7 @@ If live environment unstable:
 ## Demo Checklist
 
 - Browser tabs closed
+- Splunk Enterprise free trial instance already running with Developer License applied
 - Splunk session already authenticated
 - Prompt copied and ready
 - Backup screenshots ready

@@ -126,7 +126,7 @@ All notable changes to **SPL Forge** will be documented in this file.
   - Validation: Pydantic or Zod schemas
   - Queue/Cache: Redis
   - State: PostgreSQL
-  - Containers: Docker and Docker Compose
+  - Local Splunk development environment using Splunk Enterprise free trial + Developer License
   - CI: GitHub Actions
   - Observability: OpenTelemetry + Splunk ingestion
 - Core data flow documentation from user prompt to final Splunk artifact.
