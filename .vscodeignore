@@ -1,10 +1,15 @@
 .vscode/**
 .vscode-test/**
+.github/**
+docs/**
 out/**
 node_modules/**
 src/**
 .gitignore
 .yarnrc
+PRD.md
+ROADMAP.md
+WORKTREE.md
 esbuild.js
 vsc-extension-quickstart.md
 **/tsconfig.json
