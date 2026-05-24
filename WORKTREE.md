@@ -4,12 +4,9 @@
 
 **SPL Forge** is an AI-native agentic IDE for Splunk that turns natural language into working SPL queries, dashboards, alerts, and deployable Splunk apps. It autonomously generates, tests, debugs, and fixes queries using the Splunk MCP Server.
 
-- **Repository**: Utpal-Kalita/SPL-Forge
-- **Language Composition**: JavaScript (70.2%), TypeScript (29.8%)
-- **Type**: VS Code Extension
+
 - **Status**: Foundation/MVP Development
 - **License**: Not specified
-- **Default Branch**: main
 
 ---
 
@@ -280,13 +277,8 @@ Refer to `vsc-extension-quickstart.md` and `docs/VS_CODE_SETUP.md` for detailed 
 
 ## Links & Resources
 
-- **Main Repository**: https://github.com/Utpal-Kalita/SPL-Forge
 - **Product Requirements**: [PRD.md](./PRD.md)
 - **Roadmap**: [ROADMAP.md](./ROADMAP.md)
 - **Architecture**: [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md)
 
----
 
-**Last Updated**: May 24, 2026  
-**Repository Owner**: Utpal-Kalita  
-**Visibility**: Private
