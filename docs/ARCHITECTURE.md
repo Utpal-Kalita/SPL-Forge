@@ -117,6 +117,31 @@ src/
    └─ extension.test.ts
 ```
 
+## Current Day 2 Scaffold
+
+```text
+src/
+├─ extension.ts
+├─ agent/
+│  └─ generate.ts
+├─ config/
+│  └─ env.ts
+├─ panels/
+│  └─ assistant.ts
+└─ test/
+   └─ extension.test.ts
+```
+
+Day 2 currently supports:
+
+- prompt entry inside webview panel
+- webview message passing into extension runtime
+- `.env.local`-aware config loading
+- optional OpenAI or Anthropic API calls
+- deterministic mock fallback when no API key configured
+- raw provider output and parsed SPL rendering in panel
+- output channel logging for prompt/provider/result
+
 ## Runtime Modes
 
 ### MCP Mode

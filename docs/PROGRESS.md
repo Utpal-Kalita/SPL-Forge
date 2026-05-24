@@ -4,7 +4,7 @@ Actual repo status as of 2026-05-24.
 
 ## Overall State
 
-SPL Forge now has product definition, setup documentation, Day 1 environment guidance, sample data, and an initial VS Code extension scaffold with a working webview panel.
+SPL Forge now has product definition, setup documentation, Day 1 environment guidance, sample data, Day 2 prompt flow, and an initial VS Code extension scaffold that can return raw SPL from a mock or configured LLM provider.
 
 ## Completed
 
@@ -25,11 +25,15 @@ SPL Forge now has product definition, setup documentation, Day 1 environment gui
 - [x] Local Splunk Enterprise free trial installed manually
 - [x] Official `Splunk.splunk` VS Code extension installed manually
 - [x] Splunk Developer License requested and applied manually
+- [x] Day 2 prompt input wired from webview to extension runtime
+- [x] `.env.local`-aware config loader added in `src/config/env.ts`
+- [x] LLM generation adapter with mock fallback added in `src/agent/generate.ts`
+- [x] Raw provider output and parsed SPL render inside panel
+- [x] Output channel logging added for prompt/provider/result
 
 ## Not Started Yet
 
-- [ ] Prompt submission flow from panel to extension backend
-- [ ] LLM integration
+- [ ] Prompt-quality tuning for stronger Splunk query generation
 - [ ] Splunk MCP integration
 - [ ] Splunk REST fallback integration
 - [ ] mock execution mode implementation
@@ -42,6 +46,7 @@ SPL Forge now has product definition, setup documentation, Day 1 environment gui
 - [ ] Splunk app packaging
 - [ ] Stable extension host test run in local/CI environment
 
+
 ## MVP Readiness Snapshot
 
 | Area | Status | Notes |
@@ -52,20 +57,20 @@ SPL Forge now has product definition, setup documentation, Day 1 environment gui
 | Sample data prep | Done | Auth CSV fixture ready for import |
 | Manual Splunk environment | Mostly done | Free trial + Developer License + Splunk VS Code extension confirmed |
 | Demo planning | Done | Runbook present |
-| Architecture direction | Done | High-level plan present with Day 1 diagram draft |
-| Extension code | Started | Command and panel scaffold present |
+| Architecture direction | Done | High-level plan present with Day 1 and Day 2 scaffold notes |
+| Extension code | Started | Prompt UI, panel messaging, provider adapter, output logging present |
 | Splunk connectivity | Not started | No MCP or REST code yet |
-| Agent workflow | Not started | No generation or repair logic yet |
+| Agent workflow | Started | Raw SPL generation path works via mock or configured LLM provider |
 | Artifact export | Not started | No packaging code yet |
 | Testing | Started | Test scaffold present; extension host run still unstable in sandbox |
 
 ## Reality Check
 
-If someone clones repo now, they get strong planning and setup docs plus a real extension shell, but not working SPL generation or Splunk execution yet.
+If someone clones repo now, they get strong planning and setup docs plus a real extension shell that accepts prompts and returns raw SPL, but not Splunk execution or repair loop yet.
 
 ## Next Logical Build Order
 
-1. Add prompt submission flow and output/logging
+1. Tune prompt templates for stronger query output
 2. Add mock-mode query loop
 3. Add live Splunk adapter
 4. Add repair loop

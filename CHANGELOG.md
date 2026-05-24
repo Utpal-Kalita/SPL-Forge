@@ -13,6 +13,14 @@ All notable changes to **SPL Forge** will be documented in this file.
 - VS Code extension scaffold with TypeScript and esbuild configuration.
 - Extension activation command infrastructure: `spl-forge.openPanel` for launching the assistant panel.
 - First working webview panel scaffold in `src/panels/assistant.ts`.
+- Day 2 prompt submission flow from panel to extension runtime.
+- `.env.local`-aware runtime config loader in `src/config/env.ts`.
+- LLM generation adapter in `src/agent/generate.ts` with:
+  - OpenAI chat completions support
+  - Anthropic messages API support
+  - deterministic mock fallback when API credentials are absent
+- Raw provider output and parsed SPL rendering inside webview panel.
+- SPL Forge output channel logging for prompt, provider, raw response, and parsed SPL.
 - Build pipeline with esbuild for fast bundling and development watch mode.
 - Development tools stack: TypeScript (5.9.3), ESLint (9.39.3), npm-run-all for parallel task execution.
 - Testing framework setup with VS Code test CLI and Mocha support.
@@ -64,6 +72,7 @@ All notable changes to **SPL Forge** will be documented in this file.
 - Standardized development stack on TypeScript and Node.js for consistency with VS Code ecosystem.
 - Shifted authentication strategy toward token-based approach with VS Code SecretStorage for security.
 - Replaced Docker-first local setup path with Splunk Enterprise free trial + Developer License flow.
+- Upgraded panel from static Day 1 status view to interactive Day 2 prompt/response workspace.
 
 ### Fixed
 
