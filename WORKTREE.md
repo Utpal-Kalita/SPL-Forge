@@ -42,6 +42,7 @@ SPL-Forge/
 ├── README.md                   # Main project documentation
 ├── CHANGELOG.md                # Version history
 ├── vsc-extension-quickstart.md # VS Code extension quickstart
+├── ROADMAP.md                  # MVP and Future Roadmap
 └── PRD.md                      # Product requirements (root level)
 ```
 
