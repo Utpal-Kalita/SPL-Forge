@@ -1,48 +1,44 @@
 # Docker Setup Guide for SPL Forge
 
-This guide explains how to use Docker to set up a complete SPL Forge development environment with Splunk, eliminating platform-specific installation complexities and ensuring reproducible local development.
-
----
+This guide explains how to use Docker to set up complete SPL Forge development environment with Splunk, eliminating platform-specific installation complexity and making local development reproducible.
 
 ## Why Use Docker for SPL Forge
 
 ### Benefits
 
-- **Reproducibility**: Same environment across all developers and CI/CD pipelines
-- **Isolation**: Splunk runs in a container, no system-level installation needed
-- **Easy Reset**: Stop and remove containers to start fresh
-- **Cross-Platform**: Works on Linux, macOS, and Windows with Docker Desktop
-- **Resource Control**: Set memory and CPU limits to manage system load
-- **Persistence**: Use volumes to keep data between container restarts
-- **Demo-Safe**: Pre-configured demo scenarios without affecting host system
+- Reproducibility: same environment across developers and CI pipelines
+- Isolation: Splunk runs in container, no host-level installation needed
+- Easy reset: remove containers and volumes to start fresh
+- Cross-platform: works on Linux, macOS, and Windows with Docker
+- Resource control: limit memory and CPU usage
+- Persistence: named volumes keep data between restarts
+- Demo-safe: pre-configured local scenarios without touching host setup
 
 ### When to Use Docker
 
-- ✅ Local development and testing
-- ✅ Running CI/CD workflows
-- ✅ Demo preparation and walkthroughs
-- ✅ Team onboarding (consistent environments)
-- ✅ Temporary Splunk instances for integration testing
-- ✅ Isolated experiments without side effects
+- Local development and testing
+- CI and validation workflows
+- Demo preparation and walkthroughs
+- Team onboarding
+- Temporary Splunk instances for integration testing
+- Isolated experiments without side effects
 
-### When NOT to Use Docker
+### When Not to Use Docker
 
-- ❌ Production deployments (use official Splunk deployment patterns)
-- ❌ Long-term enterprise Splunk instances (use dedicated infrastructure)
-- ❌ When you need full Splunk clustering or distributed search
-
----
+- Production deployments
+- Long-term enterprise Splunk instances
+- Full Splunk clustering or distributed search topologies
 
 ## Prerequisites
 
 ### Required
 
-- **Docker** — version 20.10+ recommended
+- Docker 20.10+ recommended
   - [Docker Desktop](https://www.docker.com/products/docker-desktop)
-  - [Docker Engine](https://docs.docker.com/engine/install/) (Linux)
-
-- **Docker Compose** (optional, included with Docker Desktop)
-  - Simplifies multi-container orchestration if needed in future
+  - [Docker Engine](https://docs.docker.com/engine/install/) for Linux
+- Docker Compose
+  - Included with Docker Desktop
+  - Needed for included `docker-compose.yml`
 
 ### Verify Installation
 
@@ -51,18 +47,16 @@ docker --version
 docker ps
 ```
 
-Should output:
-```
+Expected:
+
+```text
 Docker version 20.10.x or higher
 CONTAINER ID   IMAGE     COMMAND   CREATED   STATUS    PORTS     NAMES
-(empty if no containers running)
 ```
-
----
 
 ## Quick Start: Docker + Splunk Enterprise
 
-### Option 1: Single `docker run` Command (Fastest)
+### Option 1: Single `docker run` Command
 
 ```bash
 docker run -d \
@@ -75,95 +69,85 @@ docker run -d \
   splunk/splunk:latest
 ```
 
-**What this does:**
+What this does:
 
 | Flag | Purpose |
-|------|---------|
-| `-d` | Run in background (detached mode) |
-| `--name splunk-spl-forge` | Container name for easy reference |
-| `-p 8000:8000` | Web UI access (http://localhost:8000) |
-| `-p 8089:8089` | Management port for API (https://localhost:8089) |
-| `-e SPLUNK_PASSWORD=...` | Admin password (change to your preference) |
-| `-e SPLUNK_START_ARGS='--accept-license'` | Accept license automatically |
-| `-v splunk-data:/opt/splunk/var` | Persistent volume for data |
-| `splunk/splunk:latest` | Splunk official Docker image |
+| --- | --- |
+| `-d` | Run in background |
+| `--name splunk-spl-forge` | Stable container name |
+| `-p 8000:8000` | Splunk Web UI |
+| `-p 8089:8089` | Splunk management API |
+| `-e SPLUNK_PASSWORD=...` | Sets admin password |
+| `-e SPLUNK_START_ARGS='--accept-license'` | Accepts Splunk license |
+| `-v splunk-data:/opt/splunk/var` | Persists indexed data |
+| `splunk/splunk:latest` | Official Splunk image |
 
-### Option 2: Docker Compose (Recommended for Teams)
+### Option 2: Docker Compose
 
-Use the included `docker-compose.yml`:
+Use included `docker-compose.yml`:
 
 ```bash
-# Start services
 docker-compose up -d
-
-# View logs
 docker-compose logs -f splunk
-
-# Stop services
 docker-compose down
-
-# Stop and remove volumes
 docker-compose down -v
 ```
 
----
-
-## Splunk Initialization & Access
+## Splunk Initialization and Access
 
 ### 1. Wait for Splunk to Be Ready
 
 ```bash
-# View startup logs
 docker logs splunk-spl-forge
-
-# Wait until you see:
-# "Splunk has finished initializing and is ready to accept logins"
 ```
 
-This typically takes **2-3 minutes** on first startup.
+Wait for message:
+
+```text
+Splunk has finished initializing and is ready to accept logins
+```
+
+First startup usually takes 2 to 3 minutes.
 
 ### 2. Access Splunk Web UI
 
-Open in browser:
-```
+Open:
+
+```text
 http://localhost:8000
 ```
 
-Login credentials:
-- **Username**: `admin`
-- **Password**: `SplunkDemo123!` (or your chosen password)
+Credentials:
+
+- Username: `admin`
+- Password: `SplunkDemo123!`
 
 ### 3. Verify API Connectivity
 
 ```bash
-# Test management port (requires accepting self-signed certificate)
 curl -k -u admin:SplunkDemo123! \
   https://localhost:8089/services/server/info
 ```
 
-Expected response includes Splunk version and instance info.
-
----
+Expected response includes Splunk version and server information.
 
 ## Loading Demo Data into Docker Splunk
 
-### Option A: Upload via Web UI (Easiest)
+### Option A: Upload via Web UI
 
-1. Navigate to `http://localhost:8000`
-2. Click **Settings** → **Data Inputs** → **Add Data**
-3. Choose **Upload Files**
-4. Select your CSV or log file
-5. Set `sourcetype` to `auth` (for failed-login scenario)
-6. Set `index` to `main`
-7. Click **Review** → **Submit**
+1. Open `http://localhost:8000`
+2. Go to `Settings -> Data Inputs -> Add Data`
+3. Choose `Upload Files`
+4. Select CSV or log file
+5. Set `sourcetype=auth`
+6. Set `index=main`
+7. Submit import
 
-### Option B: Copy Files into Container
+### Option B: Copy File into Container
 
 ```bash
-# Copy file into container
 docker cp /path/to/sample_logs.csv splunk-spl-forge:/tmp/sample_logs.csv
 
-# Execute upload inside container
 docker exec splunk-spl-forge /opt/splunk/bin/splunk add oneshot \
   /tmp/sample_logs.csv \
   -sourcetype auth \
@@ -184,22 +168,45 @@ timestamp,user,src,country,user_agent,action,sourcetype,index
 2026-05-24T10:19:27Z,agarcia,45.67.89.123,Brazil,Firefox/89.0,failure,auth,main
 ```
 
-Upload via one of the above methods.
+Upload with either method above.
 
----
+## Verification Queries
 
-## Environment Variables for SPL Forge Extension
+Run in Splunk search UI after data load:
 
-Create `.env.local` in repository root (do NOT commit):
+### Basic Search
 
-```bash
-# Copy template
-cp .env.example .env.local
-
-# Edit with your values
+```spl
+index=main sourcetype=auth | head 10
 ```
 
-Or manually create `.env.local`:
+### Count Failed Logins
+
+```spl
+index=main sourcetype=auth action=failure | stats count
+```
+
+### Failed Logins by Country
+
+```spl
+index=main sourcetype=auth action=failure | stats count by country
+```
+
+### Top Users with Failures
+
+```spl
+index=main sourcetype=auth action=failure | top user
+```
+
+## Environment Variables for SPL Forge
+
+Copy example file:
+
+```bash
+cp .env.example .env.local
+```
+
+Recommended `.env.local` values:
 
 ```bash
 SPLUNK_HOST=https://localhost:8089
@@ -212,13 +219,7 @@ SPL_FORGE_SPLUNK_MODE=rest
 SPL_FORGE_SPLUNK_SOURCE=docker
 ```
 
-Add to `.gitignore`:
-
-```bash
-echo ".env.local" >> .gitignore
-```
-
----
+Ensure `.env.local` stays ignored by git.
 
 ## Docker Management Commands
 
@@ -226,64 +227,45 @@ echo ".env.local" >> .gitignore
 
 ```bash
 docker ps
-docker ps -a  # Include stopped containers
+docker ps -a
 ```
 
-### View Container Logs
+### View Logs
 
 ```bash
-# Real-time logs
 docker logs -f splunk-spl-forge
-
-# Last 100 lines
 docker logs --tail 100 splunk-spl-forge
-
-# Logs since specific time
 docker logs --since 2h splunk-spl-forge
 ```
 
-### Stop Container
+### Stop, Start, Restart
 
 ```bash
 docker stop splunk-spl-forge
-```
-
-Container persists on disk; restart later with `docker start`.
-
-### Start Container
-
-```bash
 docker start splunk-spl-forge
-```
-
-### Restart Container
-
-```bash
 docker restart splunk-spl-forge
 ```
 
-### Remove Container (Cleanup)
+### Remove Container
 
 ```bash
-# Stop first
 docker stop splunk-spl-forge
-
-# Remove container
 docker rm splunk-spl-forge
 ```
 
-**⚠️ Warning:** Removes container but keeps volume. Data persists.
+This removes container but keeps named volumes.
 
-### Remove Container + Data (Full Reset)
+### Full Reset
 
 ```bash
-# Stop and remove container
-docker stop splunk-spl-forge && docker rm splunk-spl-forge
+docker stop splunk-spl-forge
+docker rm splunk-spl-forge
+docker volume rm splunk-data splunk-etc
+```
 
-# Remove volume
-docker volume rm splunk-data
+Or prune unused volumes:
 
-# OR remove all unused volumes
+```bash
 docker volume prune
 ```
 
@@ -293,19 +275,13 @@ docker volume prune
 docker exec -it splunk-spl-forge /bin/bash
 ```
 
-Once inside:
+Useful commands inside container:
+
 ```bash
-# View Splunk config
 cat /opt/splunk/etc/splunk-launch.conf
-
-# Check indexes
 /opt/splunk/bin/splunk list index -auth admin:SplunkDemo123!
-
-# View index data
 /opt/splunk/bin/splunk search "index=main | head 5" -auth admin:SplunkDemo123!
 ```
-
----
 
 ## Resource Management
 
@@ -325,9 +301,9 @@ docker run -d \
 ```
 
 | Flag | Meaning |
-|------|---------|
-| `--memory 4g` | Max 4GB RAM for Splunk container |
-| `--cpus 2.0` | Max 2 CPU cores for Splunk container |
+| --- | --- |
+| `--memory 4g` | Limit container RAM to 4 GB |
+| `--cpus 2.0` | Limit container CPU to 2 cores |
 
 ### Monitor Resource Usage
 
@@ -335,99 +311,47 @@ docker run -d \
 docker stats splunk-spl-forge
 ```
 
-Shows real-time CPU, memory, network I/O, and block I/O.
-
----
-
 ## Integration with VS Code Extension Development
 
-### Workflow
+Recommended workflow:
 
-1. **Terminal 1**: Watch extension code
-   ```bash
-   npm run watch
-   ```
+- Terminal 1: `npm run watch`
+- Terminal 2: `docker logs -f splunk-spl-forge`
+- Terminal 3: `npm run lint` or `npm test`
+- VS Code: press `F5` to launch Extension Development Host
 
-2. **Terminal 2**: Monitor Splunk logs
-   ```bash
-   docker logs -f splunk-spl-forge
-   ```
+Extension can then:
 
-3. **Terminal 3**: Run tests or lint
-   ```bash
-   npm run lint
-   npm test
-   ```
-
-4. **VS Code**: Press F5 to launch Extension Development Host
-
-### Testing Extension with Docker Splunk
-
-The extension can test Splunk connectivity by:
-
-1. Reading environment variables (`.env.local`)
-2. Making API calls to `https://localhost:8089`
-3. Executing sample SPL queries
-4. Capturing results in real-time
-
----
-
-## Verification Queries
-
-Once data is loaded, test with these SPL queries in Splunk UI:
-
-### 1. Basic Search
-```spl
-index=main sourcetype=auth | head 10
-```
-
-### 2. Count Failed Logins
-```spl
-index=main sourcetype=auth action=failure | stats count
-```
-
-### 3. Failed Logins by Country
-```spl
-index=main sourcetype=auth action=failure | stats count by country
-```
-
-### 4. Top Users with Failures
-```spl
-index=main sourcetype=auth action=failure | top user
-```
-
----
+- Read values from `.env.local`
+- Make REST calls to `https://localhost:8089`
+- Execute sample SPL queries
+- Capture responses during development
 
 ## Troubleshooting Docker Setup
 
-### Splunk Container Won't Start
+### Splunk Container Does Not Start
+
+Check logs:
 
 ```bash
-# Check logs
 docker logs splunk-spl-forge
-
-# Common issues:
-# - Port 8000 or 8089 already in use
-# - Insufficient disk space
-# - Docker daemon not running
 ```
 
-**Solution**: Stop other services using ports 8000/8089, ensure 5GB+ free disk space.
+Common causes:
 
-### Can't Connect to http://localhost:8000
+- Port `8000` or `8089` already in use
+- Not enough disk space
+- Docker daemon not running
+
+### Cannot Reach `http://localhost:8000`
 
 ```bash
-# Check if container is running
 docker ps | grep splunk-spl-forge
-
-# If not running, start it
 docker start splunk-spl-forge
-
-# Wait 30-60 seconds for initialization
 docker logs splunk-spl-forge | tail -5
 ```
 
-### Splunk Password Reset
+### Reset Splunk Password
 
 ```bash
 docker exec splunk-spl-forge /opt/splunk/bin/splunk reset admin-passphrase \
@@ -435,36 +359,29 @@ docker exec splunk-spl-forge /opt/splunk/bin/splunk reset admin-passphrase \
   -password NewPassword123!
 ```
 
-### Data Volume Issues
+### Volume Problems
 
 ```bash
-# Check volume status
 docker volume ls | grep splunk-data
-
-# Inspect volume
 docker volume inspect splunk-data
-
-# Remove and recreate
 docker volume rm splunk-data
-# Then re-run docker run or docker-compose up
 ```
+
+Then recreate with `docker-compose up -d`.
 
 ### SSL Certificate Warning
 
-Splunk uses self-signed certificates by default. This is expected in Docker:
+Splunk uses self-signed certificates by default in Docker. For local development, set:
 
 ```bash
-# Bypass SSL verification in .env.local
 SPLUNK_VERIFY_SSL=false
 ```
 
-For production, provide proper certificates.
+Use proper certificates in production.
 
----
+## CI Integration
 
-## CI/CD Integration
-
-### GitHub Actions Example
+Example GitHub Actions job:
 
 ```yaml
 name: Test SPL Forge with Docker Splunk
@@ -474,7 +391,7 @@ on: [push, pull_request]
 jobs:
   test:
     runs-on: ubuntu-latest
-    
+
     services:
       splunk:
         image: splunk/splunk:latest
@@ -482,23 +399,23 @@ jobs:
           SPLUNK_PASSWORD: TestPassword123!
           SPLUNK_START_ARGS: "--accept-license"
         options: >-
-          --health-cmd "curl -f https://localhost:8089/services/server/info || exit 1"
+          --health-cmd "curl -f -k https://localhost:8089/services/server/info || exit 1"
           --health-interval 30s
           --health-timeout 10s
           --health-retries 5
         ports:
           - 8000:8000
           - 8089:8089
-    
+
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: '18'
-      
+          node-version: "18"
+
       - name: Install dependencies
         run: npm install
-      
+
       - name: Run tests
         env:
           SPLUNK_HOST: https://localhost:8089
@@ -507,110 +424,92 @@ jobs:
         run: npm test
 ```
 
----
-
 ## Switching Between Docker and Non-Docker Splunk
 
-### Using Environment Variable
-
-In `.env.local`:
+Example `.env.local` values:
 
 ```bash
 # Docker Splunk
 SPL_FORGE_SPLUNK_SOURCE=docker
 SPLUNK_HOST=https://localhost:8089
 
-# OR local/cloud Splunk
+# Local or cloud Splunk
 SPL_FORGE_SPLUNK_SOURCE=local
 SPLUNK_HOST=https://your-splunk-host:8089
 ```
 
-### Code Example
+Example code:
 
-```typescript
+```ts
 const splunkHost = process.env.SPLUNK_HOST;
-const splunkMode = process.env.SPL_FORGE_SPLUNK_SOURCE || 'docker';
-
-// Adapter automatically handles SSL, auth, etc.
+const splunkMode = process.env.SPL_FORGE_SPLUNK_SOURCE || "docker";
 ```
-
----
 
 ## Advanced: Custom Splunk Docker Image
 
-For team-specific configurations, create a custom Dockerfile:
+Example `Dockerfile.splunk`:
 
 ```dockerfile
 FROM splunk/splunk:latest
 
-# Set default password
 ENV SPLUNK_PASSWORD=SplunkDemo123!
 ENV SPLUNK_START_ARGS=--accept-license
 
-# Copy custom apps or configs
 COPY ./splunk-apps/ /opt/splunk/etc/apps/
-
-# Pre-load sample data
 COPY ./sample_data/ /tmp/sample_data/
-
-# Run initialization script
 COPY ./scripts/init-splunk.sh /
+
 RUN chmod +x /init-splunk.sh
 RUN /init-splunk.sh
 
 EXPOSE 8000 8089
 ```
 
-Build:
+Build custom image:
+
 ```bash
 docker build -t spl-forge/splunk:latest -f Dockerfile.splunk .
 ```
 
-Use in `docker-compose.yml`:
+Then update `docker-compose.yml` to use:
+
 ```yaml
 services:
   splunk:
-    image: spl-forge/splunk:latest  # Your custom image
+    image: spl-forge/splunk:latest
 ```
-
----
 
 ## Best Practices
 
-### ✅ Do
+Do:
 
-- Use `.env.local` for sensitive credentials (excluded from Git)
-- Set memory limits to prevent system overload
-- Use named volumes for data persistence
-- Document custom Docker configurations in `Dockerfile` comments
-- Test against Docker Splunk before pushing to production
-- Use Docker Compose for consistent team environments
+- Use `.env.local` for sensitive credentials
+- Set resource limits
+- Use named volumes for persistence
+- Document custom Docker additions
+- Test against Docker Splunk before pushing
+- Use Docker Compose for team consistency
 
-### ❌ Don't
+Do not:
 
-- Commit `.env.local` or passwords to Git
+- Commit `.env.local` or passwords
 - Run Splunk without resource limits
-- Use `latest` tag in production (pin specific versions)
-- Store important data only in containers (use volumes)
-- Run containers as root unnecessarily
-- Assume Docker setup works for production deployments
-
----
+- Use `latest` in production
+- Store important data only inside container filesystem
+- Assume Docker setup is production deployment pattern
 
 ## Next Steps
 
-1. **Set up Docker** → Follow Quick Start above
-2. **Load demo data** → Use Option A-C under "Loading Demo Data"
-3. **Verify connectivity** → Run queries in Splunk UI
-4. **Configure VS Code extension** → Create `.env.local` with Splunk credentials
-5. **Test extension** → `npm run watch` + F5 in VS Code
-
----
+1. Start Docker environment with quick start commands.
+2. Load demo data with one of methods above.
+3. Verify queries in Splunk UI.
+4. Create `.env.local` from `.env.example`.
+5. Run `npm run watch` and launch VS Code host with `F5`.
 
 ## Related Documentation
 
-- [`QUICKSTART.md`](./QUICKSTART.md) — Fastest path to demo
-- [`SPLUNK_SETUP.md`](./SPLUNK_SETUP.md) — Splunk setup options (including Docker)
-- [`VS_CODE_SETUP.md`](./VS_CODE_SETUP.md) — VS Code extension development
-- [`ARCHITECTURE.md`](./ARCHITECTURE.md) — System design and component overview
-- [`DEMO_RUNBOOK.md`](./DEMO_RUNBOOK.md) — Demo scenario walkthrough
+- [`QUICKSTART.md`](./QUICKSTART.md)
+- [`SPLUNK_SETUP.md`](./SPLUNK_SETUP.md)
+- [`VS_CODE_SETUP.md`](./VS_CODE_SETUP.md)
+- [`ARCHITECTURE.md`](./ARCHITECTURE.md)
+- [`DEMO_RUNBOOK.md`](./DEMO_RUNBOOK.md)

@@ -3,6 +3,7 @@
 *.vsix
 .DS_Store
 .env
+.env.local
 .vscode-test/
 dist
 node_modules/
