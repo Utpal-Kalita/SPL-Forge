@@ -6,6 +6,7 @@ const defaultPrompt = 'Create a failed login dashboard by country and user agent
 
 type PromptResult = {
   llmModel: string;
+  planSummary: string;
   providerLabel: string;
   rawText: string;
   spl: string;
@@ -23,6 +24,7 @@ type PanelState = {
   lastSpl?: string;
   lastProvider?: string;
   lastError?: string;
+  lastPlanSummary?: string;
   status: 'idle' | 'running' | 'success' | 'error';
 };
 
@@ -108,6 +110,7 @@ export class SPLForgePanel {
 
       this.state = {
         lastError: undefined,
+        lastPlanSummary: result.planSummary,
         lastPrompt: prompt,
         lastProvider: `${result.providerLabel} / ${result.llmModel}`,
         lastRawText: result.rawText,
@@ -369,11 +372,11 @@ export function getPanelHtml(input: PanelHtmlInput) {
   <body>
     <main>
       <section class="hero">
-        <div class="eyebrow">Day 2 LLM integration</div>
+        <div class="eyebrow">Day 3 Query Generation</div>
         <h1>SPL Forge</h1>
         <p>
-          Prompt now flows from panel into extension runtime. Day 2 target:
-          natural-language in, raw SPL out, provider logged.
+          Prompt now flows through intent parsing and schema-aware generation.
+          Day 3 target: stronger SPL quality before Splunk execution work starts.
         </p>
         <div class="pill-row">
           <span class="pill">Mode: ${escapeHtml(config.splunkMode)}</span>
@@ -389,28 +392,34 @@ export function getPanelHtml(input: PanelHtmlInput) {
           <h2>Prompt</h2>
           <label for="prompt-input">Describe search, dashboard, or alert intent.</label>
           <textarea id="prompt-input" placeholder="Describe Splunk artifact you want...">${escapeHtml(state.lastPrompt)}</textarea>
-          <button id="generate-button"${state.status === 'running' ? ' disabled' : ''}>Generate Raw SPL</button>
+          <button id="generate-button"${state.status === 'running' ? ' disabled' : ''}>Generate Query Plan + SPL</button>
           ${state.lastError ? `<div class="error">${escapeHtml(state.lastError)}</div>` : ''}
         </article>
 
         <article class="card">
-          <h2>Day 2 Checklist</h2>
+          <h2>Day 3 Checklist</h2>
           <ul>
             <li>Natural-language prompt accepted in panel</li>
-            <li>Webview posts message into extension runtime</li>
-            <li>LLM adapter or mock fallback returns raw SPL string</li>
+            <li>Intent parser infers artifact, breakdowns, time range, threshold</li>
+            <li>LLM prompt includes known demo schema context</li>
+            <li>Mock fallback returns deterministic Splunk-shaped SPL</li>
             <li>Provider + model logged in output channel</li>
-            <li>Raw result visible without Splunk execution yet</li>
+            <li>Parsed query plan visible before live Splunk execution exists</li>
           </ul>
         </article>
       </section>
 
       <section class="grid two">
         <article class="card">
+          <h2>Query Plan</h2>
+          <pre>${escapeHtml(state.lastPlanSummary ?? 'Intent summary will render here after prompt submission.')}</pre>
+        </article>
+
+        <article class="card">
           <h2>Raw Provider Output</h2>
           <div class="stack">
             <div>Last provider: <code>${escapeHtml(state.lastProvider ?? 'none yet')}</code></div>
-            <pre>${escapeHtml(state.lastRawText ?? 'No generation yet. Submit prompt to test Day 2 flow.')}</pre>
+            <pre>${escapeHtml(state.lastRawText ?? 'No generation yet. Submit prompt to test Day 3 flow.')}</pre>
           </div>
         </article>
 
@@ -430,10 +439,10 @@ Alert if failed attempts exceed 100 in 5 minutes.</pre>
         <article class="card">
           <h2>Next Build Targets</h2>
           <ol>
-            <li>Prompt templates tuned for Day 3 query quality</li>
             <li>Mock Splunk adapter for deterministic run loop</li>
             <li>REST adapter for live Splunk execution</li>
             <li>Repair loop for field and sourcetype failures</li>
+            <li>Result preview from executed searches</li>
           </ol>
         </article>
       </section>

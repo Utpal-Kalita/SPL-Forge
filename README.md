@@ -115,6 +115,7 @@ Current repository assets:
 - Setup guides for VS Code, Splunk, and first-run workflow
 - Supporting docs for architecture, demo flow, and contribution expectations
 - Brand banner and repository presentation assets
+- VS Code extension shell with Day 3 intent-aware SPL generation flow
 
 ## Documentation
 

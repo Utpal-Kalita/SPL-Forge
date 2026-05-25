@@ -24,6 +24,7 @@ export function activate(context: vscode.ExtensionContext) {
 
         return {
           llmModel: config.llmModel,
+          planSummary: result.planSummary,
           providerLabel: result.providerUsed,
           rawText: result.rawText,
           spl: result.spl,

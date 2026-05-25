@@ -2,7 +2,7 @@
 
 All notable changes to **SPL Forge** will be documented in this file.
 
-> **Project status:** SPL Forge is a pre-release hackathon project for the Splunk Agentic Ops Hackathon 2026. Currently in the **Foundation/MVP Planning phase** with VS Code extension scaffolding complete. Core implementation work (backend API, agentic logic, Splunk connectors) is in progress.
+> **Project status:** SPL Forge is pre-release hackathon project for Splunk Agentic Ops Hackathon 2026. Foundation setup, prompt flow, and query-generation stage are complete. Splunk execution, repair loop, and artifact export stages remain in progress.
 
 ---
 
@@ -20,11 +20,30 @@ All notable changes to **SPL Forge** will be documented in this file.
   - Anthropic messages API support
   - deterministic mock fallback when API credentials are absent
 - Raw provider output and parsed SPL rendering inside webview panel.
+- Query plan summary returned from generation pipeline and rendered in panel.
+- Intent parser in `src/agent/generate.ts` for:
+  - artifact classification (`search`, `dashboard`, `alert`, `dashboard+alert`)
+  - breakdown detection (`country`, `user_agent`, `user`, `src`)
+  - focus-field inference for aggregation defaults
+  - threshold and threshold-window extraction
+  - relative-time parsing for `last`, `past`, `previous`, `today`, and `yesterday`
+- Schema-aware LLM prompt construction using known failed-login demo fields and Splunk defaults.
+- Deterministic mock SPL builder for:
+  - dashboard-style grouped searches
+  - threshold alert searches
+  - time-trend searches
+  - success and failure login prompt variants
 - SPL Forge output channel logging for prompt, provider, raw response, and parsed SPL.
 - Build pipeline with esbuild for fast bundling and development watch mode.
 - Development tools stack: TypeScript (5.9.3), ESLint (9.39.3), npm-run-all for parallel task execution.
 - Testing framework setup with VS Code test CLI and Mocha support.
 - Type definitions for VS Code API, Node.js, and Mocha testing framework.
+- Extended unit coverage for:
+  - intent parsing
+  - threshold alert shaping
+  - trend query shaping
+  - relative-time parsing
+  - structured mock SPL generation
 - VS Code SecretStorage API integration ready for secure token management.
 - Documentation structure and initial guides:
   - QUICKSTART.md for first-time setup
@@ -42,7 +61,7 @@ All notable changes to **SPL Forge** will be documented in this file.
 - Sample failed-login fixture in `samples/failed_login_auth.csv`.
 - Workspace recommendation for official `Splunk.splunk` VS Code extension.
 
-### In Progress (Planned for 0.5.0)
+### In Progress (Planned for next milestone)
 
 - Backend API routes for the forge pipeline (intent analysis, SPL generation, validation, execution, optimization, artifact generation).
 - Splunk connectivity layer:
@@ -73,11 +92,16 @@ All notable changes to **SPL Forge** will be documented in this file.
 - Shifted authentication strategy toward token-based approach with VS Code SecretStorage for security.
 - Replaced Docker-first local setup path with Splunk Enterprise free trial + Developer License flow.
 - Upgraded panel from static Day 1 status view to interactive Day 2 prompt/response workspace.
+- Upgraded panel again from raw Day 2 prompt/response view to Day 3 query-planning workspace with interpreted intent summary.
+- Replaced generic mock SPL output with prompt-aware Splunk-shaped query synthesis for demo data.
+- Tightened provider prompts so model requests include explicit schema hints and primary-query constraint for dashboard+alert prompts.
 
 ### Fixed
 
 - Clarified that the extension should gracefully handle missing Splunk configuration with helpful error messages.
 - Corrected docs and repo guidance to reflect Day 1 scaffold status instead of pure planning-only state.
+- Corrected mock query defaults from `sourcetype=csv` to `sourcetype=auth` to match sample fixture and docs.
+- Fixed mismatch between repo status docs and actual implementation stage by marking query-generation work complete.
 
 ### Security
 

@@ -1,10 +1,10 @@
 # SPL Forge Progress
 
-Actual repo status as of 2026-05-24.
+Actual repo status as of 2026-05-25.
 
 ## Overall State
 
-SPL Forge now has product definition, setup documentation, Day 1 environment guidance, sample data, Day 2 prompt flow, and an initial VS Code extension scaffold that can return raw SPL from a mock or configured LLM provider.
+SPL Forge now has product definition, setup documentation, Day 1 environment guidance, sample data, Day 2 prompt flow, and completed Day 3 query generation work with intent parsing, schema-aware prompting, broader time parsing, alert-oriented shaping, and stronger mock SPL output.
 
 ## Completed
 
@@ -30,10 +30,15 @@ SPL Forge now has product definition, setup documentation, Day 1 environment gui
 - [x] LLM generation adapter with mock fallback added in `src/agent/generate.ts`
 - [x] Raw provider output and parsed SPL render inside panel
 - [x] Output channel logging added for prompt/provider/result
+- [x] Day 3 intent parser added for artifact, breakdown, time window, and threshold hints
+- [x] Day 3 schema-aware prompt builder added for LLM requests
+- [x] Day 3 deterministic mock SPL generation improved for failed-login demo prompts
+- [x] Panel updated to show query plan summary before execution stage
+- [x] Day 3 prompt coverage expanded for dashboard, alert, trend, and relative-time prompts
+- [x] Day 3 tests expanded to cover multiple prompt classes
 
 ## Not Started Yet
 
-- [ ] Prompt-quality tuning for stronger Splunk query generation
 - [ ] Splunk MCP integration
 - [ ] Splunk REST fallback integration
 - [ ] mock execution mode implementation
@@ -60,18 +65,17 @@ SPL Forge now has product definition, setup documentation, Day 1 environment gui
 | Architecture direction | Done | High-level plan present with Day 1 and Day 2 scaffold notes |
 | Extension code | Started | Prompt UI, panel messaging, provider adapter, output logging present |
 | Splunk connectivity | Not started | No MCP or REST code yet |
-| Agent workflow | Started | Raw SPL generation path works via mock or configured LLM provider |
+| Agent workflow | Day 3 done | Intent-aware query generation works via mock or configured LLM provider |
 | Artifact export | Not started | No packaging code yet |
 | Testing | Started | Test scaffold present; extension host run still unstable in sandbox |
 
 ## Reality Check
 
-If someone clones repo now, they get strong planning and setup docs plus a real extension shell that accepts prompts and returns raw SPL, but not Splunk execution or repair loop yet.
+If someone clones repo now, they get strong planning and setup docs plus a real extension shell that accepts prompts, explains interpreted query intent, and returns stronger demo-safe SPL, but not Splunk execution or repair loop yet.
 
 ## Next Logical Build Order
 
-1. Tune prompt templates for stronger query output
-2. Add mock-mode query loop
-3. Add live Splunk adapter
-4. Add repair loop
-5. Add export flow
+1. Add mock-mode query loop
+2. Add live Splunk adapter
+3. Add repair loop
+4. Add export flow
