@@ -8,14 +8,14 @@ SPL Forge contains product docs plus an active VS Code extension scaffold for an
 
 Core docs:
 
-- [`PRD.md`](./PRD.md) for product scope and MVP definition
-- [`ROADMAP.md`](./ROADMAP.md) for phased delivery plan
+- [`PRD.md`](../PRD.md) for product scope and MVP definition
+- [`ROADMAP.md`](../ROADMAP.md) for phased delivery plan
 - [`VS_CODE_SETUP.md`](./VS_CODE_SETUP.md) for editor environment
 - [`SPLUNK_SETUP.md`](./SPLUNK_SETUP.md) for Splunk-side preparation
 
 ## Recommended First-Run Path
 
-1. Read [`PRD.md`](./PRD.md) to understand intended workflow.
+1. Read [`PRD.md`](../PRD.md) to understand intended workflow.
 2. Complete [`VS_CODE_SETUP.md`](./VS_CODE_SETUP.md).
 3. Complete [`FREE_TRIAL_SETUP.md`](./FREE_TRIAL_SETUP.md).
 4. Review [`SPLUNK_SETUP.md`](./SPLUNK_SETUP.md) for MCP, REST, or mock integration mode.
@@ -67,6 +67,6 @@ Prompt -> Generate SPL -> Run in Splunk -> Detect issue -> Repair -> Preview -> 
 
 ## Need More Context
 
-- Product scope: [`PRD.md`](./PRD.md)
-- Build sequence: [`ROADMAP.md`](./ROADMAP.md)
+- Product scope: [`PRD.md`](../PRD.md)
+- Build sequence: [`ROADMAP.md`](../ROADMAP.md)
 - System layout: [`ARCHITECTURE.md`](./ARCHITECTURE.md)

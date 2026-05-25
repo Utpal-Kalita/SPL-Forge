@@ -224,4 +224,4 @@ If live Splunk fails during demo:
 - [`SPLUNK_MCP.md`](./SPLUNK_MCP.md)
 - [`VS_CODE_SETUP.md`](./VS_CODE_SETUP.md)
 - [`DEMO_RUNBOOK.md`](./DEMO_RUNBOOK.md)
-- [`PRD.md`](./PRD.md)
+- [`PRD.md`](../PRD.md)

@@ -103,6 +103,6 @@ If live environment unstable:
 
 ## Related Docs
 
-- [`PRD.md`](./PRD.md)
-- [`ROADMAP.md`](./ROADMAP.md)
+- [`PRD.md`](../PRD.md)
+- [`ROADMAP.md`](../ROADMAP.md)
 - [`SPLUNK_SETUP.md`](./SPLUNK_SETUP.md)

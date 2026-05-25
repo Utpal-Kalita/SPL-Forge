@@ -10,8 +10,8 @@ SPL Forge now has product definition, setup documentation, Day 1 environment gui
 
 - [x] Repository banner and presentation assets added
 - [x] Main project README rewritten and aligned with product direction
-- [x] Product requirements document added in [`PRD.md`](./PRD.md)
-- [x] Roadmap added in [`ROADMAP.md`](./ROADMAP.md)
+- [x] Product requirements document added in [`PRD.md`](../PRD.md)
+- [x] Roadmap added in [`ROADMAP.md`](../ROADMAP.md)
 - [x] Quickstart guide added in [`QUICKSTART.md`](./QUICKSTART.md)
 - [x] VS Code setup guide added in [`VS_CODE_SETUP.md`](./VS_CODE_SETUP.md)
 - [x] Free trial setup guide added in [`FREE_TRIAL_SETUP.md`](./FREE_TRIAL_SETUP.md)

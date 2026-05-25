@@ -83,7 +83,7 @@ All notable changes to **SPL Forge** will be documented in this file.
 - Sample failed-login fixture in `samples/failed_login_auth.csv`.
 - Workspace recommendation for official `Splunk.splunk` VS Code extension.
 - GitHub Actions CodeQL workflow for TypeScript security and quality scanning.
-- GitHub Actions dependency review workflow for high-severity package change blocking on pull requests.
+- GitHub Actions npm dependency audit workflow for high-severity production dependency checks on pull requests.
 - GitHub Actions VSIX packaging workflow that uploads extension package artifacts from CI.
 - GitHub Actions Markdown link check workflow for documentation health.
 - GitHub Actions Gitleaks workflow for committed secret scanning.
@@ -132,6 +132,9 @@ All notable changes to **SPL Forge** will be documented in this file.
 - Fixed MCP/REST retry flow so zero-row first pass can retry widened time range instead of returning early.
 - Fixed local self-hosted trial auth searches by rewriting CSV-backed demo queries into working `rex` + `where` pipelines.
 - Fixed opaque localhost network failures so nested socket errors surface in adapter messages.
+- Fixed documentation links from `docs/` pages to root-level `PRD.md` and `ROADMAP.md` so Markdown link checks pass.
+- Fixed GitHub Actions dependency scanning by replacing unsupported Dependency Review usage with portable `npm audit`.
+- Fixed TypeScript type resolution robustness by explicitly including Node and Mocha ambient types.
 
 ### Security
 

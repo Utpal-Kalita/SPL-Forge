@@ -210,6 +210,6 @@ Required for resilient demos and local iteration. Day 4 implementation returns d
 
 ## Related Docs
 
-- [`PRD.md`](./PRD.md)
-- [`ROADMAP.md`](./ROADMAP.md)
+- [`PRD.md`](../PRD.md)
+- [`ROADMAP.md`](../ROADMAP.md)
 - [`DEMO_RUNBOOK.md`](./DEMO_RUNBOOK.md)
