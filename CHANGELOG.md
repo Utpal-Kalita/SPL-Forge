@@ -82,6 +82,12 @@ All notable changes to **SPL Forge** will be documented in this file.
 - Git configuration with .gitignore and .vscodeignore for clean version control and packaging.
 - Sample failed-login fixture in `samples/failed_login_auth.csv`.
 - Workspace recommendation for official `Splunk.splunk` VS Code extension.
+- GitHub Actions CodeQL workflow for TypeScript security and quality scanning.
+- GitHub Actions dependency review workflow for high-severity package change blocking on pull requests.
+- GitHub Actions VSIX packaging workflow that uploads extension package artifacts from CI.
+- GitHub Actions Markdown link check workflow for documentation health.
+- GitHub Actions Gitleaks workflow for committed secret scanning.
+- Dependabot configuration for weekly npm and GitHub Actions update pull requests.
 
 ### In Progress (Planned for next milestone)
 
