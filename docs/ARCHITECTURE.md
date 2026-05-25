@@ -142,19 +142,64 @@ Day 2 currently supports:
 - raw provider output and parsed SPL rendering in panel
 - output channel logging for prompt/provider/result
 
+## Current Day 3 Scaffold
+
+```text
+src/
+├─ agent/
+│  └─ generate.ts
+├─ panels/
+│  └─ assistant.ts
+└─ test/
+   └─ extension.test.ts
+```
+
+Day 3 currently supports:
+
+- intent parsing for artifact type, breakdowns, focus field, time range, and thresholds
+- schema-aware LLM prompts for the failed-login demo dataset
+- deterministic mock SPL generation for dashboard, alert, and trend prompts
+- query plan rendering in the panel
+
+## Current Day 4 Scaffold
+
+```text
+src/
+├─ config/
+│  └─ env.ts
+├─ splunk/
+│  └─ execute.ts
+├─ extension.ts
+├─ panels/
+│  └─ assistant.ts
+└─ test/
+   └─ extension.test.ts
+```
+
+Day 4 currently supports:
+
+- `mock` execution mode using deterministic failed-login fixture rows
+- `rest` execution mode using Splunk `/services/search/jobs/export`
+- `mcp` execution mode using Splunk MCP Server `splunk_run_query`
+- MCP preflight call through `splunk_get_info`
+- execution summaries, messages, fields, and result previews in the panel
+- runtime config for Splunk MCP endpoint/token, REST URL/credentials, search limit, and self-signed TLS
+- error reporting when REST credentials are missing or Splunk returns an error
+- local self-hosted trial auth-query rewrite for CSV fixture field extraction and stale-timestamp retry
+
 ## Runtime Modes
 
 ### MCP Mode
 
-Best long-term path. Strong alignment with agentic workflow.
+Best hackathon path. Strong alignment with agentic workflow. Day 4 implementation calls MCP `splunk_get_info` plus `splunk_run_query`, normalizes tool output into panel result preview, and rewrites local CSV demo auth queries into working extraction pipelines when sample data lacks search-time field extraction.
 
 ### REST Fallback
 
-Practical fallback when MCP unavailable.
+Practical fallback when MCP unavailable. Day 4 implementation posts generated SPL to Splunk search export endpoint.
 
 ### Mock Mode
 
-Required for resilient demos and local iteration.
+Required for resilient demos and local iteration. Day 4 implementation returns deterministic rows from the failed-login fixture shape.
 
 ## What Success Looks Like
 

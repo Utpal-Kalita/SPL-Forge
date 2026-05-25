@@ -243,34 +243,35 @@ SPL Forge currently has:
 
 - `mock` execution mode
 - `rest` execution mode
+- `mcp` execution mode using JSON-RPC `tools/call`
 - generated SPL preview
 - query plan rendering
 - result preview in VS Code panel
 
-MCP adapter is not implemented yet.
+MCP adapter now calls `splunk_run_query` and normalizes returned tool content into existing execution result shape.
 
 ### Target Adapter Shape
 
-Suggested future module:
+Current module shape:
 
 ```text
 src/splunk/
-├─ execute.ts
-├─ mcp.ts
-├─ rest.ts
-├─ mock.ts
-└─ schema.ts
+└─ execute.ts
 ```
 
-Suggested MCP adapter responsibilities:
+MCP adapter responsibilities:
 
 - connect to configured MCP endpoint
 - validate encrypted token presence
-- call `splunk_get_info` for health check
-- call `splunk_get_indexes` and `splunk_get_metadata` for context
 - call `splunk_run_query` for generated SPL execution
 - normalize MCP tool responses into existing SPL Forge execution result shape
 - surface MCP guardrail errors clearly in VS Code panel
+
+Future responsibilities:
+
+- call `splunk_get_info` for health check
+- call `splunk_get_indexes` and `splunk_get_metadata` for context
+- use schema output as repair-loop context
 
 ## Environment Proposal
 

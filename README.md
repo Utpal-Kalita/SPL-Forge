@@ -115,10 +115,12 @@ Current repository assets:
 - Setup guides for VS Code, Splunk, and first-run workflow
 - Supporting docs for architecture, demo flow, and contribution expectations
 - Brand banner and repository presentation assets
-- VS Code extension shell with Day 3 intent-aware SPL generation flow
+- VS Code extension shell with intent-aware SPL generation and query plan feedback
+- MCP/REST/mock Splunk execution path with result preview in the panel
 
 ## Documentation
 
+- [Docs Index](./docs/README.md)
 - [Product Requirements Document](./PRD.md)
 - [Roadmap](./ROADMAP.md)
 - [Progress](./docs/PROGRESS.md)
@@ -127,6 +129,7 @@ Current repository assets:
 - [VS Code Setup](./docs/VS_CODE_SETUP.md)
 - [Sample Data](./docs/SAMPLE_DATA.md)
 - [Splunk Setup](./docs/SPLUNK_SETUP.md)
+- [Splunk MCP Server Research](./docs/SPLUNK_MCP.md)
 - [Free Trial Setup](./docs/FREE_TRIAL_SETUP.md)
 - [Architecture](./docs/ARCHITECTURE.md)
 - [Demo Runbook](./docs/DEMO_RUNBOOK.md)

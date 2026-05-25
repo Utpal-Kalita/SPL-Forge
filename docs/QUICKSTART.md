@@ -4,7 +4,7 @@ Use this guide if you want fastest path from clone to demo.
 
 ## What This Repository Contains
 
-SPL Forge currently documents a product direction for an AI-native Splunk development workspace. The repository is in planning and setup stage, not production-complete implementation stage.
+SPL Forge contains product docs plus an active VS Code extension scaffold for an AI-native Splunk development workspace. It is not production-complete, but prompt generation and initial Splunk execution plumbing are implemented.
 
 Core docs:
 
@@ -45,21 +45,25 @@ Prompt -> Generate SPL -> Run in Splunk -> Detect issue -> Repair -> Preview -> 
 - Setup guidance
 - Demo planning
 - Architecture notes
+- VS Code panel for prompt input
+- LLM/mock SPL generation path
+- Query plan rendering
+- Mock Splunk execution with result preview
+- MCP execution adapter for Splunk MCP Server `splunk_run_query`
+- REST execution adapter for Splunk search export endpoint
 
 ## Not Yet Included
 
-- Finished VS Code extension source
-- Live MCP integration implementation
+- Self-debugging repair loop
 - Dashboard export engine
 - Alert packaging logic
 
 ## Suggested Next Build Order
 
-1. Scaffold VS Code extension
-2. Add LLM prompt pipeline
-3. Add Splunk connectivity via MCP or REST
-4. Add retry and repair loop
-5. Add preview and export layer
+1. Add schema inspection flow
+2. Add retry and repair loop
+3. Add dashboard export engine
+4. Add alert packaging logic
 
 ## Need More Context
 

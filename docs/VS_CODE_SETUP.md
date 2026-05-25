@@ -61,6 +61,10 @@ SPL-Forge/
 │   ├── ARCHITECTURE.md         # System architecture
 │   └── DEMO_RUNBOOK.md         # Demo scenario walkthrough
 ├── src/                        # Extension source code
+│   ├── agent/                  # SPL generation and prompt handling
+│   ├── config/                 # Runtime environment loader
+│   ├── panels/                 # VS Code webview panel
+│   ├── splunk/                 # Mock/REST execution adapters
 │   ├── extension.ts            # Main VS Code extension entry point
 │   └── test/                   # Extension tests
 ├── package.json                # Extension metadata, commands, scripts, dependencies

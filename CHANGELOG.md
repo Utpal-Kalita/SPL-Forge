@@ -2,7 +2,7 @@
 
 All notable changes to **SPL Forge** will be documented in this file.
 
-> **Project status:** SPL Forge is pre-release hackathon project for Splunk Agentic Ops Hackathon 2026. Foundation setup, prompt flow, and query-generation stage are complete. Splunk execution, repair loop, and artifact export stages remain in progress.
+> **Project status:** SPL Forge is pre-release hackathon project for Splunk Agentic Ops Hackathon 2026. Foundation setup, prompt flow, query generation, and MCP/REST/mock Splunk execution plumbing are complete. Repair loop and artifact export stages remain in progress.
 
 ---
 
@@ -33,6 +33,26 @@ All notable changes to **SPL Forge** will be documented in this file.
   - threshold alert searches
   - time-trend searches
   - success and failure login prompt variants
+- Splunk execution adapter in `src/splunk/execute.ts` with:
+  - deterministic mock execution mode
+  - MCP execution mode for `splunk_run_query`
+  - MCP preflight support for `splunk_get_info`
+  - REST execution mode for `/services/search/jobs/export`
+  - local trial fixture rewrite for CSV-backed auth searches
+  - automatic `earliest=0` retry for stale demo timestamps
+  - result rows, field collection, messages, elapsed time, and error status
+- Runtime config for Splunk execution:
+  - `SPL_FORGE_SPLUNK_MODE`
+  - `SPL_FORGE_SPLUNK_MCP_ENDPOINT`
+  - `SPL_FORGE_SPLUNK_MCP_TOKEN`
+  - `SPL_FORGE_SPLUNK_MCP_ALLOW_SELF_SIGNED`
+  - `SPL_FORGE_SPLUNK_URL`
+  - `SPL_FORGE_SPLUNK_TOKEN`
+  - `SPL_FORGE_SPLUNK_USERNAME`
+  - `SPL_FORGE_SPLUNK_PASSWORD`
+  - `SPL_FORGE_SPLUNK_SEARCH_LIMIT`
+  - `SPL_FORGE_SPLUNK_ALLOW_SELF_SIGNED`
+- `.env.example` with LLM and Splunk execution settings.
 - SPL Forge output channel logging for prompt, provider, raw response, and parsed SPL.
 - Build pipeline with esbuild for fast bundling and development watch mode.
 - Development tools stack: TypeScript (5.9.3), ESLint (9.39.3), npm-run-all for parallel task execution.
@@ -44,6 +64,8 @@ All notable changes to **SPL Forge** will be documented in this file.
   - trend query shaping
   - relative-time parsing
   - structured mock SPL generation
+  - mock Splunk execution
+  - REST missing-credential handling
 - VS Code SecretStorage API integration ready for secure token management.
 - Documentation structure and initial guides:
   - QUICKSTART.md for first-time setup
@@ -64,10 +86,6 @@ All notable changes to **SPL Forge** will be documented in this file.
 ### In Progress (Planned for next milestone)
 
 - Backend API routes for the forge pipeline (intent analysis, SPL generation, validation, execution, optimization, artifact generation).
-- Splunk connectivity layer:
-  - MCP Server connector for Splunk integration
-  - REST API fallback connector
-  - Mock connector for demo reliability
 - Agent orchestrator for multi-stage workflow (Intent → Generate → Validate → Execute → Repair → Optimize → Package).
 - LLM provider abstraction for OpenAI, Anthropic, or Splunk Hosted Models.
 - Schema service for caching and discovering Splunk metadata (indexes, sourcetypes, fields).
@@ -93,6 +111,8 @@ All notable changes to **SPL Forge** will be documented in this file.
 - Replaced Docker-first local setup path with Splunk Enterprise free trial + Developer License flow.
 - Upgraded panel from static Day 1 status view to interactive Day 2 prompt/response workspace.
 - Upgraded panel again from raw Day 2 prompt/response view to Day 3 query-planning workspace with interpreted intent summary.
+- Upgraded panel to run generated SPL and render execution summary plus result preview.
+- Added Splunk MCP Server path as first-class execution mode, with REST and mock kept as fallbacks.
 - Replaced generic mock SPL output with prompt-aware Splunk-shaped query synthesis for demo data.
 - Tightened provider prompts so model requests include explicit schema hints and primary-query constraint for dashboard+alert prompts.
 
@@ -102,6 +122,10 @@ All notable changes to **SPL Forge** will be documented in this file.
 - Corrected docs and repo guidance to reflect Day 1 scaffold status instead of pure planning-only state.
 - Corrected mock query defaults from `sourcetype=csv` to `sourcetype=auth` to match sample fixture and docs.
 - Fixed mismatch between repo status docs and actual implementation stage by marking query-generation work complete.
+- Fixed quickstart and progress docs so they reflect implemented extension, generation, and execution work.
+- Fixed MCP/REST retry flow so zero-row first pass can retry widened time range instead of returning early.
+- Fixed local self-hosted trial auth searches by rewriting CSV-backed demo queries into working `rex` + `where` pipelines.
+- Fixed opaque localhost network failures so nested socket errors surface in adapter messages.
 
 ### Security
 

@@ -4,7 +4,7 @@ Actual repo status as of 2026-05-25.
 
 ## Overall State
 
-SPL Forge now has product definition, setup documentation, Day 1 environment guidance, sample data, Day 2 prompt flow, and completed Day 3 query generation work with intent parsing, schema-aware prompting, broader time parsing, alert-oriented shaping, and stronger mock SPL output.
+SPL Forge now has product definition, setup documentation, Day 1 environment guidance, sample data, Day 2 prompt flow, completed Day 3 query generation, and working Day 4 Splunk execution through MCP, REST, and mock modes.
 
 ## Completed
 
@@ -36,15 +36,22 @@ SPL Forge now has product definition, setup documentation, Day 1 environment gui
 - [x] Panel updated to show query plan summary before execution stage
 - [x] Day 3 prompt coverage expanded for dashboard, alert, trend, and relative-time prompts
 - [x] Day 3 tests expanded to cover multiple prompt classes
+- [x] Day 4 Splunk execution adapter added in `src/splunk/execute.ts`
+- [x] Mock execution mode added for deterministic failed-login result previews
+- [x] REST execution mode added for Splunk search export endpoint
+- [x] MCP execution mode added for Splunk MCP Server `splunk_run_query`
+- [x] MCP preflight added with `splunk_get_info`
+- [x] Splunk runtime config expanded for URL, credentials, search limit, and self-signed TLS
+- [x] Panel updated to show execution summary, messages, fields, and result preview
+- [x] `.env.example` added for LLM and Splunk execution settings
+- [x] Local self-hosted trial auth queries now auto-rewrite CSV fixture fields with `rex` and header filtering
+- [x] Local stale demo time windows now auto-retry with `earliest=0`
+- [x] Live localhost MCP smoke test verified against local Splunk MCP Server
 
 ## Not Started Yet
 
-- [ ] Splunk MCP integration
-- [ ] Splunk REST fallback integration
-- [ ] mock execution mode implementation
 - [ ] schema inspection flow
 - [ ] self-repair query loop
-- [ ] result preview UI
 - [ ] dashboard export generation
 - [ ] alert export generation
 - [ ] saved search packaging
@@ -64,18 +71,17 @@ SPL Forge now has product definition, setup documentation, Day 1 environment gui
 | Demo planning | Done | Runbook present |
 | Architecture direction | Done | High-level plan present with Day 1 and Day 2 scaffold notes |
 | Extension code | Started | Prompt UI, panel messaging, provider adapter, output logging present |
-| Splunk connectivity | Not started | No MCP or REST code yet |
+| Splunk connectivity | Day 4 done | MCP, REST, and mock execution adapters exist; local MCP smoke verified |
 | Agent workflow | Day 3 done | Intent-aware query generation works via mock or configured LLM provider |
 | Artifact export | Not started | No packaging code yet |
 | Testing | Started | Test scaffold present; extension host run still unstable in sandbox |
 
 ## Reality Check
 
-If someone clones repo now, they get strong planning and setup docs plus a real extension shell that accepts prompts, explains interpreted query intent, and returns stronger demo-safe SPL, but not Splunk execution or repair loop yet.
+If someone clones repo now, they get strong planning and setup docs plus real extension shell that accepts prompts, explains interpreted query intent, returns stronger demo-safe SPL, and executes it through MCP, REST, or mock mode. Local self-hosted trial auth fixture queries are rewritten so imported CSV data works in live MCP demos. Repair loop and export flow are not built yet.
 
 ## Next Logical Build Order
 
-1. Add mock-mode query loop
-2. Add live Splunk adapter
-3. Add repair loop
-4. Add export flow
+1. Add schema inspection flow
+2. Add repair loop
+3. Add export flow
