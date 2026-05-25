@@ -84,6 +84,8 @@ If using Splunk MCP Server:
 3. Verify tools expose search and metadata access.
 4. Confirm IDE client can connect without manual reauth during demo.
 
+See [`SPLUNK_MCP.md`](./SPLUNK_MCP.md) for current Splunk MCP Server research, required capabilities, token behavior, tool list, and SPL Forge adapter notes.
+
 ## REST Preparation
 
 If using REST fallback:
@@ -92,6 +94,48 @@ If using REST fallback:
 2. Create least-privilege service credentials.
 3. Test search execution endpoint.
 4. Test field discovery endpoint.
+
+### SPL Forge REST Environment
+
+Create `.env.local` from `.env.example`, then set:
+
+```bash
+SPL_FORGE_SPLUNK_MODE=rest
+SPL_FORGE_SPLUNK_URL=https://localhost:8089
+SPL_FORGE_SPLUNK_ALLOW_SELF_SIGNED=true
+SPL_FORGE_SPLUNK_SEARCH_LIMIT=10
+```
+
+Use token auth:
+
+```bash
+SPL_FORGE_SPLUNK_TOKEN=<token>
+```
+
+Or basic auth for local development:
+
+```bash
+SPL_FORGE_SPLUNK_USERNAME=admin
+SPL_FORGE_SPLUNK_PASSWORD=<password>
+```
+
+The Day 4 REST adapter posts generated SPL to:
+
+```text
+/services/search/jobs/export
+```
+
+It requests JSON output and renders returned rows, fields, messages, and errors in the VS Code panel.
+
+### Mock Execution Environment
+
+For offline or demo-safe work:
+
+```bash
+SPL_FORGE_SPLUNK_MODE=mock
+```
+
+Mock mode uses deterministic failed-login fixture-shaped rows. It supports grouped `stats`, simple `timechart`, and raw row preview for the current demo queries.
 
 ## Security Rules
 
@@ -103,6 +147,8 @@ If using REST fallback:
 ## Demo Validation Checklist
 
 - Can run sample SPL query successfully
+- Can run generated SPL from SPL Forge panel in `mock` mode
+- Can show execution summary and result preview in VS Code
 - Can retrieve field metadata
 - Can show one broken query example
 - Can show repaired query example
@@ -138,6 +184,7 @@ If live Splunk fails during demo:
 ## Related Docs
 
 - [`FREE_TRIAL_SETUP.md`](./FREE_TRIAL_SETUP.md)
+- [`SPLUNK_MCP.md`](./SPLUNK_MCP.md)
 - [`VS_CODE_SETUP.md`](./VS_CODE_SETUP.md)
 - [`DEMO_RUNBOOK.md`](./DEMO_RUNBOOK.md)
 - [`PRD.md`](./PRD.md)
