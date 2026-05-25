@@ -266,7 +266,7 @@ export function analyzePrompt(prompt: string): PromptIntent {
   }
 
   const thresholdMatch = lowerPrompt.match(/(?:exceed|over|above|greater than)\s+(\d+)/);
-  const thresholdWindowMatch = lowerPrompt.match(/in\s+(\d+)\s+(minute|minutes|hour|hours|day|days)/);
+  const thresholdWindowMatch = lowerPrompt.match(/in\s+(\d+)\s+(minutes|minute|hours|hour|days|day)/);
 
   return {
     artifact: dashboard && alert ? 'dashboard+alert' : dashboard ? 'dashboard' : alert ? 'alert' : 'search',
