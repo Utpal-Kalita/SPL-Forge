@@ -9,8 +9,8 @@ suite('Extension Test Suite', () => {
 
 	test('panel html shows day 1 scaffold state', () => {
 		const config: ForgeConfig = {
-			geminiApiKey: undefined,
-			geminiModel: 'gemini-2.0-flash',
+			groqApiKey: undefined,
+			groqModel: 'llama-3.1-8b-instant',
 			llmModel: 'mock-spl-forge-v1',
 			llmProvider: 'mock',
 			splunkMode: 'mock',

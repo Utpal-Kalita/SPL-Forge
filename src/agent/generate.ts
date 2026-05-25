@@ -26,8 +26,8 @@ export async function generateSplFromPrompt(input: GenerateSplInput, config: For
     throw new Error('Prompt is empty.');
   }
 
-  if (config.llmProvider === 'gemini' && config.geminiApiKey) {
-    return generateWithGemini(normalizedPrompt, config);
+  if (config.llmProvider === 'groq' && config.groqApiKey) {
+    return generateWithGroq(normalizedPrompt, config);
   }
 
   if (config.llmProvider === 'openai' && config.llmApiKey) {
@@ -48,56 +48,43 @@ export async function generateSplFromPrompt(input: GenerateSplInput, config: For
   };
 }
 
-async function generateWithGemini(prompt: string, config: ForgeConfig): Promise<GenerateSplResult> {
-  const response = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(config.geminiModel)}:generateContent?key=${encodeURIComponent(config.geminiApiKey ?? '')}`,
-    {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        system_instruction: {
-          parts: [
-            {
-              text: generationSystemPrompt,
-            },
-          ],
-        },
-        contents: [
-          {
-            role: 'user',
-            parts: [
-              {
-                text: prompt,
-              },
-            ],
-          },
-        ],
-        generationConfig: {
-          temperature: 0.2,
-        },
-      }),
+async function generateWithGroq(prompt: string, config: ForgeConfig): Promise<GenerateSplResult> {
+  const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${config.groqApiKey}`,
     },
-  );
+    body: JSON.stringify({
+      model: config.groqModel,
+      temperature: 0.2,
+      messages: [
+        {
+          role: 'system',
+          content: generationSystemPrompt,
+        },
+        {
+          role: 'user',
+          content: prompt,
+        },
+      ],
+    }),
+  });
 
   if (!response.ok) {
-    throw new Error(`Gemini request failed: ${response.status} ${response.statusText}`);
+    throw new Error(`Groq request failed: ${response.status} ${response.statusText}`);
   }
 
-  const payload = (await response.json()) as GeminiGenerateContentResponse;
-  const rawText = payload.candidates?.[0]?.content?.parts
-    ?.map((part) => part.text ?? '')
-    .join('\n')
-    .trim();
+  const payload = (await response.json()) as OpenAiChatCompletionResponse;
+  const rawText = payload.choices[0]?.message?.content?.trim();
 
   if (!rawText) {
-    throw new Error('Gemini response missing content.');
+    throw new Error('Groq response missing content.');
   }
 
   return {
     prompt,
-    providerUsed: `gemini:${config.geminiModel}`,
+    providerUsed: `groq:${config.groqModel}`,
     rawText,
     spl: extractSpl(rawText),
   };
@@ -242,14 +229,4 @@ type AnthropicMessageResponse = {
         type: string;
       }
   >;
-};
-
-type GeminiGenerateContentResponse = {
-  candidates?: Array<{
-    content?: {
-      parts?: Array<{
-        text?: string;
-      }>;
-    };
-  }>;
 };

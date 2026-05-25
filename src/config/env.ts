@@ -2,12 +2,12 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as vscode from 'vscode';
 
-export type LlmProvider = 'gemini' | 'openai' | 'anthropic' | 'local' | 'mock';
+export type LlmProvider = 'groq' | 'openai' | 'anthropic' | 'local' | 'mock';
 
 export type ForgeConfig = {
   llmApiKey?: string;
-  geminiApiKey?: string;
-  geminiModel: string;
+  groqApiKey?: string;
+  groqModel: string;
   llmModel: string;
   llmProvider: LlmProvider;
   splunkMode: string;
@@ -15,32 +15,29 @@ export type ForgeConfig = {
   workspaceName: string;
 };
 
-let cachedConfig: ForgeConfig | undefined;
+type LoadForgeConfigOptions = {
+  extensionRootPath?: string;
+};
 
-export function loadForgeConfig(): ForgeConfig {
-  if (cachedConfig) {
-    return cachedConfig;
-  }
-
+export function loadForgeConfig(options: LoadForgeConfigOptions = {}): ForgeConfig {
   const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
   const workspaceName = workspaceFolder?.name ?? 'workspace';
-  const localEnvValues = workspaceFolder ? parseEnvFile(path.join(workspaceFolder.uri.fsPath, '.env.local')) : {};
+  const workspaceEnvValues = workspaceFolder ? parseEnvFile(path.join(workspaceFolder.uri.fsPath, '.env.local')) : {};
+  const extensionEnvValues = options.extensionRootPath ? parseEnvFile(path.join(options.extensionRootPath, '.env.local')) : {};
 
-  const envValue = (key: string) => process.env[key] ?? localEnvValues[key];
+  const envValue = (key: string) => process.env[key] ?? workspaceEnvValues[key] ?? extensionEnvValues[key];
   const llmProvider = normalizeProvider(envValue('SPL_FORGE_LLM_PROVIDER'));
 
-  cachedConfig = {
+  return {
     llmApiKey: envValue('SPL_FORGE_LLM_API_KEY'),
-    geminiApiKey: envValue('SPL_FORGE_GEMINI_API_KEY') ?? envValue('GEMINI_API_KEY') ?? envValue('GOOGLE_API_KEY'),
-    geminiModel: envValue('SPL_FORGE_GEMINI_MODEL') ?? 'gemini-2.0-flash',
+    groqApiKey: envValue('GROQ_API_KEY') ?? envValue('SPL_FORGE_GROQ_API_KEY'),
+    groqModel: envValue('GROQ_MODEL') ?? 'llama-3.1-8b-instant',
     llmModel: envValue('SPL_FORGE_LLM_MODEL') ?? defaultModelForProvider(llmProvider),
     llmProvider,
     splunkMode: envValue('SPL_FORGE_SPLUNK_MODE') ?? 'rest',
     splunkSource: envValue('SPL_FORGE_SPLUNK_SOURCE') ?? 'self_hosted_trial',
     workspaceName,
   };
-
-  return cachedConfig;
 }
 
 function parseEnvFile(filePath: string) {
@@ -75,7 +72,7 @@ function parseEnvFile(filePath: string) {
 }
 
 function normalizeProvider(value: string | undefined): LlmProvider {
-  if (value === 'gemini' || value === 'openai' || value === 'anthropic' || value === 'local' || value === 'mock') {
+  if (value === 'groq' || value === 'openai' || value === 'anthropic' || value === 'local' || value === 'mock') {
     return value;
   }
 
@@ -84,8 +81,8 @@ function normalizeProvider(value: string | undefined): LlmProvider {
 
 function defaultModelForProvider(provider: LlmProvider) {
   switch (provider) {
-    case 'gemini':
-      return 'gemini-2.0-flash';
+    case 'groq':
+      return 'llama-3.1-8b-instant';
     case 'openai':
       return 'gpt-4.1-mini';
     case 'anthropic':

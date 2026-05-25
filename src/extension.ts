@@ -5,12 +5,13 @@ import { SPLForgePanel } from './panels/assistant';
 
 export function activate(context: vscode.ExtensionContext) {
   const outputChannel = vscode.window.createOutputChannel('SPL Forge');
+  const readConfig = () => loadForgeConfig({ extensionRootPath: context.extensionUri.fsPath });
 
   const disposable = vscode.commands.registerCommand('spl-forge.openPanel', () => {
     SPLForgePanel.createOrShow({
       extensionUri: context.extensionUri,
       onSubmitPrompt: async (prompt) => {
-        const config = loadForgeConfig();
+        const config = readConfig();
 
         outputChannel.appendLine(`[prompt] ${prompt}`);
 
@@ -28,7 +29,7 @@ export function activate(context: vscode.ExtensionContext) {
           spl: result.spl,
         };
       },
-      readConfig: loadForgeConfig,
+      readConfig,
     });
   });
 
