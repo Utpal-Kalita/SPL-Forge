@@ -56,7 +56,7 @@ suite('Extension Test Suite', () => {
 	test('analyze prompt captures day 3 intent', () => {
 		const intent = analyzePrompt('Create a failed login dashboard by country and user agent for the last 30 minutes. Alert if failed attempts exceed 100 in 5 minutes.');
 
-		assert.deepStrictEqual(intent.breakdowns, ['country', 'user_agent']);
+		assert.deepStrictEqual(intent.breakdowns, ['country', 'user_agent', 'user']);
 		assert.strictEqual(intent.artifact, 'dashboard+alert');
 		assert.strictEqual(intent.focusField, 'country');
 		assert.strictEqual(intent.earliest, '-30m');
