@@ -3,6 +3,7 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 
 export type LlmProvider = 'groq' | 'openai' | 'anthropic' | 'local' | 'mock';
+export type SplunkMode = 'mcp' | 'mock' | 'rest';
 
 export type ForgeConfig = {
   llmApiKey?: string;
@@ -10,8 +11,17 @@ export type ForgeConfig = {
   groqModel: string;
   llmModel: string;
   llmProvider: LlmProvider;
-  splunkMode: string;
+  splunkMcpAllowSelfSigned: boolean;
+  splunkMcpEndpoint?: string;
+  splunkMcpToken?: string;
+  splunkAllowSelfSigned: boolean;
+  splunkMode: SplunkMode;
+  splunkPassword?: string;
+  splunkSearchLimit: number;
   splunkSource: string;
+  splunkToken?: string;
+  splunkUrl: string;
+  splunkUsername?: string;
   workspaceName: string;
 };
 
@@ -27,6 +37,7 @@ export function loadForgeConfig(options: LoadForgeConfigOptions = {}): ForgeConf
 
   const envValue = (key: string) => process.env[key] ?? workspaceEnvValues[key] ?? extensionEnvValues[key];
   const llmProvider = normalizeProvider(envValue('SPL_FORGE_LLM_PROVIDER'));
+  const splunkMode = normalizeSplunkMode(envValue('SPL_FORGE_SPLUNK_MODE'));
 
   return {
     llmApiKey: envValue('SPL_FORGE_LLM_API_KEY'),
@@ -34,8 +45,20 @@ export function loadForgeConfig(options: LoadForgeConfigOptions = {}): ForgeConf
     groqModel: envValue('GROQ_MODEL') ?? 'llama-3.1-8b-instant',
     llmModel: envValue('SPL_FORGE_LLM_MODEL') ?? defaultModelForProvider(llmProvider),
     llmProvider,
-    splunkMode: envValue('SPL_FORGE_SPLUNK_MODE') ?? 'rest',
+    splunkMcpAllowSelfSigned: parseBoolean(envValue('SPL_FORGE_SPLUNK_MCP_ALLOW_SELF_SIGNED'), false),
+    splunkMcpEndpoint: envValue('SPL_FORGE_SPLUNK_MCP_ENDPOINT') ?? envValue('SPLUNK_MCP_URL'),
+    splunkMcpToken: envValue('SPL_FORGE_SPLUNK_MCP_TOKEN') ?? envValue('SPLUNK_MCP_TOKEN'),
+    splunkAllowSelfSigned: parseBoolean(
+      envValue('SPL_FORGE_SPLUNK_ALLOW_SELF_SIGNED'),
+      parseBoolean(envValue('SPLUNK_VERIFY_SSL'), false) === false,
+    ),
+    splunkMode,
+    splunkPassword: envValue('SPL_FORGE_SPLUNK_PASSWORD') ?? envValue('SPLUNK_PASSWORD'),
+    splunkSearchLimit: parseInteger(envValue('SPL_FORGE_SPLUNK_SEARCH_LIMIT'), 10),
     splunkSource: envValue('SPL_FORGE_SPLUNK_SOURCE') ?? 'self_hosted_trial',
+    splunkToken: envValue('SPL_FORGE_SPLUNK_TOKEN'),
+    splunkUrl: envValue('SPL_FORGE_SPLUNK_URL') ?? envValue('SPLUNK_HOST') ?? 'https://localhost:8089',
+    splunkUsername: envValue('SPL_FORGE_SPLUNK_USERNAME') ?? envValue('SPLUNK_USERNAME'),
     workspaceName,
   };
 }
@@ -77,6 +100,31 @@ function normalizeProvider(value: string | undefined): LlmProvider {
   }
 
   return 'mock';
+}
+
+function normalizeSplunkMode(value: string | undefined): SplunkMode {
+  if (value === 'mcp' || value === 'mock' || value === 'rest') {
+    return value;
+  }
+
+  return 'mock';
+}
+
+function parseBoolean(value: string | undefined, fallback: boolean) {
+  if (value === undefined) {
+    return fallback;
+  }
+
+  return value === '1' || value.toLowerCase() === 'true' || value.toLowerCase() === 'yes';
+}
+
+function parseInteger(value: string | undefined, fallback: number) {
+  if (!value) {
+    return fallback;
+  }
+
+  const parsed = Number.parseInt(value, 10);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
 }
 
 function defaultModelForProvider(provider: LlmProvider) {

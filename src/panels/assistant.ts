@@ -1,10 +1,12 @@
 import * as vscode from 'vscode';
 import type { ForgeConfig } from '../config/env';
+import type { SplunkSearchResult } from '../splunk/execute';
 
 const panelType = 'splForgeAssistant';
 const defaultPrompt = 'Create a failed login dashboard by country and user agent. Alert if failed attempts exceed 100 in 5 minutes.';
 
 type PromptResult = {
+  execution: SplunkSearchResult;
   llmModel: string;
   planSummary: string;
   providerLabel: string;
@@ -24,8 +26,9 @@ type PanelState = {
   lastSpl?: string;
   lastProvider?: string;
   lastError?: string;
+  lastExecution?: SplunkSearchResult;
   lastPlanSummary?: string;
-  status: 'idle' | 'running' | 'success' | 'error';
+  status: 'error' | 'idle' | 'running' | 'success' | 'warning';
 };
 
 export class SPLForgePanel {
@@ -109,13 +112,14 @@ export class SPLForgePanel {
       const result = await this.dependencies.onSubmitPrompt(prompt);
 
       this.state = {
+        lastExecution: result.execution,
         lastError: undefined,
         lastPlanSummary: result.planSummary,
         lastPrompt: prompt,
         lastProvider: `${result.providerLabel} / ${result.llmModel}`,
         lastRawText: result.rawText,
         lastSpl: result.spl,
-        status: 'success',
+        status: result.execution.status === 'success' ? 'success' : 'warning',
       };
     } catch (error) {
       this.state = {
@@ -282,6 +286,11 @@ export function getPanelHtml(input: PanelHtmlInput) {
         color: var(--danger);
       }
 
+      .status-warning {
+        border-color: rgba(255, 209, 102, 0.4);
+        color: var(--warn);
+      }
+
       label {
         display: block;
         margin-bottom: 8px;
@@ -372,15 +381,16 @@ export function getPanelHtml(input: PanelHtmlInput) {
   <body>
     <main>
       <section class="hero">
-        <div class="eyebrow">Day 3 Query Generation</div>
+        <div class="eyebrow">Day 4 Splunk Connectivity</div>
         <h1>SPL Forge</h1>
         <p>
-          Prompt now flows through intent parsing and schema-aware generation.
-          Day 3 target: stronger SPL quality before Splunk execution work starts.
+          Prompt now generates SPL and executes it through configured Splunk mode.
+          Mock mode gives deterministic demo results; REST mode can run against Splunk management API.
         </p>
         <div class="pill-row">
           <span class="pill">Mode: ${escapeHtml(config.splunkMode)}</span>
           <span class="pill">Source: ${escapeHtml(config.splunkSource)}</span>
+          <span class="pill">Endpoint: ${escapeHtml(getSplunkEndpointLabel(config))}</span>
           <span class="pill">Provider: ${escapeHtml(config.llmProvider)}</span>
           <span class="pill">Model: ${escapeHtml(config.llmProvider === 'groq' ? config.groqModel : config.llmModel)}</span>
           <span class="pill status-${state.status}">Status: ${escapeHtml(statusLabel)}</span>
@@ -392,19 +402,20 @@ export function getPanelHtml(input: PanelHtmlInput) {
           <h2>Prompt</h2>
           <label for="prompt-input">Describe search, dashboard, or alert intent.</label>
           <textarea id="prompt-input" placeholder="Describe Splunk artifact you want...">${escapeHtml(state.lastPrompt)}</textarea>
-          <button id="generate-button"${state.status === 'running' ? ' disabled' : ''}>Generate Query Plan + SPL</button>
+          <button id="generate-button"${state.status === 'running' ? ' disabled' : ''}>Generate + Run SPL</button>
           ${state.lastError ? `<div class="error">${escapeHtml(state.lastError)}</div>` : ''}
         </article>
 
         <article class="card">
-          <h2>Day 3 Checklist</h2>
+          <h2>Day 4 Checklist</h2>
           <ul>
             <li>Natural-language prompt accepted in panel</li>
-            <li>Intent parser infers artifact, breakdowns, time range, threshold</li>
-            <li>LLM prompt includes known demo schema context</li>
-            <li>Mock fallback returns deterministic Splunk-shaped SPL</li>
+            <li>Intent parser and LLM adapter generate SPL</li>
+            <li>Execution adapter routes through mock, REST, or MCP mode</li>
+            <li>Mock mode returns deterministic sample rows</li>
+            <li>REST mode posts to Splunk search export endpoint</li>
             <li>Provider + model logged in output channel</li>
-            <li>Parsed query plan visible before live Splunk execution exists</li>
+            <li>Result rows or execution errors visible in panel</li>
           </ul>
         </article>
       </section>
@@ -419,13 +430,25 @@ export function getPanelHtml(input: PanelHtmlInput) {
           <h2>Raw Provider Output</h2>
           <div class="stack">
             <div>Last provider: <code>${escapeHtml(state.lastProvider ?? 'none yet')}</code></div>
-            <pre>${escapeHtml(state.lastRawText ?? 'No generation yet. Submit prompt to test Day 3 flow.')}</pre>
+            <pre>${escapeHtml(state.lastRawText ?? 'No generation yet. Submit prompt to generate and run SPL.')}</pre>
           </div>
         </article>
 
         <article class="card">
           <h2>Parsed SPL</h2>
           <pre>${escapeHtml(state.lastSpl ?? 'Parsed SPL will render here after prompt submission.')}</pre>
+        </article>
+      </section>
+
+      <section class="grid two">
+        <article class="card">
+          <h2>Execution Summary</h2>
+          <pre>${escapeHtml(formatExecutionSummary(state.lastExecution))}</pre>
+        </article>
+
+        <article class="card">
+          <h2>Result Preview</h2>
+          <pre>${escapeHtml(formatRows(state.lastExecution))}</pre>
         </article>
       </section>
 
@@ -439,10 +462,10 @@ Alert if failed attempts exceed 100 in 5 minutes.</pre>
         <article class="card">
           <h2>Next Build Targets</h2>
           <ol>
-            <li>Mock Splunk adapter for deterministic run loop</li>
-            <li>REST adapter for live Splunk execution</li>
             <li>Repair loop for field and sourcetype failures</li>
-            <li>Result preview from executed searches</li>
+            <li>Schema inspection flow for missing fields</li>
+            <li>Dashboard export from successful query</li>
+            <li>Alert export from threshold query</li>
           </ol>
         </article>
       </section>
@@ -487,12 +510,53 @@ function getStatusLabel(status: PanelState['status']) {
       return 'running';
     case 'success':
       return 'success';
+    case 'warning':
+      return 'warning';
     case 'error':
       return 'error';
     case 'idle':
     default:
       return 'idle';
   }
+}
+
+function getSplunkEndpointLabel(config: ForgeConfig) {
+  if (config.splunkMode === 'mcp') {
+    return config.splunkMcpEndpoint ?? 'mcp endpoint not configured';
+  }
+
+  if (config.splunkMode === 'rest') {
+    return config.splunkUrl;
+  }
+
+  return 'mock';
+}
+
+function formatExecutionSummary(execution: SplunkSearchResult | undefined) {
+  if (!execution) {
+    return 'Execution summary will render here after prompt submission.';
+  }
+
+  return [
+    `Mode: ${execution.mode}`,
+    `Status: ${execution.status}`,
+    `Rows: ${execution.rowCount}`,
+    `Elapsed: ${execution.elapsedMs}ms`,
+    `Fields: ${execution.fields.length > 0 ? execution.fields.join(', ') : 'none'}`,
+    `Messages: ${execution.messages.length > 0 ? execution.messages.join(' | ') : 'none'}`,
+  ].join('\n');
+}
+
+function formatRows(execution: SplunkSearchResult | undefined) {
+  if (!execution) {
+    return 'Result rows will render here after execution.';
+  }
+
+  if (execution.rows.length === 0) {
+    return execution.status === 'success' ? 'Search completed with zero rows.' : 'No rows because execution failed.';
+  }
+
+  return JSON.stringify(execution.rows.slice(0, 10), null, 2);
 }
 
 function isPromptMessage(message: unknown): message is { prompt: string; type: 'submitPrompt' } {
