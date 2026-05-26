@@ -4,7 +4,7 @@ Actual repo status as of 2026-05-25.
 
 ## Overall State
 
-SPL Forge now has product definition, setup documentation, Day 1 environment guidance, sample data, Day 2 prompt flow, completed Day 3 query generation, and working Day 4 Splunk execution through MCP, REST, and mock modes.
+SPL Forge now has product definition, setup documentation, Day 1 environment guidance, sample data, Day 2 prompt flow, completed Day 3 query generation, working Day 4 Splunk execution through MCP/REST/mock modes, and a Day 5 self-debugging repair loop.
 
 ## Completed
 
@@ -47,16 +47,19 @@ SPL Forge now has product definition, setup documentation, Day 1 environment gui
 - [x] Local self-hosted trial auth queries now auto-rewrite CSV fixture fields with `rex` and header filtering
 - [x] Local stale demo time windows now auto-retry with `earliest=0`
 - [x] Live localhost MCP smoke test verified against local Splunk MCP Server
+- [x] Day 5 forge workflow added for generate -> execute -> schema inspect -> repair -> rerun
+- [x] Schema inspection helper added for fields, indexes, sourcetypes, and messages
+- [x] Deterministic repair rules added for common index, sourcetype, field alias, action value, and time-window failures
+- [x] Repair history added to panel and output channel
+- [x] Root `architecture_diagram.md` added for hackathon submission requirements
+- [x] MIT license added for open-source submission requirement
 
 ## Not Started Yet
 
-- [ ] schema inspection flow
-- [ ] self-repair query loop
 - [ ] dashboard export generation
 - [ ] alert export generation
 - [ ] saved search packaging
 - [ ] Splunk app packaging
-- [ ] Stable extension host test run in local/CI environment
 
 
 ## MVP Readiness Snapshot
@@ -71,17 +74,18 @@ SPL Forge now has product definition, setup documentation, Day 1 environment gui
 | Demo planning | Done | Runbook present |
 | Architecture direction | Done | High-level plan present with Day 1 and Day 2 scaffold notes |
 | Extension code | Started | Prompt UI, panel messaging, provider adapter, output logging present |
-| Splunk connectivity | Day 4 done | MCP, REST, and mock execution adapters exist; local MCP smoke verified |
+| Splunk connectivity | Day 4 done | MCP, REST, and mock execution adapters exist; local MCP and REST smoke verified |
 | Agent workflow | Day 3 done | Intent-aware query generation works via mock or configured LLM provider |
+| Self-debug loop | Day 5 done | Executes once, inspects schema after failure/empty rows, repairs common demo issues, reruns with capped attempts |
 | Artifact export | Not started | No packaging code yet |
-| Testing | Started | Test scaffold present; extension host run still unstable in sandbox |
+| Testing | Started | Extension tests pass locally with VS Code test runner; CI runs with xvfb on Ubuntu |
 
 ## Reality Check
 
-If someone clones repo now, they get strong planning and setup docs plus real extension shell that accepts prompts, explains interpreted query intent, returns stronger demo-safe SPL, and executes it through MCP, REST, or mock mode. Local self-hosted trial auth fixture queries are rewritten so imported CSV data works in live MCP demos. Repair loop and export flow are not built yet.
+If someone clones repo now, they get strong planning and setup docs plus real extension shell that accepts prompts, explains interpreted query intent, returns stronger demo-safe SPL, executes it through MCP, REST, or mock mode, and repairs common failed-login demo query mistakes after schema inspection. Local self-hosted trial auth fixture queries are rewritten so imported CSV data works in live MCP demos. Export flow is not built yet.
 
 ## Next Logical Build Order
 
-1. Add schema inspection flow
-2. Add repair loop
-3. Add export flow
+1. Add dashboard export flow
+2. Add alert export flow
+3. Add Splunk app packaging

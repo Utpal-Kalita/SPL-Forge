@@ -51,19 +51,18 @@ Prompt -> Generate SPL -> Run in Splunk -> Detect issue -> Repair -> Preview -> 
 - Mock Splunk execution with result preview
 - MCP execution adapter for Splunk MCP Server `splunk_run_query`
 - REST execution adapter for Splunk search export endpoint
+- Day 5 repair loop with schema inspection and retry history
 
 ## Not Yet Included
 
-- Self-debugging repair loop
 - Dashboard export engine
 - Alert packaging logic
 
 ## Suggested Next Build Order
 
-1. Add schema inspection flow
-2. Add retry and repair loop
-3. Add dashboard export engine
-4. Add alert packaging logic
+1. Add dashboard export engine
+2. Add alert packaging logic
+3. Add Splunk app packaging
 
 ## Need More Context
 

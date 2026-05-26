@@ -4,6 +4,8 @@ import * as vscode from 'vscode';
 import type { ForgeConfig } from '../config/env';
 import { getPanelHtml } from '../panels/assistant';
 import { analyzePrompt, extractSpl, generateSplFromPrompt, summarizeIntent } from '../agent/generate';
+import { repairSplQuery } from '../agent/repair';
+import { runForgePrompt } from '../agent/workflow';
 import { executeSplSearch, rewriteDemoFixtureSearch, widenDemoFixtureTimeRange } from '../splunk/execute';
 
 suite('Extension Test Suite', () => {
@@ -40,11 +42,12 @@ suite('Extension Test Suite', () => {
 			},
 		});
 
-		assert.ok(html.includes('Day 4 Splunk Connectivity'));
+		assert.ok(html.includes('Day 5 Self-Debugging Loop'));
 		assert.ok(html.includes('Generate + Run SPL'));
 		assert.ok(html.includes('failed_login_auth.csv'));
 		assert.ok(html.includes('Provider: mock'));
 		assert.ok(html.includes('Query Plan'));
+		assert.ok(html.includes('Repair History'));
 		assert.ok(html.includes('Execution Summary'));
 	});
 
@@ -110,6 +113,43 @@ suite('Extension Test Suite', () => {
 		assert.ok(result.rowCount > 0);
 		assert.ok(result.fields.includes('country'));
 		assert.ok(result.fields.includes('failed_logins'));
+	});
+
+	test('forge workflow returns final execution with no repair when first run succeeds', async () => {
+		const result = await runForgePrompt('Create a failed login dashboard by country.', mockConfig);
+
+		assert.strictEqual(result.execution.status, 'success');
+		assert.strictEqual(result.attempts.length, 1);
+		assert.strictEqual(result.repairSummary, 'No repair needed.');
+		assert.ok(result.spl.includes('index=main sourcetype=auth action=failure'));
+	});
+
+	test('repair loop rewrites common wrong fields and auth source hints', () => {
+		const repair = repairSplQuery(
+			'index=security sourcetype=linux_secure status=failed earliest=-30m | stats count as failed_logins by source_ip useragent',
+			{
+				elapsedMs: 5,
+				fields: [],
+				messages: ['No matching fields found.'],
+				mode: 'mcp',
+				rowCount: 0,
+				rows: [],
+				search: 'index=security sourcetype=linux_secure status=failed earliest=-30m | stats count as failed_logins by source_ip useragent',
+				status: 'success',
+			},
+			{
+				fields: ['action', 'country', 'src', 'user', 'user_agent'],
+				indexes: ['main'],
+				messages: ['schema ok'],
+				sourcetypes: ['auth'],
+			},
+		);
+
+		assert.strictEqual(repair.shouldRetry, true);
+		assert.ok(repair.repairedSpl.includes('index=main sourcetype=auth action=failure earliest=0'));
+		assert.ok(repair.repairedSpl.includes('by src user_agent'));
+		assert.ok(repair.reason.includes('replaced index=security'));
+		assert.ok(repair.reason.includes('replaced field source_ip with src'));
 	});
 
 	test('rest splunk adapter reports missing credentials', async () => {

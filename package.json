@@ -4,6 +4,7 @@
   "description": "Self-debugging agentic IDE for Splunk development",
   "version": "0.0.1",
   "publisher": "prantikmedhi",
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/Utpal-Kalita/SPL-Forge.git"

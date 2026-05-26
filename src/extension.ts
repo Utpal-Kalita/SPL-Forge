@@ -1,8 +1,7 @@
 import * as vscode from 'vscode';
-import { generateSplFromPrompt } from './agent/generate';
+import { runForgePrompt } from './agent/workflow';
 import { loadForgeConfig } from './config/env';
 import { SPLForgePanel } from './panels/assistant';
-import { executeSplSearch } from './splunk/execute';
 
 export function activate(context: vscode.ExtensionContext) {
   const outputChannel = vscode.window.createOutputChannel('SPL Forge');
@@ -16,15 +15,20 @@ export function activate(context: vscode.ExtensionContext) {
 
         outputChannel.appendLine(`[prompt] ${prompt}`);
 
-        const result = await generateSplFromPrompt({ prompt }, config);
-        const execution = await executeSplSearch(result.spl, config);
+        const result = await runForgePrompt(prompt, config);
+        const execution = result.execution;
 
         outputChannel.appendLine(`[provider] ${result.providerUsed}`);
         outputChannel.appendLine(`[raw] ${result.rawText}`);
-        outputChannel.appendLine(`[spl] ${result.spl}`);
-        outputChannel.appendLine(`[splunk:${execution.mode}] ${execution.status} ${execution.rowCount} row(s) in ${execution.elapsedMs}ms`);
-        for (const message of execution.messages) {
-          outputChannel.appendLine(`[splunk-message] ${message}`);
+        for (const [index, attempt] of result.attempts.entries()) {
+          outputChannel.appendLine(`[attempt:${index + 1}] ${attempt.spl}`);
+          outputChannel.appendLine(`[splunk:${attempt.execution.mode}] ${attempt.execution.status} ${attempt.execution.rowCount} row(s) in ${attempt.execution.elapsedMs}ms`);
+          if (attempt.repairReason) {
+            outputChannel.appendLine(`[repair:${index + 1}] ${attempt.repairReason}`);
+          }
+          for (const message of attempt.execution.messages) {
+            outputChannel.appendLine(`[splunk-message] ${message}`);
+          }
         }
         outputChannel.show(true);
 
@@ -34,6 +38,7 @@ export function activate(context: vscode.ExtensionContext) {
           planSummary: result.planSummary,
           providerLabel: result.providerUsed,
           rawText: result.rawText,
+          repairSummary: result.repairSummary,
           spl: result.spl,
         };
       },

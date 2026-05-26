@@ -187,6 +187,33 @@ Day 4 currently supports:
 - error reporting when REST credentials are missing or Splunk returns an error
 - local self-hosted trial auth-query rewrite for CSV fixture field extraction and stale-timestamp retry
 
+## Current Day 5 Scaffold
+
+```text
+src/
+├─ agent/
+│  ├─ generate.ts
+│  ├─ repair.ts
+│  └─ workflow.ts
+├─ splunk/
+│  ├─ execute.ts
+│  └─ schema.ts
+├─ extension.ts
+├─ panels/
+│  └─ assistant.ts
+└─ test/
+   └─ extension.test.ts
+```
+
+Day 5 currently supports:
+
+- forge workflow orchestration around generate -> execute -> inspect -> repair -> rerun
+- schema inspection summary for fields, indexes, sourcetypes, and probe messages
+- deterministic repair rules for common wrong index, sourcetype, field alias, action value, and time-window failures
+- capped repair attempts before returning final execution state
+- repair history rendering in the VS Code panel and output channel
+- independent unit coverage for repair behavior and workflow success path
+
 ## Runtime Modes
 
 ### MCP Mode

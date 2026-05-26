@@ -56,6 +56,7 @@ Demonstrate:
 - schema inspection
 - rewritten SPL
 - successful rerun
+- repair history in the VS Code panel
 
 ### 6. Show Artifact Output
 
@@ -100,6 +101,7 @@ If live environment unstable:
 - Uses execution feedback, not blind text generation
 - Supports MCP-first agentic workflow
 - Keeps human in control before export
+- Meets hackathon repo requirements with root architecture diagram and open-source license
 
 ## Related Docs
 

@@ -11,6 +11,7 @@ type PromptResult = {
   planSummary: string;
   providerLabel: string;
   rawText: string;
+  repairSummary: string;
   spl: string;
 };
 
@@ -25,6 +26,7 @@ type PanelState = {
   lastRawText?: string;
   lastSpl?: string;
   lastProvider?: string;
+  lastRepairSummary?: string;
   lastError?: string;
   lastExecution?: SplunkSearchResult;
   lastPlanSummary?: string;
@@ -118,6 +120,7 @@ export class SPLForgePanel {
         lastPrompt: prompt,
         lastProvider: `${result.providerLabel} / ${result.llmModel}`,
         lastRawText: result.rawText,
+        lastRepairSummary: result.repairSummary,
         lastSpl: result.spl,
         status: result.execution.status === 'success' ? 'success' : 'warning',
       };
@@ -381,11 +384,11 @@ export function getPanelHtml(input: PanelHtmlInput) {
   <body>
     <main>
       <section class="hero">
-        <div class="eyebrow">Day 4 Splunk Connectivity</div>
+        <div class="eyebrow">Day 5 Self-Debugging Loop</div>
         <h1>SPL Forge</h1>
         <p>
-          Prompt now generates SPL and executes it through configured Splunk mode.
-          Mock mode gives deterministic demo results; REST mode can run against Splunk management API.
+          Prompt now generates SPL, executes it, inspects schema on failure or zero rows,
+          repairs common field/index/sourcetype mistakes, and reruns with capped attempts.
         </p>
         <div class="pill-row">
           <span class="pill">Mode: ${escapeHtml(config.splunkMode)}</span>
@@ -412,8 +415,9 @@ export function getPanelHtml(input: PanelHtmlInput) {
             <li>Natural-language prompt accepted in panel</li>
             <li>Intent parser and LLM adapter generate SPL</li>
             <li>Execution adapter routes through mock, REST, or MCP mode</li>
-            <li>Mock mode returns deterministic sample rows</li>
-            <li>REST mode posts to Splunk search export endpoint</li>
+            <li>Schema inspection runs after failed or empty execution</li>
+            <li>Repair loop rewrites common field, index, sourcetype, action, and time-window problems</li>
+            <li>Final successful SPL replaces initial failed candidate</li>
             <li>Provider + model logged in output channel</li>
             <li>Result rows or execution errors visible in panel</li>
           </ul>
@@ -437,6 +441,11 @@ export function getPanelHtml(input: PanelHtmlInput) {
         <article class="card">
           <h2>Parsed SPL</h2>
           <pre>${escapeHtml(state.lastSpl ?? 'Parsed SPL will render here after prompt submission.')}</pre>
+        </article>
+
+        <article class="card">
+          <h2>Repair History</h2>
+          <pre>${escapeHtml(state.lastRepairSummary ?? 'Repair history will render here after prompt submission.')}</pre>
         </article>
       </section>
 

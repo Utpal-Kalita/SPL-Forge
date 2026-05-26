@@ -92,6 +92,12 @@ All notable changes to **SPL Forge** will be documented in this file.
 - GitHub Actions Gitleaks workflow for committed secret scanning.
 - Dependabot configuration for weekly npm and GitHub Actions update pull requests.
 - Live Splunk verification CLI via `npm run verify:splunk` for REST and MCP smoke tests against real data.
+- Day 5 self-debugging workflow for generate -> execute -> schema inspect -> repair -> rerun.
+- Schema inspection helper for field, index, sourcetype, and probe-message summaries.
+- Deterministic repair rules for common failed-login demo mistakes across index, sourcetype, field aliases, action values, and time windows.
+- Repair history rendering in the VS Code panel and SPL Forge output channel.
+- Root `architecture_diagram.md` for hackathon submission requirements.
+- MIT license declaration for open-source submission readiness.
 
 ### In Progress (Planned for next milestone)
 
