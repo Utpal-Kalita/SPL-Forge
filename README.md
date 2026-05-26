@@ -123,6 +123,7 @@ Current repository assets:
 - Dashboard plus disabled alert publish path via `npm run publish:app` or the panel Publish to Splunk button
 - Alert saved-search preview generated from threshold prompts
 - Minimal Splunk app folder export via `npm run export:app`
+- Ten-prompt smoke verifier via `npm run verify:prompts -- --mode mcp`
 - Polished VS Code panel flow with query history, error log, Run, Export App, and Publish to Splunk controls
 - Day 9 stability coverage for trend breakdowns, successful-login prompts, source-IP grouping, threshold alerts, and unsafe provider output
 - Root architecture diagram and MIT license for hackathon submission readiness

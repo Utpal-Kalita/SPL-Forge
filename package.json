@@ -42,6 +42,7 @@
     "lint": "eslint src",
     "test": "vscode-test",
     "package:vsix": "npm run package && npx @vscode/vsce package",
+    "verify:prompts": "npm run compile-tests && node out/cli/verify-prompts.js",
     "verify:splunk": "npm run compile-tests && node out/cli/verify-splunk.js",
     "publish:dashboard": "npm run compile-tests && node out/cli/publish-dashboard.js",
     "publish:app": "npm run compile-tests && node out/cli/publish-app.js",

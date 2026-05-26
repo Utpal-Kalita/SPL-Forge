@@ -66,6 +66,7 @@ SPL Forge now has product definition, setup documentation, Day 1 environment gui
 - [x] Panel Publish to Splunk writes dashboard XML and a disabled saved-search alert through Splunk REST
 - [x] Day 9 trend-by-breakdown fix preserves `timechart ... by country` for trend dashboard prompts
 - [x] Day 9 prompt coverage added for successful-login dashboards, top source-IP searches, threshold-window alerts, and unsafe provider output
+- [x] `npm run verify:prompts -- --mode mcp` added and verified against 10 real Groq/MCP prompt scenarios
 - [x] Root `architecture_diagram.md` added for hackathon submission requirements
 - [x] MIT license added for open-source submission requirement
 
@@ -91,12 +92,12 @@ SPL Forge now has product definition, setup documentation, Day 1 environment gui
 | Self-debug loop | Day 5 done | Executes once, inspects schema and MCP metadata after failure/empty rows, repairs common demo issues, optionally asks LLM for a safe repair, and reruns with capped attempts |
 | Artifact export | Day 7 done | Dashboard Studio JSON, classic dashboard XML, Splunk UI dashboard publish, alert saved-search preview, and local app-folder export exist |
 | Panel UX | Day 8 done | Prompt, run, export, publish, history, error log, execution summary, and artifact previews are in one panel |
-| Testing and iteration | Day 9 in progress | Complex prompt coverage added; trend breakdown and unsafe `sendalert` output fixed |
+| Testing and iteration | Day 9 in progress | Complex prompt coverage added; 10 real Groq/MCP prompts pass with verifier |
 | Testing | Started | Extension tests pass locally with VS Code test runner; CI runs with xvfb on Ubuntu |
 
 ## Reality Check
 
-If someone clones repo now, they get strong planning and setup docs plus real extension panel that accepts prompts, explains interpreted query intent, returns stronger demo-safe SPL, executes it through MCP, REST, or mock mode, repairs common failed-login demo query mistakes after schema and MCP metadata inspection, previews Dashboard Studio JSON plus saved-search alert config for dashboard/alert prompts, can publish a generated dashboard plus disabled alert into Splunk UI via REST, and can export a minimal Splunk app folder from the panel or CLI. Local self-hosted trial auth fixture queries are rewritten so imported CSV data works in live MCP demos. Day 9 coverage now checks multiple prompt shapes, including trends, successful logins, source IP grouping, threshold windows, and unsafe provider artifacts.
+If someone clones repo now, they get strong planning and setup docs plus real extension panel that accepts prompts, explains interpreted query intent, returns stronger demo-safe SPL, executes it through MCP, REST, or mock mode, repairs common failed-login demo query mistakes after schema and MCP metadata inspection, previews Dashboard Studio JSON plus saved-search alert config for dashboard/alert prompts, can publish a generated dashboard plus disabled alert into Splunk UI via REST, and can export a minimal Splunk app folder from the panel or CLI. Local self-hosted trial auth fixture queries are rewritten so imported CSV data works in live MCP demos. Day 9 coverage now checks 10 prompt shapes, including trends, successful logins, source IP grouping, threshold windows, generic auth investigation, and unsafe provider artifacts.
 
 ## Next Logical Build Order
 

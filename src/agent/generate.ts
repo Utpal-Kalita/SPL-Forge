@@ -243,12 +243,14 @@ export function normalizeGeneratedSpl(spl: string, intent: PromptIntent) {
     .replace(/\|\s*alert\b[^\n|]*/gi, '')
     .replace(/\|\s*sendalert\b[^\n|]*/gi, '')
     .replace(/\|\s*bin\s+\w+\s+over\s+\d+\s*/gi, '')
+    .replace(/^`|`$/g, '')
+    .replace(/^search\s+/i, '')
     .replace(/\bby\s+([^\n|]+)/gi, (match, fields: string) => `by ${fields.replace(/,\s*/g, ' ').replace(/\s+/g, ' ').trim()}`)
     .replace(/\s+\n/g, '\n')
     .replace(/[ \t]+/g, ' ')
     .trim();
 
-  if (hasUnsafeGeneratedShape(normalized)) {
+  if (hasUnsafeGeneratedShape(normalized) || hasIntentMismatch(normalized, intent)) {
     return generateMockSpl(intent);
   }
 
@@ -269,6 +271,63 @@ function hasUnsafeGeneratedShape(spl: string) {
   }
 
   return false;
+}
+
+function hasIntentMismatch(spl: string, intent: PromptIntent) {
+  const metric = metricName(intent);
+
+  if (intent.wantsFailedLogins && !/\baction=failure\b/.test(spl)) {
+    return true;
+  }
+
+  if (intent.wantsSuccessLogins && !/\baction=success\b/.test(spl)) {
+    return true;
+  }
+
+  if (intent.wantsTrend) {
+    if (!/\|\s*timechart\b/i.test(spl)) {
+      return true;
+    }
+
+    if (!new RegExp(`\\bcount\\s+as\\s+${metric}\\b`, 'i').test(spl)) {
+      return true;
+    }
+
+    for (const breakdown of intent.breakdowns) {
+      if (!new RegExp(`\\bby\\b[^|]*\\b${breakdown}\\b`, 'i').test(spl)) {
+        return true;
+      }
+    }
+  }
+
+  if (intent.threshold !== undefined && intent.thresholdWindow) {
+    const binIndex = searchIndex(spl, /\|\s*bin\s+_time\s+span=/i);
+    const statsIndex = searchIndex(spl, new RegExp(`\\|\\s*stats\\s+count\\s+as\\s+${metric}\\s+by\\s+_time\\b`, 'i'));
+    const whereIndex = searchIndex(spl, new RegExp(`\\|\\s*where\\s+${metric}\\s*>\\s*${intent.threshold}\\b`, 'i'));
+
+    if (binIndex === -1) {
+      return true;
+    }
+
+    if (statsIndex === -1) {
+      return true;
+    }
+
+    if (whereIndex === -1) {
+      return true;
+    }
+
+    if (!(binIndex < statsIndex && statsIndex < whereIndex)) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+function searchIndex(value: string, pattern: RegExp) {
+  const match = pattern.exec(value);
+  return match ? match.index : -1;
 }
 
 function buildUserPrompt(prompt: string, intent: PromptIntent) {

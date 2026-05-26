@@ -51,7 +51,7 @@ In summary, Splunk’s own messaging and recent feature releases align perfectly
   - **Status:** Complete in current MVP panel with prompt input, query history, error log, Generate + Run SPL, Export App, and Publish to Splunk controls.
 
 - **Day 9: Testing & Iteration.** Run multiple test scenarios (different prompts, complex queries). Identify bugs or edge cases. Improve prompt templates or error handling as needed. Ensure SPL Forge can handle at least 2-3 distinct use-cases. *Deliverable:* Stability fixes, improved reliability.  
-  - **Status:** In progress with added coverage for trend-by-country, top source-IP, successful-login, alert-window, and unsafe provider-output scenarios.
+  - **Status:** In progress with added coverage for trend-by-country, top source-IP, successful-login, alert-window, generic auth investigation, and unsafe provider-output scenarios. Ten real Groq/MCP prompts pass through `npm run verify:prompts -- --mode mcp`.
 
 - **Day 10: Demo Prep.** Prepare the hackathon demo script and sample data sets. Record or rehearse the 3-minute walkthrough (see below). Finalize architecture diagram and README. *Deliverable:* Demo video storyboard ready; final working prototype.  
 
