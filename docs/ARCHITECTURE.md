@@ -237,6 +237,7 @@ Day 6 currently supports:
 - REST publisher CLI for loading generated dashboard into Splunk UI
 - deterministic saved-search alert draft generation from threshold prompts
 - panel preview for alert title, condition, schedule, and savedsearches.conf draft
+- local Splunk app folder export with `app.conf`, dashboard XML, `savedsearches.conf`, metadata, README, and manifest
 - output-channel logging for generated dashboard artifacts
 - unit coverage for dashboard and alert artifact generation plus workflow integration
 

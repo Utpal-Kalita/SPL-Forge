@@ -60,12 +60,12 @@ SPL Forge now has product definition, setup documentation, Day 1 environment gui
 - [x] Panel now renders alert title, threshold condition, schedule, and savedsearches.conf draft
 - [x] Dashboard artifact now includes classic XML that can be loaded into Splunk UI
 - [x] `npm run publish:dashboard` publishes the generated dashboard to Splunk UI through REST using the verified executable search
+- [x] `npm run export:app` writes a minimal Splunk app folder with app.conf, dashboard XML, savedsearches.conf, metadata, README, and manifest
 - [x] Root `architecture_diagram.md` added for hackathon submission requirements
 - [x] MIT license added for open-source submission requirement
 
 ## Not Started Yet
 
-- [ ] saved search packaging
 - [ ] Splunk app packaging
 
 
@@ -84,15 +84,15 @@ SPL Forge now has product definition, setup documentation, Day 1 environment gui
 | Splunk connectivity | Day 4 done | MCP, REST, and mock execution adapters exist; local MCP and REST smoke verified |
 | Agent workflow | Day 3 done | Intent-aware query generation works via mock or configured LLM provider |
 | Self-debug loop | Day 5 done | Executes once, inspects schema and MCP metadata after failure/empty rows, repairs common demo issues, optionally asks LLM for a safe repair, and reruns with capped attempts |
-| Artifact export | Started | Dashboard Studio JSON, classic dashboard XML, Splunk UI dashboard publish, and alert saved-search previews exist; full app packaging not built yet |
+| Artifact export | Day 7 started | Dashboard Studio JSON, classic dashboard XML, Splunk UI dashboard publish, alert saved-search preview, and local app-folder export exist |
 | Testing | Started | Extension tests pass locally with VS Code test runner; CI runs with xvfb on Ubuntu |
 
 ## Reality Check
 
-If someone clones repo now, they get strong planning and setup docs plus real extension shell that accepts prompts, explains interpreted query intent, returns stronger demo-safe SPL, executes it through MCP, REST, or mock mode, repairs common failed-login demo query mistakes after schema and MCP metadata inspection, previews Dashboard Studio JSON plus saved-search alert config for dashboard/alert prompts, and can publish a generated dashboard into Splunk UI via REST. Local self-hosted trial auth fixture queries are rewritten so imported CSV data works in live MCP demos. Full app packaging is not built yet.
+If someone clones repo now, they get strong planning and setup docs plus real extension shell that accepts prompts, explains interpreted query intent, returns stronger demo-safe SPL, executes it through MCP, REST, or mock mode, repairs common failed-login demo query mistakes after schema and MCP metadata inspection, previews Dashboard Studio JSON plus saved-search alert config for dashboard/alert prompts, can publish a generated dashboard into Splunk UI via REST, and can export a minimal Splunk app folder. Local self-hosted trial auth fixture queries are rewritten so imported CSV data works in live MCP demos.
 
 ## Next Logical Build Order
 
-1. Add saved search packaging
-2. Add Splunk app packaging
-3. Add human approval controls before writing artifacts
+1. Add zip packaging
+2. Add human approval controls before writing artifacts
+3. Add richer app validation before import

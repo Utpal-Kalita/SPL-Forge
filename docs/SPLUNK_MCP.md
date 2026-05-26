@@ -27,7 +27,8 @@ REST remains a fallback path. Mock mode remains available for offline demos and 
 | Dashboard generation | Implemented as Dashboard Studio JSON and classic XML |
 | Dashboard publish | Implemented through REST with `npm run publish:dashboard` |
 | Alert preview | Implemented as saved-search configuration draft |
-| Full Splunk app packaging | Planned |
+| Splunk app folder export | Implemented with `npm run export:app` |
+| Zip packaging | Planned |
 
 ## Recommended Integration Position
 
@@ -318,6 +319,20 @@ If Splunk adds locale:
 http://localhost:8000/en-GB/app/search/failed_login_dashboard
 ```
 
+Export generated app folder:
+
+```bash
+npm run export:app -- --mode mcp
+```
+
+Expected output:
+
+```text
+Exported Splunk app folder: .../exports/spl-forge-generated-app
+Files: 6
+Rows verified before export: 12
+```
+
 ## Troubleshooting
 
 ### `ERR_SSL_PROTOCOL_ERROR` on port 8000
@@ -410,6 +425,7 @@ Before demo:
 - Panel prompt returns rows.
 - `npm run publish:dashboard -- --mode mcp` publishes dashboard.
 - Splunk UI dashboard shows chart/table rows.
+- `npm run export:app -- --mode mcp` writes importable app folder.
 
 ## Related Docs
 

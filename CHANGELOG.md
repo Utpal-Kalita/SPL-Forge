@@ -110,6 +110,7 @@ All notable changes to **SPL Forge** will be documented in this file.
 - Classic XML dashboard artifact and `npm run publish:dashboard` REST publisher for Splunk UI verification.
 - Dashboard publisher now uses the verified executable Splunk search, including local demo field extraction.
 - End-to-end failed-login demo flow now covers prompt -> Groq SPL -> MCP execution -> normalized final SPL -> result preview -> dashboard artifact -> alert artifact -> Splunk UI dashboard publish.
+- Minimal Splunk app folder export via `npm run export:app`, including `app.conf`, dashboard XML, `savedsearches.conf`, metadata, README, and manifest.
 
 ### In Progress (Planned for next milestone)
 

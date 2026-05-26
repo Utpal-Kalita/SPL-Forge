@@ -3,6 +3,7 @@ import * as http from 'http';
 import * as vscode from 'vscode';
 import { generateAlertArtifact } from '../artifacts/alert';
 import { buildClassicDashboardXml, generateDashboardArtifact } from '../artifacts/dashboard';
+import { buildSplunkAppPackage } from '../artifacts/package';
 import type { ForgeConfig } from '../config/env';
 import { getPanelHtml } from '../panels/assistant';
 import { analyzePrompt, extractSpl, generateSplFromPrompt, normalizeGeneratedSpl, summarizeIntent } from '../agent/generate';
@@ -219,6 +220,23 @@ suite('Extension Test Suite', () => {
     assert.strictEqual(alert.cronSchedule, '*/5 * * * *');
     assert.ok(alert.alertSearch.includes('| where failed_logins > 100'));
     assert.ok(alert.savedSearchConf.includes('alert_type = number of events'));
+  });
+
+  test('splunk app package contains app config, dashboard, saved search, metadata, and readme', async () => {
+    const result = await runForgePrompt(
+      'Create a failed login dashboard by country and user agent. Alert if failed attempts exceed 100 in 5 minutes.',
+      mockConfig,
+    );
+    const appPackage = buildSplunkAppPackage({ appId: 'SPL Forge Generated App', result });
+
+    assert.strictEqual(appPackage.appId, 'spl_forge_generated_app');
+    assert.ok(appPackage.files['default/app.conf'].includes('SPL Forge Generated App'));
+    assert.ok(appPackage.files['metadata/default.meta'].includes('export = system'));
+    assert.ok(appPackage.files['default/savedsearches.conf'].includes('[Failed Login Threshold Alert]'));
+    assert.ok(appPackage.files['default/savedsearches.conf'].includes('| bin _time span=5m'));
+    assert.ok(appPackage.files['default/data/ui/views/failed_login_dashboard.xml'].includes('<dashboard version="1.1">'));
+    assert.ok(appPackage.files['README.md'].includes('Rows verified before export'));
+    assert.ok(appPackage.files['spl-forge-manifest.json'].includes('"rowCount"'));
   });
 
 	test('repair loop rewrites common wrong fields and auth source hints', () => {
