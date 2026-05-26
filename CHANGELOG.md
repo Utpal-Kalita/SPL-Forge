@@ -105,6 +105,8 @@ All notable changes to **SPL Forge** will be documented in this file.
 - `SPL_FORGE_REPAIR_AUTO_RUN` policy flag plus panel indicator for auto-rerun versus approval-required repair mode.
 - Day 6 Dashboard Studio JSON artifact generation from final working SPL and result schema.
 - Dashboard artifact preview in the VS Code panel and output-channel dashboard logging.
+- Alert saved-search draft generation from threshold prompts.
+- Alert artifact preview in the VS Code panel and output-channel alert logging.
 
 ### In Progress (Planned for next milestone)
 
@@ -139,6 +141,7 @@ All notable changes to **SPL Forge** will be documented in this file.
 - Tightened provider prompts so model requests include explicit schema hints and primary-query constraint for dashboard+alert prompts.
 - Expanded Day 5 from deterministic-only repairs to deterministic plus optional LLM repair using live schema context.
 - Started artifact generation path with deterministic dashboard previews before write/export support.
+- Replaced day-specific panel labels with generic workflow labels.
 
 ### Fixed
 

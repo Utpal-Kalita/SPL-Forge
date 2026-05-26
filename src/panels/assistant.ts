@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import type { AlertArtifact } from '../artifacts/alert';
 import type { DashboardArtifact } from '../artifacts/dashboard';
 import type { ForgeConfig } from '../config/env';
 import type { SplunkSearchResult } from '../splunk/execute';
@@ -7,6 +8,7 @@ const panelType = 'splForgeAssistant';
 const defaultPrompt = 'Create a failed login dashboard by country and user agent. Alert if failed attempts exceed 100 in 5 minutes.';
 
 type PromptResult = {
+  alert?: AlertArtifact;
   dashboard?: DashboardArtifact;
   execution: SplunkSearchResult;
   llmModel: string;
@@ -33,6 +35,7 @@ type PanelState = {
   lastExecution?: SplunkSearchResult;
   lastPlanSummary?: string;
   lastDashboard?: DashboardArtifact;
+  lastAlert?: AlertArtifact;
   status: 'error' | 'idle' | 'running' | 'success' | 'warning';
 };
 
@@ -117,6 +120,7 @@ export class SPLForgePanel {
       const result = await this.dependencies.onSubmitPrompt(prompt);
 
       this.state = {
+        lastAlert: result.alert,
         lastDashboard: result.dashboard,
         lastExecution: result.execution,
         lastError: undefined,
@@ -388,12 +392,12 @@ export function getPanelHtml(input: PanelHtmlInput) {
   <body>
     <main>
       <section class="hero">
-        <div class="eyebrow">Day 5 Self-Debugging Loop</div>
+        <div class="eyebrow">Agentic Splunk Artifact Loop</div>
         <h1>SPL Forge</h1>
         <p>
           Prompt now generates SPL, executes it, inspects schema on failure or zero rows,
           repairs common field/index/sourcetype mistakes, and reruns with capped attempts.
-          Day 6 adds dashboard artifact generation from final working SPL.
+          Final working SPL now produces dashboard and alert artifact previews before export.
         </p>
         <div class="pill-row">
           <span class="pill">Mode: ${escapeHtml(config.splunkMode)}</span>
@@ -416,7 +420,7 @@ export function getPanelHtml(input: PanelHtmlInput) {
         </article>
 
         <article class="card">
-          <h2>Day 4 Checklist</h2>
+          <h2>Workflow Checklist</h2>
           <ul>
             <li>Natural-language prompt accepted in panel</li>
             <li>Intent parser and LLM adapter generate SPL</li>
@@ -426,6 +430,7 @@ export function getPanelHtml(input: PanelHtmlInput) {
             <li>Final successful SPL replaces initial failed candidate</li>
             <li>Provider + model logged in output channel</li>
             <li>Result rows or execution errors visible in panel</li>
+            <li>Dashboard and alert artifacts previewed from final SPL</li>
           </ul>
         </article>
       </section>
@@ -474,9 +479,15 @@ export function getPanelHtml(input: PanelHtmlInput) {
         </article>
 
         <article class="card">
+          <h2>Alert Artifact</h2>
+          <pre>${escapeHtml(formatAlertArtifact(state.lastAlert))}</pre>
+        </article>
+      </section>
+
+      <section class="grid two">
+        <article class="card">
           <h2>Next Build Targets</h2>
           <ol>
-            <li>Alert export from threshold query</li>
             <li>Saved search packaging</li>
             <li>Splunk app directory export</li>
             <li>Human approval before writing artifacts</li>
@@ -584,6 +595,20 @@ function formatDashboardArtifact(dashboard: DashboardArtifact | undefined) {
     `Fields: ${dashboard.fields.length > 0 ? dashboard.fields.join(', ') : 'none'}`,
     '',
     dashboard.dashboardJson,
+  ].join('\n');
+}
+
+function formatAlertArtifact(alert: AlertArtifact | undefined) {
+  if (!alert) {
+    return 'Alert saved-search draft will render here when prompt includes threshold or alert intent.';
+  }
+
+  return [
+    `Title: ${alert.title}`,
+    `Condition: ${alert.condition}`,
+    `Schedule: ${alert.cronSchedule}`,
+    '',
+    alert.savedSearchConf,
   ].join('\n');
 }
 

@@ -1,6 +1,7 @@
 import * as assert from 'assert';
 import * as http from 'http';
 import * as vscode from 'vscode';
+import { generateAlertArtifact } from '../artifacts/alert';
 import { generateDashboardArtifact } from '../artifacts/dashboard';
 import type { ForgeConfig } from '../config/env';
 import { getPanelHtml } from '../panels/assistant';
@@ -45,7 +46,7 @@ suite('Extension Test Suite', () => {
 			},
 		});
 
-		assert.ok(html.includes('Day 5 Self-Debugging Loop'));
+		assert.ok(html.includes('Agentic Splunk Artifact Loop'));
 		assert.ok(html.includes('Generate + Run SPL'));
 		assert.ok(html.includes('failed_login_auth.csv'));
 		assert.ok(html.includes('Provider: mock'));
@@ -54,6 +55,7 @@ suite('Extension Test Suite', () => {
     assert.ok(html.includes('Repair: auto-rerun'));
     assert.ok(html.includes('Execution Summary'));
     assert.ok(html.includes('Dashboard Artifact'));
+    assert.ok(html.includes('Alert Artifact'));
   });
 
 	test('extract spl removes fenced markdown', () => {
@@ -146,6 +148,20 @@ suite('Extension Test Suite', () => {
     assert.ok(result.dashboard);
     assert.strictEqual(result.dashboard.visualizationType, 'bar');
     assert.ok(result.dashboard.dashboardJson.includes('"type": "ds.search"'));
+    assert.strictEqual(result.alert, undefined);
+  });
+
+  test('forge workflow returns alert artifact for dashboard plus alert prompt', async () => {
+    const result = await runForgePrompt(
+      'Create a failed login dashboard by country and user agent. Alert if failed attempts exceed 100 in 5 minutes.',
+      mockConfig,
+    );
+
+    assert.ok(result.dashboard);
+    assert.ok(result.alert);
+    assert.strictEqual(result.alert.condition, 'failed_logins > 100 in 5 minutes');
+    assert.ok(result.alert.alertSearch.includes('| bin _time span=5m'));
+    assert.ok(result.alert.savedSearchConf.includes('disabled = 1'));
   });
 
   test('dashboard artifact generates dashboard studio json from result schema', () => {
@@ -172,6 +188,21 @@ suite('Extension Test Suite', () => {
     assert.ok(dashboard.dashboardJson.includes('"viz_primary"'));
     assert.ok(dashboard.dashboardJson.includes('"splunk.bar"'));
     assert.ok(dashboard.dashboardJson.includes('"ds.search"'));
+  });
+
+  test('alert artifact generates saved search preview from threshold intent', () => {
+    const intent = analyzePrompt('Alert if failed attempts exceed 100 in 5 minutes.');
+    const alert = generateAlertArtifact(
+      'Alert if failed attempts exceed 100 in 5 minutes.',
+      intent,
+      'index=main sourcetype=auth action=failure latest=now | stats count as failed_logins by country user_agent user | sort - failed_logins',
+    );
+
+    assert.ok(alert);
+    assert.strictEqual(alert.title, 'Failed Login Threshold Alert');
+    assert.strictEqual(alert.cronSchedule, '*/5 * * * *');
+    assert.ok(alert.alertSearch.includes('| where failed_logins > 100'));
+    assert.ok(alert.savedSearchConf.includes('alert_type = number of events'));
   });
 
 	test('repair loop rewrites common wrong fields and auth source hints', () => {

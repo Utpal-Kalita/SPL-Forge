@@ -23,6 +23,9 @@ export function activate(context: vscode.ExtensionContext) {
         if (result.dashboard) {
           outputChannel.appendLine(`[dashboard] ${result.dashboard.title} (${result.dashboard.visualizationType})`);
         }
+        if (result.alert) {
+          outputChannel.appendLine(`[alert] ${result.alert.title} (${result.alert.condition})`);
+        }
         for (const [index, attempt] of result.attempts.entries()) {
           outputChannel.appendLine(`[attempt:${index + 1}] ${attempt.spl}`);
           outputChannel.appendLine(`[splunk:${attempt.execution.mode}] ${attempt.execution.status} ${attempt.execution.rowCount} row(s) in ${attempt.execution.elapsedMs}ms`);
@@ -36,6 +39,7 @@ export function activate(context: vscode.ExtensionContext) {
         outputChannel.show(true);
 
         return {
+          alert: result.alert,
           dashboard: result.dashboard,
           execution,
           llmModel: config.llmModel,

@@ -233,8 +233,10 @@ Day 6 currently supports:
 - deterministic Dashboard Studio JSON generation from final working SPL
 - visualization selection from prompt intent and result schema (`bar`, `line`, `singlevalue`, or `table`)
 - panel preview for dashboard title, visualization type, fields, and JSON
+- deterministic saved-search alert draft generation from threshold prompts
+- panel preview for alert title, condition, schedule, and savedsearches.conf draft
 - output-channel logging for generated dashboard artifacts
-- unit coverage for dashboard artifact generation and workflow integration
+- unit coverage for dashboard and alert artifact generation plus workflow integration
 
 ## Runtime Modes
 

@@ -308,7 +308,7 @@ export function analyzePrompt(prompt: string): PromptIntent {
     latest: 'now',
     threshold: thresholdMatch ? Number(thresholdMatch[1]) : undefined,
     thresholdWindow: thresholdWindowMatch ? `${thresholdWindowMatch[1]} ${thresholdWindowMatch[2]}` : undefined,
-    wantsFailedLogins: /failed login|failed auth|login failure|auth failure|unsuccessful login|login errors?/.test(lowerPrompt),
+    wantsFailedLogins: /failed login|failed auth|failed attempts?|login failure|auth failure|unsuccessful login|login errors?/.test(lowerPrompt),
     wantsSuccessLogins: /successful login|success login|login success|successful auth/.test(lowerPrompt),
     wantsTrend: /\bover time\b|trend|timeline|timechart|per minute|per hour/.test(lowerPrompt),
   };

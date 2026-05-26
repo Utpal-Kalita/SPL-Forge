@@ -1,4 +1,5 @@
 import type { ForgeConfig } from '../config/env';
+import { generateAlertArtifact, type AlertArtifact } from '../artifacts/alert';
 import { generateDashboardArtifact, type DashboardArtifact } from '../artifacts/dashboard';
 import { executeSplSearch, type SplunkSearchResult } from '../splunk/execute';
 import { inspectSplunkSchema, type SplunkSchemaSummary } from '../splunk/schema';
@@ -13,6 +14,7 @@ export type ForgeRunAttempt = {
 };
 
 export type ForgeRunResult = GenerateSplResult & {
+	alert?: AlertArtifact;
 	attempts: ForgeRunAttempt[];
 	dashboard?: DashboardArtifact;
 	execution: SplunkSearchResult;
@@ -63,6 +65,7 @@ function finish(generation: GenerateSplResult, attempts: ForgeRunAttempt[], inte
 
 	return {
 		...generation,
+		alert: generateAlertArtifact(generation.prompt, intent, finalAttempt.spl),
 		attempts,
 		dashboard: generateDashboardArtifact(generation.prompt, intent, finalAttempt.spl, finalAttempt.execution),
 		execution: finalAttempt.execution,
