@@ -114,6 +114,7 @@ All notable changes to **SPL Forge** will be documented in this file.
 - Polished VS Code panel interaction with query history, error log, Run control, and Export App button for the current verified package.
 - Publish to Splunk panel action that writes dashboard XML and a disabled saved-search alert through Splunk REST.
 - `npm run publish:app` CLI smoke path for publishing the same dashboard and disabled alert package.
+- Day 9 prompt stability coverage for trend-by-country, top source-IP, successful-login, threshold-window, and unsafe provider-output scenarios.
 
 ### In Progress (Planned for next milestone)
 
@@ -158,6 +159,8 @@ All notable changes to **SPL Forge** will be documented in this file.
 - Fixed GitHub Actions dependency scanning by replacing unsupported Dependency Review usage with portable `npm audit`.
 - Fixed TypeScript type resolution robustness by explicitly including Node and Mocha ambient types.
 - Fixed published dashboard searches so Splunk UI uses the verified executable query, including demo fixture field extraction, instead of the display-only SPL.
+- Fixed trend dashboard generation so requested breakdowns are preserved in `timechart ... by <field>` searches.
+- Fixed unsafe provider-output detection so `sendalert` output is replaced with a safe generated SPL query.
 
 ### Verified
 

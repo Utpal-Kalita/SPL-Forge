@@ -128,8 +128,37 @@ suite('Extension Test Suite', () => {
 
 		assert.ok(result.planSummary.includes('Time: -2h to now'));
 		assert.ok(result.spl.includes('earliest=-2h latest=now'));
-		assert.ok(result.spl.includes('| timechart span=15m count as failed_logins'));
+		assert.ok(result.spl.includes('| timechart span=15m count as failed_logins by country'));
 	});
+
+  test('normalization preserves requested trend breakdown after unsafe provider output fallback', () => {
+    const intent = analyzePrompt('Create a failed login trend dashboard by country for the last 30 minutes. Alert if failed attempts exceed 3 in 5 minutes.');
+    const normalized = normalizeGeneratedSpl([
+      'index=main sourcetype=auth action=failure',
+      '| timechart span=5min count as failed_logins by country',
+      '| sendalert alert="Failed Logins Exceeded" to="admin"',
+      '| timechart span=5min count as failed_logins by country',
+    ].join(' '), intent);
+
+    assert.ok(normalized.includes('earliest=-30m latest=now'));
+    assert.ok(normalized.includes('| timechart span=5m count as failed_logins by country'));
+    assert.ok(!normalized.includes('sendalert'));
+  });
+
+  test('complex top source-ip prompt keeps limit and threshold window', async () => {
+    const generated = await generateSplFromPrompt({
+      prompt: 'Show top 3 source IPs with failed logins today.',
+    }, mockConfig);
+    const alertGenerated = await generateSplFromPrompt({
+      prompt: 'Alert if failed logins by source IP exceed 2 in 5 minutes.',
+    }, mockConfig);
+
+    assert.ok(generated.planSummary.includes('Limit: top 3'));
+    assert.ok(generated.spl.includes('action=failure'));
+    assert.ok(generated.spl.includes('by src'));
+    assert.ok(generated.spl.includes('| head 3'));
+    assert.ok(alertGenerated.spl.includes('| stats count as failed_logins by _time src'));
+  });
 
 	test('time parser handles today wording', () => {
 		const intent = analyzePrompt('Show successful login counts by user today.');
@@ -137,6 +166,17 @@ suite('Extension Test Suite', () => {
 		assert.strictEqual(intent.earliest, '@d');
 		assert.strictEqual(intent.wantsSuccessLogins, true);
 	});
+
+  test('successful login dashboard prompt uses success action and success metric', async () => {
+    const result = await generateSplFromPrompt({
+      prompt: 'Create a successful login dashboard by user and country for today. Alert if successful logins exceed 5 in 5 minutes.',
+    }, mockConfig);
+
+    assert.ok(result.planSummary.includes('Focus: successful logins'));
+    assert.ok(result.spl.includes('action=success'));
+    assert.ok(result.spl.includes('earliest=@d latest=now'));
+    assert.ok(result.spl.includes('| stats count as successful_logins by country user'));
+  });
 
 	test('mock splunk adapter returns grouped rows', async () => {
 		const result = await executeSplSearch('index=main sourcetype=auth action=failure | stats count as failed_logins by country user_agent | sort - failed_logins', mockConfig);

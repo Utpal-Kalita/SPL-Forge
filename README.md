@@ -124,6 +124,7 @@ Current repository assets:
 - Alert saved-search preview generated from threshold prompts
 - Minimal Splunk app folder export via `npm run export:app`
 - Polished VS Code panel flow with query history, error log, Run, Export App, and Publish to Splunk controls
+- Day 9 stability coverage for trend breakdowns, successful-login prompts, source-IP grouping, threshold alerts, and unsafe provider output
 - Root architecture diagram and MIT license for hackathon submission readiness
 
 ## Documentation

@@ -158,9 +158,26 @@ function executeMockSearch(search: string, config: ForgeConfig): Omit<SplunkSear
       : mockEvents;
 
   if (search.includes('timechart')) {
-    const rows = [
-      { _time: '2026-05-24T10:15:00Z', failed_logins: String(filtered.filter((event) => event.action === 'failure').length) },
-    ];
+    const metric = search.match(/\bcount\s+as\s+(\w+)/)?.[1] ?? 'event_count';
+    const splitField = search.match(/\btimechart\b[\s\S]*?\bby\s+(\w+)/i)?.[1];
+    const row: Record<string, string> = { _time: '2026-05-24T10:15:00Z' };
+
+    if (splitField) {
+      const grouped = new Map<string, number>();
+
+      for (const event of filtered) {
+        const value = event[splitField as keyof typeof event] ?? 'unknown';
+        grouped.set(value, (grouped.get(value) ?? 0) + 1);
+      }
+
+      for (const [value, count] of grouped) {
+        row[value] = String(count);
+      }
+    } else {
+      row[metric] = String(filtered.length);
+    }
+
+    const rows = [row];
 
     return mockSuccess(search, config, rows);
   }

@@ -18,6 +18,7 @@ export type PromptIntent = {
   focusField?: string;
   earliest?: string;
   latest?: string;
+  limit?: number;
   threshold?: number;
   thresholdWindow?: string;
   wantsFailedLogins: boolean;
@@ -234,8 +235,13 @@ export function extractSpl(rawText: string) {
 }
 
 export function normalizeGeneratedSpl(spl: string, intent: PromptIntent) {
+  if (hasUnsafeGeneratedShape(spl)) {
+    return generateMockSpl(intent);
+  }
+
   const normalized = spl
     .replace(/\|\s*alert\b[^\n|]*/gi, '')
+    .replace(/\|\s*sendalert\b[^\n|]*/gi, '')
     .replace(/\|\s*bin\s+\w+\s+over\s+\d+\s*/gi, '')
     .replace(/\bby\s+([^\n|]+)/gi, (match, fields: string) => `by ${fields.replace(/,\s*/g, ' ').replace(/\s+/g, ' ').trim()}`)
     .replace(/\s+\n/g, '\n')
@@ -250,7 +256,7 @@ export function normalizeGeneratedSpl(spl: string, intent: PromptIntent) {
 }
 
 function hasUnsafeGeneratedShape(spl: string) {
-  if (/\|\s*(alert|sendemail|outputlookup|delete|collect)\b/i.test(spl)) {
+  if (/\|\s*(alert|sendalert|sendemail|outputlookup|delete|collect)\b/i.test(spl)) {
     return true;
   }
 
@@ -299,6 +305,7 @@ export function analyzePrompt(prompt: string): PromptIntent {
 
   const thresholdMatch = lowerPrompt.match(/(?:exceed|over|above|greater than)\s+(\d+)/);
   const thresholdWindowMatch = lowerPrompt.match(/in\s+(\d+)\s+(minutes|minute|hours|hour|days|day)/);
+  const limitMatch = lowerPrompt.match(/\btop\s+(\d+)\b|\blimit\s+(\d+)\b/);
 
   return {
     artifact: dashboard && alert ? 'dashboard+alert' : dashboard ? 'dashboard' : alert ? 'alert' : 'search',
@@ -306,6 +313,7 @@ export function analyzePrompt(prompt: string): PromptIntent {
     focusField,
     earliest: normalizeTimeWindow(lowerPrompt),
     latest: 'now',
+    limit: limitMatch ? Number(limitMatch[1] ?? limitMatch[2]) : undefined,
     threshold: thresholdMatch ? Number(thresholdMatch[1]) : undefined,
     thresholdWindow: thresholdWindowMatch ? `${thresholdWindowMatch[1]} ${thresholdWindowMatch[2]}` : undefined,
     wantsFailedLogins: /failed login|failed auth|failed attempts?|login failure|auth failure|unsuccessful login|login errors?/.test(lowerPrompt),
@@ -319,6 +327,10 @@ export function summarizeIntent(intent: PromptIntent) {
 
   if (intent.wantsFailedLogins) {
     parts.push('Focus: failed logins');
+  }
+
+  if (intent.wantsSuccessLogins) {
+    parts.push('Focus: successful logins');
   }
 
   if (intent.breakdowns.length > 0) {
@@ -335,6 +347,10 @@ export function summarizeIntent(intent: PromptIntent) {
 
   if (intent.threshold !== undefined) {
     parts.push(`Threshold: > ${intent.threshold}${intent.thresholdWindow ? ` in ${intent.thresholdWindow}` : ''}`);
+  }
+
+  if (intent.limit !== undefined) {
+    parts.push(`Limit: top ${intent.limit}`);
   }
 
   if (intent.wantsTrend) {
@@ -369,21 +385,24 @@ function generateMockSpl(intent: PromptIntent) {
 
 function buildPipeline(intent: PromptIntent) {
   if (intent.wantsTrend) {
-    return [`| timechart span=${resolveTrendSpan(intent)} count as ${metricName(intent)}`];
+    const byClause = intent.breakdowns.length > 0 ? ` by ${intent.breakdowns.join(' ')}` : '';
+    return [`| timechart span=${resolveTrendSpan(intent)} count as ${metricName(intent)}${byClause}`];
   }
 
   if ((intent.artifact === 'dashboard' || intent.artifact === 'dashboard+alert') && intent.breakdowns.length > 0) {
     return [
       `| stats count as ${metricName(intent)} by ${intent.breakdowns.join(' ')}`,
       `| sort - ${metricName(intent)}`,
+      ...limitPipeline(intent),
     ];
   }
 
   if (intent.threshold !== undefined && intent.thresholdWindow) {
     const thresholdSpan = toSplunkSpan(intent.thresholdWindow);
+    const groupFields = intent.breakdowns.length > 0 ? ` ${intent.breakdowns.join(' ')}` : '';
     return [
       `| bin _time span=${thresholdSpan}`,
-      `| stats count as ${metricName(intent)} by _time`,
+      `| stats count as ${metricName(intent)} by _time${groupFields}`,
       `| where ${metricName(intent)} > ${intent.threshold}`,
       '| sort _time',
     ];
@@ -393,6 +412,7 @@ function buildPipeline(intent: PromptIntent) {
     return [
       `| stats count as ${metricName(intent)} by ${intent.breakdowns.join(' ')}`,
       `| sort - ${metricName(intent)}`,
+      ...limitPipeline(intent),
     ];
   }
 
@@ -401,14 +421,23 @@ function buildPipeline(intent: PromptIntent) {
       `| stats count as ${metricName(intent)} by ${intent.focusField ?? 'user'}`,
       `| where ${metricName(intent)} > ${intent.threshold}`,
       `| sort - ${metricName(intent)}`,
+      ...limitPipeline(intent),
     ];
   }
 
   if (intent.wantsFailedLogins || intent.wantsSuccessLogins) {
-    return [`| stats count as ${metricName(intent)} by ${intent.focusField ?? 'user'}`, `| sort - ${metricName(intent)}`];
+    return [
+      `| stats count as ${metricName(intent)} by ${intent.focusField ?? 'user'}`,
+      `| sort - ${metricName(intent)}`,
+      ...limitPipeline(intent),
+    ];
   }
 
   return ['| head 25'];
+}
+
+function limitPipeline(intent: PromptIntent) {
+  return intent.limit !== undefined ? [`| head ${intent.limit}`] : [];
 }
 
 function metricName(intent: PromptIntent) {
