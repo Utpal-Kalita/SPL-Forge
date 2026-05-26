@@ -107,6 +107,7 @@ All notable changes to **SPL Forge** will be documented in this file.
 - Dashboard artifact preview in the VS Code panel and output-channel dashboard logging.
 - Alert saved-search draft generation from threshold prompts.
 - Alert artifact preview in the VS Code panel and output-channel alert logging.
+- Classic XML dashboard artifact and `npm run publish:dashboard` REST publisher for Splunk UI verification.
 
 ### In Progress (Planned for next milestone)
 

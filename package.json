@@ -42,7 +42,8 @@
     "lint": "eslint src",
     "test": "vscode-test",
     "package:vsix": "npm run package && npx @vscode/vsce package",
-    "verify:splunk": "npm run compile-tests && node out/cli/verify-splunk.js"
+    "verify:splunk": "npm run compile-tests && node out/cli/verify-splunk.js",
+    "publish:dashboard": "npm run compile-tests && node out/cli/publish-dashboard.js"
   },
   "devDependencies": {
     "@types/vscode": "^1.120.0",

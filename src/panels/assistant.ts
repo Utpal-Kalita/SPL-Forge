@@ -591,10 +591,14 @@ function formatDashboardArtifact(dashboard: DashboardArtifact | undefined) {
 
   return [
     `Title: ${dashboard.title}`,
+    `View: ${dashboard.viewName}`,
     `Visualization: ${dashboard.visualizationType}`,
     `Fields: ${dashboard.fields.length > 0 ? dashboard.fields.join(', ') : 'none'}`,
     '',
     dashboard.dashboardJson,
+    '',
+    'Classic XML for Splunk UI load:',
+    dashboard.classicXml,
   ].join('\n');
 }
 

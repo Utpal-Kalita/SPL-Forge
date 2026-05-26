@@ -231,8 +231,10 @@ src/
 Day 6 currently supports:
 
 - deterministic Dashboard Studio JSON generation from final working SPL
+- classic Splunk dashboard XML generation for Splunk UI loading
 - visualization selection from prompt intent and result schema (`bar`, `line`, `singlevalue`, or `table`)
 - panel preview for dashboard title, visualization type, fields, and JSON
+- REST publisher CLI for loading generated dashboard into Splunk UI
 - deterministic saved-search alert draft generation from threshold prompts
 - panel preview for alert title, condition, schedule, and savedsearches.conf draft
 - output-channel logging for generated dashboard artifacts

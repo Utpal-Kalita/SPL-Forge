@@ -148,6 +148,8 @@ suite('Extension Test Suite', () => {
     assert.ok(result.dashboard);
     assert.strictEqual(result.dashboard.visualizationType, 'bar');
     assert.ok(result.dashboard.dashboardJson.includes('"type": "ds.search"'));
+    assert.ok(result.dashboard.classicXml.includes('<dashboard version="1.1">'));
+    assert.strictEqual(result.dashboard.viewName, 'failed_login_dashboard');
     assert.strictEqual(result.alert, undefined);
   });
 
@@ -188,6 +190,8 @@ suite('Extension Test Suite', () => {
     assert.ok(dashboard.dashboardJson.includes('"viz_primary"'));
     assert.ok(dashboard.dashboardJson.includes('"splunk.bar"'));
     assert.ok(dashboard.dashboardJson.includes('"ds.search"'));
+    assert.ok(dashboard.classicXml.includes('<option name="charting.chart">bar</option>'));
+    assert.strictEqual(dashboard.viewName, 'failed_login_dashboard');
   });
 
   test('alert artifact generates saved search preview from threshold intent', () => {

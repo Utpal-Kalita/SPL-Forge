@@ -119,6 +119,7 @@ Current repository assets:
 - MCP/REST/mock Splunk execution path with result preview in the panel
 - Day 5 self-debugging loop that inspects schema after failed or empty execution, repairs common SPL mistakes, and reruns with capped attempts
 - Day 6 Dashboard Studio JSON preview generated from final working SPL for dashboard prompts
+- Classic XML dashboard publish path via `npm run publish:dashboard` for Splunk UI verification
 - Alert saved-search preview generated from threshold prompts
 - Root architecture diagram and MIT license for hackathon submission readiness
 
