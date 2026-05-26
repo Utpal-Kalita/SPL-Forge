@@ -214,6 +214,28 @@ Day 5 currently supports:
 - repair history rendering in the VS Code panel and output channel
 - independent unit coverage for repair behavior and workflow success path
 
+## Current Day 6 Scaffold
+
+```text
+src/
+├─ artifacts/
+│  └─ dashboard.ts
+├─ agent/
+│  └─ workflow.ts
+├─ panels/
+│  └─ assistant.ts
+└─ test/
+   └─ extension.test.ts
+```
+
+Day 6 currently supports:
+
+- deterministic Dashboard Studio JSON generation from final working SPL
+- visualization selection from prompt intent and result schema (`bar`, `line`, `singlevalue`, or `table`)
+- panel preview for dashboard title, visualization type, fields, and JSON
+- output-channel logging for generated dashboard artifacts
+- unit coverage for dashboard artifact generation and workflow integration
+
 ## Runtime Modes
 
 ### MCP Mode

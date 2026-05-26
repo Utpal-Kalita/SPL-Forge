@@ -103,6 +103,8 @@ All notable changes to **SPL Forge** will be documented in this file.
 - MCP schema discovery now calls `splunk_get_indexes` and `splunk_get_metadata` for repair context.
 - LLM-assisted repair prompt fallback for failed or zero-row searches after deterministic repair rules.
 - `SPL_FORGE_REPAIR_AUTO_RUN` policy flag plus panel indicator for auto-rerun versus approval-required repair mode.
+- Day 6 Dashboard Studio JSON artifact generation from final working SPL and result schema.
+- Dashboard artifact preview in the VS Code panel and output-channel dashboard logging.
 
 ### In Progress (Planned for next milestone)
 
@@ -136,6 +138,7 @@ All notable changes to **SPL Forge** will be documented in this file.
 - Replaced generic mock SPL output with prompt-aware Splunk-shaped query synthesis for demo data.
 - Tightened provider prompts so model requests include explicit schema hints and primary-query constraint for dashboard+alert prompts.
 - Expanded Day 5 from deterministic-only repairs to deterministic plus optional LLM repair using live schema context.
+- Started artifact generation path with deterministic dashboard previews before write/export support.
 
 ### Fixed
 

@@ -20,6 +20,9 @@ export function activate(context: vscode.ExtensionContext) {
 
         outputChannel.appendLine(`[provider] ${result.providerUsed}`);
         outputChannel.appendLine(`[raw] ${result.rawText}`);
+        if (result.dashboard) {
+          outputChannel.appendLine(`[dashboard] ${result.dashboard.title} (${result.dashboard.visualizationType})`);
+        }
         for (const [index, attempt] of result.attempts.entries()) {
           outputChannel.appendLine(`[attempt:${index + 1}] ${attempt.spl}`);
           outputChannel.appendLine(`[splunk:${attempt.execution.mode}] ${attempt.execution.status} ${attempt.execution.rowCount} row(s) in ${attempt.execution.elapsedMs}ms`);
@@ -33,6 +36,7 @@ export function activate(context: vscode.ExtensionContext) {
         outputChannel.show(true);
 
         return {
+          dashboard: result.dashboard,
           execution,
           llmModel: config.llmModel,
           planSummary: result.planSummary,

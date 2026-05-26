@@ -4,7 +4,7 @@ Actual repo status as of 2026-05-25.
 
 ## Overall State
 
-SPL Forge now has product definition, setup documentation, Day 1 environment guidance, sample data, Day 2 prompt flow, completed Day 3 query generation, working Day 4 Splunk execution through MCP/REST/mock modes, and a Day 5 self-debugging repair loop.
+SPL Forge now has product definition, setup documentation, Day 1 environment guidance, sample data, Day 2 prompt flow, completed Day 3 query generation, working Day 4 Splunk execution through MCP/REST/mock modes, a Day 5 self-debugging repair loop, and Day 6 dashboard artifact generation.
 
 ## Completed
 
@@ -54,12 +54,13 @@ SPL Forge now has product definition, setup documentation, Day 1 environment gui
 - [x] Optional LLM repair prompt added after deterministic diagnostics
 - [x] Repair auto-rerun policy flag added with panel visibility
 - [x] Repair history added to panel and output channel
+- [x] Day 6 dashboard artifact generator added for Dashboard Studio JSON previews
+- [x] Panel now renders dashboard artifact title, visualization type, fields, and JSON
 - [x] Root `architecture_diagram.md` added for hackathon submission requirements
 - [x] MIT license added for open-source submission requirement
 
 ## Not Started Yet
 
-- [ ] dashboard export generation
 - [ ] alert export generation
 - [ ] saved search packaging
 - [ ] Splunk app packaging
@@ -80,15 +81,15 @@ SPL Forge now has product definition, setup documentation, Day 1 environment gui
 | Splunk connectivity | Day 4 done | MCP, REST, and mock execution adapters exist; local MCP and REST smoke verified |
 | Agent workflow | Day 3 done | Intent-aware query generation works via mock or configured LLM provider |
 | Self-debug loop | Day 5 done | Executes once, inspects schema and MCP metadata after failure/empty rows, repairs common demo issues, optionally asks LLM for a safe repair, and reruns with capped attempts |
-| Artifact export | Not started | No packaging code yet |
+| Artifact export | Day 6 started | Dashboard Studio JSON preview exists; alert/export packaging not built yet |
 | Testing | Started | Extension tests pass locally with VS Code test runner; CI runs with xvfb on Ubuntu |
 
 ## Reality Check
 
-If someone clones repo now, they get strong planning and setup docs plus real extension shell that accepts prompts, explains interpreted query intent, returns stronger demo-safe SPL, executes it through MCP, REST, or mock mode, and repairs common failed-login demo query mistakes after schema and MCP metadata inspection. Local self-hosted trial auth fixture queries are rewritten so imported CSV data works in live MCP demos. Export flow is not built yet.
+If someone clones repo now, they get strong planning and setup docs plus real extension shell that accepts prompts, explains interpreted query intent, returns stronger demo-safe SPL, executes it through MCP, REST, or mock mode, repairs common failed-login demo query mistakes after schema and MCP metadata inspection, and previews Dashboard Studio JSON for dashboard prompts. Local self-hosted trial auth fixture queries are rewritten so imported CSV data works in live MCP demos. Alert/export packaging is not built yet.
 
 ## Next Logical Build Order
 
-1. Add dashboard export flow
-2. Add alert export flow
+1. Add alert export flow
+2. Add saved search packaging
 3. Add Splunk app packaging

@@ -1,6 +1,7 @@
 import * as assert from 'assert';
 import * as http from 'http';
 import * as vscode from 'vscode';
+import { generateDashboardArtifact } from '../artifacts/dashboard';
 import type { ForgeConfig } from '../config/env';
 import { getPanelHtml } from '../panels/assistant';
 import { analyzePrompt, extractSpl, generateSplFromPrompt, normalizeGeneratedSpl, summarizeIntent } from '../agent/generate';
@@ -49,10 +50,11 @@ suite('Extension Test Suite', () => {
 		assert.ok(html.includes('failed_login_auth.csv'));
 		assert.ok(html.includes('Provider: mock'));
 		assert.ok(html.includes('Query Plan'));
-		assert.ok(html.includes('Repair History'));
-		assert.ok(html.includes('Repair: auto-rerun'));
-		assert.ok(html.includes('Execution Summary'));
-	});
+    assert.ok(html.includes('Repair History'));
+    assert.ok(html.includes('Repair: auto-rerun'));
+    assert.ok(html.includes('Execution Summary'));
+    assert.ok(html.includes('Dashboard Artifact'));
+  });
 
 	test('extract spl removes fenced markdown', () => {
 		const parsed = extractSpl('```spl\nindex=main | head 10\n```');
@@ -134,14 +136,43 @@ suite('Extension Test Suite', () => {
 		assert.ok(result.fields.includes('failed_logins'));
 	});
 
-	test('forge workflow returns final execution with no repair when first run succeeds', async () => {
-		const result = await runForgePrompt('Create a failed login dashboard by country.', mockConfig);
+  test('forge workflow returns final execution with no repair when first run succeeds', async () => {
+    const result = await runForgePrompt('Create a failed login dashboard by country.', mockConfig);
 
-		assert.strictEqual(result.execution.status, 'success');
-		assert.strictEqual(result.attempts.length, 1);
-		assert.strictEqual(result.repairSummary, 'No repair needed.');
-		assert.ok(result.spl.includes('index=main sourcetype=auth action=failure'));
-	});
+    assert.strictEqual(result.execution.status, 'success');
+    assert.strictEqual(result.attempts.length, 1);
+    assert.strictEqual(result.repairSummary, 'No repair needed.');
+    assert.ok(result.spl.includes('index=main sourcetype=auth action=failure'));
+    assert.ok(result.dashboard);
+    assert.strictEqual(result.dashboard.visualizationType, 'bar');
+    assert.ok(result.dashboard.dashboardJson.includes('"type": "ds.search"'));
+  });
+
+  test('dashboard artifact generates dashboard studio json from result schema', () => {
+    const intent = analyzePrompt('Create a failed login dashboard by country and user agent.');
+    const dashboard = generateDashboardArtifact(
+      'Create a failed login dashboard by country and user agent.',
+      intent,
+      'index=main sourcetype=auth action=failure | stats count as failed_logins by country user_agent | sort - failed_logins',
+      {
+        elapsedMs: 5,
+        fields: ['country', 'user_agent', 'failed_logins'],
+        messages: [],
+        mode: 'mock',
+        rowCount: 2,
+        rows: [],
+        search: 'index=main sourcetype=auth action=failure | stats count as failed_logins by country user_agent | sort - failed_logins',
+        status: 'success',
+      },
+    );
+
+    assert.ok(dashboard);
+    assert.strictEqual(dashboard.title, 'Failed Login Dashboard');
+    assert.strictEqual(dashboard.visualizationType, 'bar');
+    assert.ok(dashboard.dashboardJson.includes('"viz_primary"'));
+    assert.ok(dashboard.dashboardJson.includes('"splunk.bar"'));
+    assert.ok(dashboard.dashboardJson.includes('"ds.search"'));
+  });
 
 	test('repair loop rewrites common wrong fields and auth source hints', () => {
 		const repair = repairSplQuery(

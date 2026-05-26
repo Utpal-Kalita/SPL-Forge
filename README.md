@@ -118,6 +118,7 @@ Current repository assets:
 - VS Code extension shell with intent-aware SPL generation and query plan feedback
 - MCP/REST/mock Splunk execution path with result preview in the panel
 - Day 5 self-debugging loop that inspects schema after failed or empty execution, repairs common SPL mistakes, and reruns with capped attempts
+- Day 6 Dashboard Studio JSON preview generated from final working SPL for dashboard prompts
 - Root architecture diagram and MIT license for hackathon submission readiness
 
 ## Documentation

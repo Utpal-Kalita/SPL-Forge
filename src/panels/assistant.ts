@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import type { DashboardArtifact } from '../artifacts/dashboard';
 import type { ForgeConfig } from '../config/env';
 import type { SplunkSearchResult } from '../splunk/execute';
 
@@ -6,6 +7,7 @@ const panelType = 'splForgeAssistant';
 const defaultPrompt = 'Create a failed login dashboard by country and user agent. Alert if failed attempts exceed 100 in 5 minutes.';
 
 type PromptResult = {
+  dashboard?: DashboardArtifact;
   execution: SplunkSearchResult;
   llmModel: string;
   planSummary: string;
@@ -30,6 +32,7 @@ type PanelState = {
   lastError?: string;
   lastExecution?: SplunkSearchResult;
   lastPlanSummary?: string;
+  lastDashboard?: DashboardArtifact;
   status: 'error' | 'idle' | 'running' | 'success' | 'warning';
 };
 
@@ -114,6 +117,7 @@ export class SPLForgePanel {
       const result = await this.dependencies.onSubmitPrompt(prompt);
 
       this.state = {
+        lastDashboard: result.dashboard,
         lastExecution: result.execution,
         lastError: undefined,
         lastPlanSummary: result.planSummary,
@@ -389,6 +393,7 @@ export function getPanelHtml(input: PanelHtmlInput) {
         <p>
           Prompt now generates SPL, executes it, inspects schema on failure or zero rows,
           repairs common field/index/sourcetype mistakes, and reruns with capped attempts.
+          Day 6 adds dashboard artifact generation from final working SPL.
         </p>
         <div class="pill-row">
           <span class="pill">Mode: ${escapeHtml(config.splunkMode)}</span>
@@ -464,18 +469,17 @@ export function getPanelHtml(input: PanelHtmlInput) {
 
       <section class="grid two">
         <article class="card">
-          <h2>Prompt Target</h2>
-          <pre>Create a failed login dashboard by country and user agent.
-Alert if failed attempts exceed 100 in 5 minutes.</pre>
+          <h2>Dashboard Artifact</h2>
+          <pre>${escapeHtml(formatDashboardArtifact(state.lastDashboard))}</pre>
         </article>
 
         <article class="card">
           <h2>Next Build Targets</h2>
           <ol>
-            <li>Repair loop for field and sourcetype failures</li>
-            <li>Schema inspection flow for missing fields</li>
-            <li>Dashboard export from successful query</li>
             <li>Alert export from threshold query</li>
+            <li>Saved search packaging</li>
+            <li>Splunk app directory export</li>
+            <li>Human approval before writing artifacts</li>
           </ol>
         </article>
       </section>
@@ -567,6 +571,20 @@ function formatRows(execution: SplunkSearchResult | undefined) {
   }
 
   return JSON.stringify(execution.rows.slice(0, 10), null, 2);
+}
+
+function formatDashboardArtifact(dashboard: DashboardArtifact | undefined) {
+  if (!dashboard) {
+    return 'Dashboard JSON will render here when prompt asks for dashboard or visualization.';
+  }
+
+  return [
+    `Title: ${dashboard.title}`,
+    `Visualization: ${dashboard.visualizationType}`,
+    `Fields: ${dashboard.fields.length > 0 ? dashboard.fields.join(', ') : 'none'}`,
+    '',
+    dashboard.dashboardJson,
+  ].join('\n');
 }
 
 function isPromptMessage(message: unknown): message is { prompt: string; type: 'submitPrompt' } {
