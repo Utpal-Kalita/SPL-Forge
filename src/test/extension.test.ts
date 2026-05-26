@@ -1,4 +1,5 @@
 import * as assert from 'assert';
+import * as http from 'http';
 import * as vscode from 'vscode';
 import type { ForgeConfig } from '../config/env';
 import { getPanelHtml } from '../panels/assistant';
@@ -121,6 +122,53 @@ suite('Extension Test Suite', () => {
 		assert.ok(result.messages[0].includes('REST mode requires'));
 	});
 
+	test('rest splunk adapter executes against local export endpoint', async () => {
+		const seenPayloads: string[] = [];
+		const server = http.createServer((req, res) => {
+			assert.strictEqual(req.method, 'POST');
+			assert.strictEqual(req.url, '/services/search/jobs/export');
+			assert.strictEqual(req.headers.authorization, 'Bearer test-token');
+
+			const chunks: Buffer[] = [];
+			req.on('data', (chunk: Buffer) => chunks.push(chunk));
+			req.on('end', () => {
+				const payload = Buffer.concat(chunks).toString('utf8');
+				seenPayloads.push(payload);
+
+				res.writeHead(200, { 'Content-Type': 'application/json' });
+				res.end([
+					JSON.stringify({ result: { country: 'US', failed_logins: 2 } }),
+					JSON.stringify({ messages: [{ text: 'rest ok' }] }),
+				].join('\n'));
+			});
+		});
+
+		await listen(server);
+
+		try {
+			const address = server.address();
+			assert.ok(address && typeof address === 'object');
+
+			const result = await executeSplSearch('index=main sourcetype=auth action=failure | stats count as failed_logins by country', {
+				...mockConfig,
+				splunkMode: 'rest',
+				splunkSource: 'remote',
+				splunkToken: 'test-token',
+				splunkUrl: `http://127.0.0.1:${address.port}`,
+			});
+
+			assert.strictEqual(result.status, 'success');
+			assert.strictEqual(result.mode, 'rest');
+			assert.strictEqual(result.rowCount, 1);
+			assert.deepStrictEqual(result.rows[0], { country: 'US', failed_logins: '2' });
+			assert.ok(result.fields.includes('country'));
+			assert.ok(result.messages.includes('rest ok'));
+			assert.ok(seenPayloads[0].includes('search=search+index%3Dmain'));
+		} finally {
+			await close(server);
+		}
+	});
+
 	test('mcp splunk adapter reports missing endpoint or token', async () => {
 		const result = await executeSplSearch('index=main | head 1', {
 			...mockConfig,
@@ -129,6 +177,76 @@ suite('Extension Test Suite', () => {
 
 		assert.strictEqual(result.status, 'error');
 		assert.ok(result.messages[0].includes('MCP mode requires'));
+	});
+
+	test('mcp splunk adapter executes against local json-rpc endpoint', async () => {
+		const calls: Array<Record<string, unknown>> = [];
+		const server = http.createServer((req, res) => {
+			assert.strictEqual(req.method, 'POST');
+			assert.strictEqual(req.headers.authorization, 'Bearer mcp-token');
+
+			const chunks: Buffer[] = [];
+			req.on('data', (chunk: Buffer) => chunks.push(chunk));
+			req.on('end', () => {
+				const payload = JSON.parse(Buffer.concat(chunks).toString('utf8')) as {
+					params?: {
+						arguments?: Record<string, unknown>;
+						name?: string;
+					};
+				};
+				calls.push(payload as Record<string, unknown>);
+
+				res.writeHead(200, { 'Content-Type': 'application/json' });
+
+				if (payload.params?.name === 'splunk_get_info') {
+					res.end(JSON.stringify({
+						jsonrpc: '2.0',
+						result: {
+							content: [{ text: JSON.stringify({ messages: ['connected'] }), type: 'text' }],
+						},
+					}));
+					return;
+				}
+
+				assert.strictEqual(payload.params?.name, 'splunk_run_query');
+				assert.strictEqual(payload.params?.arguments?.query, 'search index=main | head 1');
+				assert.strictEqual(payload.params?.arguments?.max_results, 10);
+				res.end(JSON.stringify({
+					jsonrpc: '2.0',
+					result: {
+						structuredContent: {
+							messages: ['mcp ok'],
+							results: [{ host: 'splunk-local', count: 1 }],
+						},
+					},
+				}));
+			});
+		});
+
+		await listen(server);
+
+		try {
+			const address = server.address();
+			assert.ok(address && typeof address === 'object');
+
+			const result = await executeSplSearch('index=main | head 1', {
+				...mockConfig,
+				splunkMcpEndpoint: `http://127.0.0.1:${address.port}/mcp`,
+				splunkMcpToken: 'mcp-token',
+				splunkMode: 'mcp',
+				splunkSource: 'remote',
+			});
+
+			assert.strictEqual(result.status, 'success');
+			assert.strictEqual(result.mode, 'mcp');
+			assert.strictEqual(result.rowCount, 1);
+			assert.deepStrictEqual(result.rows[0], { host: 'splunk-local', count: '1' });
+			assert.ok(result.messages.includes('MCP info: connected'));
+			assert.ok(result.messages.includes('mcp ok'));
+			assert.strictEqual(calls.length, 2);
+		} finally {
+			await close(server);
+		}
 	});
 
 	test('demo fixture time range rewrites auth queries to all time', () => {
@@ -165,3 +283,26 @@ suite('Extension Test Suite', () => {
 		assert.strictEqual(untouched, 'index=_internal earliest=-15m | head 5');
 	});
 });
+
+function listen(server: http.Server) {
+	return new Promise<void>((resolve, reject) => {
+		server.once('error', reject);
+		server.listen(0, '127.0.0.1', () => {
+			server.off('error', reject);
+			resolve();
+		});
+	});
+}
+
+function close(server: http.Server) {
+	return new Promise<void>((resolve, reject) => {
+		server.close((error) => {
+			if (error) {
+				reject(error);
+				return;
+			}
+
+			resolve();
+		});
+	});
+}

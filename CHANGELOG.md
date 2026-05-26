@@ -65,7 +65,10 @@ All notable changes to **SPL Forge** will be documented in this file.
   - relative-time parsing
   - structured mock SPL generation
   - mock Splunk execution
+  - independent local REST Splunk execution
+  - independent local MCP JSON-RPC execution
   - REST missing-credential handling
+  - MCP missing-configuration handling
 - VS Code SecretStorage API integration ready for secure token management.
 - Documentation structure and initial guides:
   - QUICKSTART.md for first-time setup
