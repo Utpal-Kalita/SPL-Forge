@@ -1,98 +1,101 @@
-# Splunk MCP Server Research
+# Splunk MCP Server Guide
 
-This document summarizes current Splunk MCP Server setup and design notes for SPL Forge.
+Structured notes for using Splunk MCP Server with SPL Forge.
 
-Research source:
+## Purpose
 
-- Splunk MCP Server for Splunk Platform docs: https://help.splunk.com/en/splunk-cloud-platform/mcp-server-for-splunk-platform/
+SPL Forge uses Splunk MCP Server as its preferred agent-to-Splunk bridge.
 
-## Why This Matters
+MCP gives SPL Forge a controlled way to:
 
-SPL Forge needs a trusted way for an AI-native IDE workflow to:
+- run generated SPL against real Splunk data
+- inspect Splunk environment metadata
+- discover indexes, sourcetypes, and knowledge objects
+- feed execution errors and schema context back into the repair loop
+- keep credentials scoped to MCP client usage
 
-- discover Splunk environment context
-- run generated SPL
-- inspect indexes, metadata, and knowledge objects
-- use Splunk AI Assistant tools when available
-- keep credentials scoped to MCP client use
+REST remains a fallback path. Mock mode remains available for offline demos and CI-safe tests.
 
-Splunk MCP Server is the preferred long-term integration path. REST remains practical fallback. Mock mode remains demo-safe fallback.
+## Current SPL Forge Status
 
-## Current Release Position
+| Area | Status |
+| --- | --- |
+| MCP preflight | Implemented with `splunk_get_info` |
+| MCP query execution | Implemented with `splunk_run_query` |
+| MCP metadata discovery | Implemented with `splunk_get_indexes` and `splunk_get_metadata` |
+| Self-debug repair loop | Implemented with deterministic repair plus optional LLM repair |
+| Dashboard generation | Implemented as Dashboard Studio JSON and classic XML |
+| Dashboard publish | Implemented through REST with `npm run publish:dashboard` |
+| Alert preview | Implemented as saved-search configuration draft |
+| Full Splunk app packaging | Planned |
 
-Splunk docs describe MCP Server 1.0.0 as generally available. Later 1.1.x releases add improvements and beta capabilities.
-
-Important version notes from Splunk docs:
-
-- Version 1.0.0 made Splunk MCP Server GA.
-- Legacy cloud-hosted On-Cloud SCS endpoint is deprecated for new deployments.
-- New deployments should use Splunk MCP Server app from Splunkbase.
-- Version 1.1.0 added OAuth 2.1 server support as Controlled Access, plus beta saved search and rate limiting features.
-- Version 1.1.3 fixed API-based custom tool creation failures when request body is provided as a string.
-
-## Recommended SPL Forge Position
+## Recommended Integration Position
 
 For SPL Forge MVP:
 
-- Keep MCP as target production adapter.
-- Keep REST as implemented fallback until MCP adapter exists.
-- Keep mock mode as demo and offline mode.
-- Do not depend on legacy SCS endpoint.
-- Assume Splunk MCP Server app install on Search Head or Search Head Cluster.
-- Assume encrypted MCP token auth for v1.0.0 and later.
+- Use Splunk MCP Server app as the primary integration path.
+- Use REST only for fallback and write-style operations that MCP does not cover yet.
+- Use mock mode for deterministic local testing.
+- Do not depend on legacy cloud-hosted SCS endpoint for new deployments.
+- Use encrypted MCP tokens for MCP access.
+- Keep direct Splunk REST tokens separate from MCP encrypted tokens.
+
+## Release Notes Snapshot
+
+| Version | Date | Notes |
+| --- | --- | --- |
+| `1.1.3` | 2026-05-19 | Fixed API custom tool creation when request body is provided as a string. |
+| `1.1.2` | 2026-05-12 | App improvements, enhanced logging, and minor fixes. |
+| `1.1.1` | 2026-04-28 | Fixed Windows issue causing server to display inactive. |
+| `1.1.0` | 2026-04-01 | Added OAuth 2.1 controlled-access support, beta saved search execution, and beta rate limiting. |
+| `1.0.5` | 2026-03-26 | Fixed RSA key pair conflicts on Search Head Clusters. |
+| `1.0.0` | GA | Splunk MCP Server generally available; encrypted tokens required. |
 
 ## Deployment Model
 
-### Preferred: Splunk MCP Server App
+### Preferred Path
 
-Splunk MCP Server app is installed on Splunk Search Head or Search Head Cluster.
+Install Splunk MCP Server app on:
 
-Setup responsibilities:
+- Splunk Search Head
+- Splunk Search Head Cluster
+- Splunk Cloud deployment where app installation is supported
 
-1. Enable API access.
-2. Enable token authentication.
-3. Install Splunk MCP Server app from Splunkbase.
-4. Restart Splunk if new capabilities require it.
-5. Assign MCP capabilities to authorized roles.
-6. Generate encrypted MCP token in Splunk MCP Server app.
-7. Configure MCP client with endpoint and bearer token.
+### Legacy Endpoint
 
-### Deprecated: Legacy Cloud Endpoint
-
-Legacy cloud-hosted endpoint under `*.api.scs.splunk.com` is deprecated for new deployments.
+The old cloud-hosted `*.api.scs.splunk.com` SCS MCP endpoint is deprecated for new deployments. Existing users should migrate to the Splunk MCP Server app.
 
 Migration steps:
 
 1. Install Splunk MCP Server app.
-2. Assign `mcp_tool_execute` capability to authorized roles.
-3. Create new encrypted MCP tokens.
-4. Update MCP client endpoint and token.
-5. Test connection.
-6. Decommission old tokens.
+2. Assign MCP capabilities.
+3. Generate encrypted MCP token.
+4. Update MCP client endpoint.
+5. Test tool execution.
+6. Decommission old endpoint/token usage.
 
-## Prerequisites
+## Splunk Prerequisites
 
 Required:
 
-- Splunk Cloud Platform: REST API access enabled.
-- All deployments: token authentication enabled.
+- REST API access enabled.
+- Token authentication enabled.
 - Splunk MCP Server app installed.
-- User role has access to APIs.
-- User role has MCP execution capability.
+- User role can access required APIs.
+- User role has `mcp_tool_execute`.
 
 Optional:
 
-- Splunk AI Assistant installed for `saia_` tools.
-- OAuth 2.1 support if environment has Controlled Access enabled.
+- `mcp_tool_admin` for tool management and token creation.
+- Splunk AI Assistant app for `saia_*` tools.
+- OAuth 2.1 support if enabled through controlled access.
 
-## RBAC And Capabilities
-
-Splunk MCP Server app adds these capabilities:
+## RBAC
 
 | Capability | Purpose |
 | --- | --- |
-| `mcp_tool_execute` | Grants access to use MCP server tools. |
-| `mcp_tool_admin` | Grants admin access for tool management and token creation. |
+| `mcp_tool_execute` | Lets users call MCP tools. |
+| `mcp_tool_admin` | Lets admins manage MCP tools and token creation. |
 
 Token creation requirements:
 
@@ -101,26 +104,40 @@ Token creation requirements:
 | User creates own token | `edit_tokens_own` and `mcp_tool_admin` |
 | Admin creates token for any user | `edit_tokens_all` and `mcp_tool_admin` |
 
-SPL Forge should treat MCP credentials as user-scoped or service-account-scoped secrets. Do not commit tokens.
+For SPL Forge demos, grant only the minimum role needed to run searches and read metadata.
 
 ## Authentication
 
-Splunk MCP Server v1.0.0 and later requires encrypted tokens for MCP authentication.
+Splunk MCP Server uses encrypted MCP tokens.
 
-Token rules:
+Rules:
 
 - Token is generated inside Splunk MCP Server app.
-- Token is shown once when created.
-- Token is used by trusted MCP client only.
-- Encrypted MCP token cannot be reused for direct Splunk REST API calls.
+- Token is displayed once.
+- Token is used by MCP clients only.
+- Token cannot be reused as a direct Splunk REST token.
 - Token can be invalidated in MCP app.
-- Global key invalidation invalidates all encrypted MCP access tokens because one public/private key pair is used at a time.
+- Global key invalidation invalidates all encrypted MCP access tokens.
 
-## Client Configuration Shape
+SPL Forge uses these variables for MCP:
 
-Splunk docs show MCP clients connecting through `mcp-remote` over streamable HTTP.
+```bash
+SPL_FORGE_SPLUNK_MODE=mcp
+SPL_FORGE_SPLUNK_MCP_ENDPOINT=https://localhost:8089/services/mcp
+SPL_FORGE_SPLUNK_MCP_TOKEN=<encrypted-mcp-token>
+SPL_FORGE_SPLUNK_MCP_ALLOW_SELF_SIGNED=false
+SPL_FORGE_SPLUNK_SEARCH_LIMIT=10
+```
 
-Example shape:
+For local self-signed Splunk MCP testing only:
+
+```bash
+SPL_FORGE_SPLUNK_MCP_ALLOW_SELF_SIGNED=true
+```
+
+## MCP Client Shape
+
+Generic client configuration shape:
 
 ```json
 {
@@ -141,201 +158,263 @@ Example shape:
 
 Replace:
 
-- `<MCP_SERVER_ENDPOINT>` with endpoint from Splunk MCP Server app.
-- `<YOUR_ENCRYPTED_TOKEN>` with encrypted token generated by Splunk MCP Server app.
-
-## Self-Signed Certificates
-
-Splunk MCP Server can be configured for self-signed certificates in test environments.
-
-Do not use self-signed certificate bypass in production.
-
-`mcp.conf` supports:
-
-| `ssl_verify` value | Meaning |
+| Placeholder | Value |
 | --- | --- |
-| `true` | Verify TLS certificates. Recommended production default. |
-| `false` | Disable verification. Testing only. |
-| `certificate_path` | Use specific certificate file. |
+| `<MCP_SERVER_ENDPOINT>` | Endpoint copied from Splunk MCP Server app. |
+| `<YOUR_ENCRYPTED_TOKEN>` | Encrypted MCP token generated in Splunk MCP Server app. |
 
-Client-side testing can use `NODE_TLS_REJECT_UNAUTHORIZED=0`, but SPL Forge should prefer explicit CA path support if possible.
-
-## Tool Namespacing
-
-Splunk MCP tools are namespaced by source:
+## Tool Namespaces
 
 | Prefix | Source |
 | --- | --- |
-| `splunk_` | Core Splunk platform tools |
-| `saia_` | Splunk AI Assistant for SPL tools |
+| `splunk_` | Core Splunk platform tools. |
+| `saia_` | Splunk AI Assistant tools. |
 
-Splunk platform tools are enabled by default. Administrators can enable or disable tools server-side.
+SPL Forge currently depends only on `splunk_*` tools.
 
-## Core Tools
+## Key Tools For SPL Forge
 
-Splunk MCP Server docs list these relevant tools:
-
-| Tool | Use For SPL Forge |
+| Tool | SPL Forge usage |
 | --- | --- |
-| `splunk_run_query` | Execute generated SPL and return results. |
-| `splunk_get_info` | Detect Splunk version, status, and environment info. |
-| `splunk_get_indexes` | Discover available indexes. |
-| `splunk_get_index_info` | Inspect index configuration and status. |
-| `splunk_get_metadata` | Discover hosts, sources, and sourcetypes across indexes and time windows. |
-| `splunk_get_user_info` | Inspect current auth context, roles, and permissions. |
-| `splunk_get_knowledge_objects` | Retrieve saved searches, alerts, lookups, macros, data models, panels, apps, and other objects. |
-| `splunk_run_saved_search` | Run existing saved searches. Beta in version 1.1.0. |
-
-Splunk AI Assistant tools, when installed:
-
-| Tool | Use For SPL Forge |
-| --- | --- |
-| `saia_generate_spl` | Generate SPL from natural language. |
-| `saia_explain_spl` | Explain SPL in natural language. |
-| `saia_optimize_spl` | Optimize SPL for performance and best practices. |
-| `saia_ask_splunk_question` | Answer Splunk concepts and command questions. |
+| `splunk_get_info` | MCP preflight and connection proof. |
+| `splunk_run_query` | Execute generated/repaired SPL and preview rows. |
+| `splunk_get_indexes` | Discover index names for repair context. |
+| `splunk_get_metadata` | Discover sourcetypes, hosts, and source context. |
+| `splunk_get_knowledge_objects` | Future saved searches, views, alerts, and macros discovery. |
+| `splunk_run_saved_search` | Future beta path for running approved saved searches. |
 
 ## Query Guardrails
 
-Splunk docs describe `run_splunk_query` as intended for quick, safe, non-destructive searches.
+`splunk_run_query` is meant for safe, bounded searches.
 
-Expected limits:
+Common guardrails:
 
-- unsafe or destructive searches can be rejected
-- execution time over 1 minute can fail
-- response over 1000 events can fail
+- unsafe/destructive commands can be blocked
+- long execution can be rejected
+- large responses can be capped
+- tool access can be disabled server-side
 
-SPL Forge should design generated SPL for bounded previews:
+SPL Forge additionally strips or blocks risky provider output such as:
 
-- include time windows
-- include result limits where appropriate
-- avoid destructive commands
-- ask for human approval before any write, export, or admin action
-- use metadata inspection before broad searches
+- `alert`
+- `sendemail`
+- `outputlookup`
+- `delete`
+- `collect`
 
-## Supported Knowledge Object Types
+Dashboard and alert artifacts are generated separately from the preview SPL.
 
-`splunk_get_knowledge_objects` supports these object types:
+## SPL Forge Runtime Modes
 
-- `saved_searches`
-- `alerts`
-- `field_extractions`
-- `field_aliases`
-- `calculated_fields`
-- `lookups`
-- `automatic_lookups`
-- `lookup_transforms`
-- `macros`
-- `tags`
-- `data_models`
-- `workflow_actions`
-- `views`
-- `panels`
-- `apps`
-- `mltk_models`
-- `mltk_algorithms`
+### MCP Mode
 
-## Mapping To SPL Forge Architecture
-
-### Current State
-
-SPL Forge currently has:
-
-- `mock` execution mode
-- `rest` execution mode
-- `mcp` execution mode using JSON-RPC `tools/call`
-- generated SPL preview
-- query plan rendering
-- result preview in VS Code panel
-
-MCP adapter now calls `splunk_run_query` and normalizes returned tool content into existing execution result shape.
-
-### Target Adapter Shape
-
-Current module shape:
-
-```text
-src/splunk/
-└─ execute.ts
-```
-
-MCP adapter responsibilities:
-
-- connect to configured MCP endpoint
-- validate encrypted token presence
-- call `splunk_get_info` for health check
-- call `splunk_run_query` for generated SPL execution
-- call `splunk_get_indexes` and `splunk_get_metadata` for repair context
-- normalize MCP tool responses into existing SPL Forge execution result shape
-- surface MCP guardrail errors clearly in VS Code panel
-- use schema output as repair-loop context
-
-Future responsibilities:
-
-- cache low-risk schema metadata between panel runs
-- expand knowledge-object discovery for dashboard and alert export
-
-## Environment Proposal
-
-Future `.env.local` shape:
+Best hackathon path:
 
 ```bash
 SPL_FORGE_SPLUNK_MODE=mcp
-SPL_FORGE_SPLUNK_MCP_ENDPOINT=https://<MCP_SERVER_ENDPOINT>
+SPL_FORGE_SPLUNK_MCP_ENDPOINT=https://localhost:8089/services/mcp
 SPL_FORGE_SPLUNK_MCP_TOKEN=<encrypted-mcp-token>
-SPL_FORGE_SPLUNK_MCP_ALLOW_SELF_SIGNED=false
-SPL_FORGE_SPLUNK_SEARCH_LIMIT=100
+SPL_FORGE_SPLUNK_SOURCE=self_hosted_trial
 ```
 
-Keep REST fallback vars:
+Used for:
+
+- live prompt execution
+- schema discovery
+- repair loop
+- dashboard/alert artifact generation from verified search
+
+### REST Mode
+
+Fallback path:
 
 ```bash
 SPL_FORGE_SPLUNK_MODE=rest
 SPL_FORGE_SPLUNK_URL=https://localhost:8089
-SPL_FORGE_SPLUNK_TOKEN=<rest-token>
+SPL_FORGE_SPLUNK_USERNAME=admin
+SPL_FORGE_SPLUNK_PASSWORD=<password>
+SPL_FORGE_SPLUNK_ALLOW_SELF_SIGNED=true
 ```
 
-MCP encrypted token and REST token are different credential types. Do not reuse one for the other.
+Used for:
 
-## MVP Checklist
+- search execution fallback
+- dashboard publish through Splunk management REST
 
-Before demo with MCP:
+### Mock Mode
 
-- Splunk MCP Server app installed.
-- API access enabled.
-- Token authentication enabled.
-- User or service role has `mcp_tool_execute`.
-- Encrypted MCP token generated and copied.
-- MCP endpoint copied from Splunk MCP Server app.
-- Client connection tested with `mcp-remote`.
-- `splunk_run_query` works with bounded search.
-- `splunk_get_indexes` returns expected demo index.
-- `splunk_get_metadata` returns expected auth sourcetype.
-- Tool management allows only needed tools for demo.
-- Mock fallback still works if MCP connection fails.
+Offline path:
+
+```bash
+SPL_FORGE_SPLUNK_MODE=mock
+```
+
+Used for:
+
+- deterministic unit tests
+- demos when Splunk is unavailable
+
+## Local Demo Fixture Behavior
+
+For `SPL_FORGE_SPLUNK_SOURCE=self_hosted_trial`, SPL Forge handles imported CSV fixture data by:
+
+- rewriting auth queries with `rex field=_raw`
+- filtering out the CSV header row
+- adding `earliest=0` when local demo timestamps are stale
+
+This is why the panel can show rows even when a raw dashboard search would otherwise return zero rows.
+
+The dashboard publisher now publishes the verified executable search, not the display-only SPL.
+
+## Verification Commands
+
+Run local tests:
+
+```bash
+npm test
+```
+
+Verify live REST and MCP:
+
+```bash
+npm run verify:splunk -- --mode all
+```
+
+Run panel flow manually:
+
+```text
+SPL Forge: Open Panel
+```
+
+Prompt:
+
+```text
+Create a failed login dashboard by country and user agent. Alert if failed attempts exceed 100 in 5 minutes.
+```
+
+Expected:
+
+- MCP mode success
+- 12 failed-login rows on local fixture
+- dashboard artifact preview
+- alert artifact preview
+- no mock data when MCP env is configured
+
+Publish generated dashboard to Splunk UI:
+
+```bash
+npm run publish:dashboard -- --mode mcp
+```
+
+Open:
+
+```text
+http://localhost:8000/app/search/failed_login_dashboard
+```
+
+If Splunk adds locale:
+
+```text
+http://localhost:8000/en-GB/app/search/failed_login_dashboard
+```
+
+## Troubleshooting
+
+### `ERR_SSL_PROTOCOL_ERROR` on port 8000
+
+Use HTTP for Splunk Web:
+
+```text
+http://localhost:8000/app/search/failed_login_dashboard
+```
+
+Use HTTPS for Splunk management API:
+
+```text
+https://localhost:8089
+```
+
+### Dashboard loads but shows no results
+
+Republish dashboard:
+
+```bash
+npm run publish:dashboard -- --mode mcp
+```
+
+Expected publisher output includes:
+
+```text
+Published search: index=main sourcetype=auth latest=now | rex field=_raw ...
+Rows verified before publish: 12
+```
+
+If published search does not include `rex field=_raw`, the dashboard is using stale XML.
+
+### MCP auth fails
+
+Check:
+
+- endpoint is copied from MCP Server app
+- token is encrypted MCP token, not direct REST token
+- user role has `mcp_tool_execute`
+- token has not expired
+- MCP tool is enabled server-side
+
+### REST publish fails
+
+Check:
+
+- `SPL_FORGE_SPLUNK_URL`
+- `SPL_FORGE_SPLUNK_USERNAME`
+- `SPL_FORGE_SPLUNK_PASSWORD`
+- `SPL_FORGE_SPLUNK_TOKEN`
+- `SPL_FORGE_SPLUNK_ALLOW_SELF_SIGNED`
+
+Dashboard publish needs direct Splunk REST credentials even when search execution uses MCP.
 
 ## Security Notes
 
+- Never commit `.env.local`.
 - Never commit MCP tokens.
+- Keep MCP token and REST token separate.
 - Prefer least-privilege roles.
-- Use per-user token for interactive development where possible.
-- Use restricted service account only for controlled demos.
-- Avoid granting `mcp_tool_admin` to normal SPL Forge users.
 - Disable privileged tools server-side if not needed.
-- Keep self-signed TLS bypass out of production.
-- Treat global token key invalidation as disruptive operational action.
+- Avoid self-signed TLS bypass in production.
+- Treat global MCP key invalidation as disruptive.
+- Keep generated alerts disabled until reviewed.
 
-## Open Implementation Questions
+## Beta Features To Treat Carefully
 
-- Should SPL Forge call MCP directly from extension runtime or through a local helper process?
-- Should MCP endpoint/token live in `.env.local`, VS Code settings, or system keychain?
-- How should MCP tool errors map into repair prompts?
-- Should `saia_generate_spl` be optional provider alongside OpenAI/Anthropic generation?
-- Should `splunk_run_saved_search` stay hidden until beta features are explicitly enabled?
+| Feature | Status | SPL Forge position |
+| --- | --- | --- |
+| `splunk_run_saved_search` | Beta in MCP Server 1.1.x | Future enhancement only. |
+| MCP Server rate limiting | Beta in MCP Server 1.1.x | Admin-controlled; plan for tool errors. |
+| OAuth 2.1 MCP Server | Controlled access | Future enterprise path. |
+| Observability MCP Gateway | Cloud/regional availability | Out of MVP scope. |
+
+## MVP Checklist
+
+Before demo:
+
+- Splunk Enterprise or Cloud available.
+- Developer License applied for local Enterprise demo.
+- Failed-login CSV fixture imported.
+- Splunk MCP Server app installed.
+- API access enabled.
+- Token auth enabled.
+- User role has `mcp_tool_execute`.
+- Encrypted MCP token generated.
+- `.env.local` configured.
+- `npm run verify:splunk -- --mode all` passes.
+- Panel prompt returns rows.
+- `npm run publish:dashboard -- --mode mcp` publishes dashboard.
+- Splunk UI dashboard shows chart/table rows.
 
 ## Related Docs
 
 - [`SPLUNK_SETUP.md`](./SPLUNK_SETUP.md)
+- [`FREE_TRIAL_SETUP.md`](./FREE_TRIAL_SETUP.md)
 - [`ARCHITECTURE.md`](./ARCHITECTURE.md)
-- [`QUICKSTART.md`](./QUICKSTART.md)
 - [`DEMO_RUNBOOK.md`](./DEMO_RUNBOOK.md)
+- [`PROGRESS.md`](./PROGRESS.md)

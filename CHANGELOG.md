@@ -2,7 +2,7 @@
 
 All notable changes to **SPL Forge** will be documented in this file.
 
-> **Project status:** SPL Forge is pre-release hackathon project for Splunk Agentic Ops Hackathon 2026. Foundation setup, prompt flow, query generation, and MCP/REST/mock Splunk execution plumbing are complete. Repair loop and artifact export stages remain in progress.
+> **Project status:** SPL Forge is pre-release hackathon project for Splunk Agentic Ops Hackathon 2026. Foundation setup, prompt flow, query generation, MCP/REST/mock Splunk execution, self-debugging repair, dashboard preview/publish, and alert preview are complete. Full Splunk app packaging remains in progress.
 
 ---
 
@@ -109,24 +109,18 @@ All notable changes to **SPL Forge** will be documented in this file.
 - Alert artifact preview in the VS Code panel and output-channel alert logging.
 - Classic XML dashboard artifact and `npm run publish:dashboard` REST publisher for Splunk UI verification.
 - Dashboard publisher now uses the verified executable Splunk search, including local demo field extraction.
+- End-to-end failed-login demo flow now covers prompt -> Groq SPL -> MCP execution -> normalized final SPL -> result preview -> dashboard artifact -> alert artifact -> Splunk UI dashboard publish.
 
 ### In Progress (Planned for next milestone)
 
 - Backend API routes for the forge pipeline (intent analysis, SPL generation, validation, execution, optimization, artifact generation).
-- Agent orchestrator for multi-stage workflow (Intent → Generate → Validate → Execute → Repair → Optimize → Package).
-- LLM provider abstraction for OpenAI, Anthropic, or Splunk Hosted Models.
-- Schema service for caching and discovering Splunk metadata (indexes, sourcetypes, fields).
-- Result preview and visualization support.
-- Artifact generators:
-  - Dashboard XML/JSON generation
-  - Alert configuration generation
+- Package/export workflow for writing generated artifacts into a reusable Splunk app directory.
+- Human approval controls before writing generated artifacts to disk or Splunk.
+- Artifact generators still needed for:
   - Saved search creation
   - Splunk app scaffolding
 - Webview UI for VS Code extension with:
-  - Natural language prompt input
   - Agent activity timeline
-  - SPL editor/output display
-  - Results preview panel
   - Artifact export interface
 
 ### Changed
@@ -144,6 +138,7 @@ All notable changes to **SPL Forge** will be documented in this file.
 - Expanded Day 5 from deterministic-only repairs to deterministic plus optional LLM repair using live schema context.
 - Started artifact generation path with deterministic dashboard previews before write/export support.
 - Replaced day-specific panel labels with generic workflow labels.
+- Promoted dashboard output from preview-only JSON to classic XML that can be published and viewed in Splunk UI.
 
 ### Fixed
 
@@ -158,6 +153,7 @@ All notable changes to **SPL Forge** will be documented in this file.
 - Fixed documentation links from `docs/` pages to root-level `PRD.md` and `ROADMAP.md` so Markdown link checks pass.
 - Fixed GitHub Actions dependency scanning by replacing unsupported Dependency Review usage with portable `npm audit`.
 - Fixed TypeScript type resolution robustness by explicitly including Node and Mocha ambient types.
+- Fixed published dashboard searches so Splunk UI uses the verified executable query, including demo fixture field extraction, instead of the display-only SPL.
 
 ### Verified
 
@@ -165,6 +161,8 @@ All notable changes to **SPL Forge** will be documented in this file.
 - Confirmed live MCP mode against real Splunk data with `npm run verify:splunk -- --mode mcp`.
 - Confirmed combined live REST+MCP verification with `npm run verify:splunk -- --mode all`.
 - Confirmed same backend workflow used by the panel with live Groq and Splunk config returns 12 rows for the failed-login dashboard prompt.
+- Confirmed generated failed-login dashboard publishes to Splunk UI at `/app/search/failed_login_dashboard`.
+- Confirmed local test suite passes with 24 VS Code extension tests.
 
 ### Security
 
