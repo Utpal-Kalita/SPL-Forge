@@ -120,9 +120,10 @@ Current repository assets:
 - Day 5 self-debugging loop that inspects schema after failed or empty execution, repairs common SPL mistakes, and reruns with capped attempts
 - Day 6 Dashboard Studio JSON preview generated from final working SPL for dashboard prompts
 - Classic XML dashboard publish path via `npm run publish:dashboard` for Splunk UI verification
+- Dashboard plus disabled alert publish path via `npm run publish:app` or the panel Publish to Splunk button
 - Alert saved-search preview generated from threshold prompts
 - Minimal Splunk app folder export via `npm run export:app`
-- Polished VS Code panel flow with query history, error log, Run, and Export App controls
+- Polished VS Code panel flow with query history, error log, Run, Export App, and Publish to Splunk controls
 - Root architecture diagram and MIT license for hackathon submission readiness
 
 ## Documentation

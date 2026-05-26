@@ -25,8 +25,9 @@ REST remains a fallback path. Mock mode remains available for offline demos and 
 | MCP metadata discovery | Implemented with `splunk_get_indexes` and `splunk_get_metadata` |
 | Self-debug repair loop | Implemented with deterministic repair plus optional LLM repair |
 | Dashboard generation | Implemented as Dashboard Studio JSON and classic XML |
-| Dashboard publish | Implemented through REST with `npm run publish:dashboard` |
+| Dashboard publish | Implemented through REST with `npm run publish:dashboard` and panel Publish to Splunk |
 | Alert preview | Implemented as saved-search configuration draft |
+| Alert publish | Implemented through panel Publish to Splunk; saved search remains disabled by default |
 | Splunk app folder export | Implemented with `npm run export:app` |
 | Zip packaging | Planned |
 
@@ -305,6 +306,14 @@ Publish generated dashboard to Splunk UI:
 
 ```bash
 npm run publish:dashboard -- --mode mcp
+```
+
+From the VS Code panel, use `Publish to Splunk` after `Generate + Run SPL` to publish the current verified dashboard and disabled alert through Splunk REST.
+
+CLI equivalent:
+
+```bash
+npm run publish:app -- --mode mcp
 ```
 
 Open:

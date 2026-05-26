@@ -44,6 +44,7 @@
     "package:vsix": "npm run package && npx @vscode/vsce package",
     "verify:splunk": "npm run compile-tests && node out/cli/verify-splunk.js",
     "publish:dashboard": "npm run compile-tests && node out/cli/publish-dashboard.js",
+    "publish:app": "npm run compile-tests && node out/cli/publish-app.js",
     "export:app": "npm run compile-tests && node out/cli/export-app.js"
   },
   "devDependencies": {

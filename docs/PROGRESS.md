@@ -61,8 +61,9 @@ SPL Forge now has product definition, setup documentation, Day 1 environment gui
 - [x] Dashboard artifact now includes classic XML that can be loaded into Splunk UI
 - [x] `npm run publish:dashboard` publishes the generated dashboard to Splunk UI through REST using the verified executable search
 - [x] `npm run export:app` writes a minimal Splunk app folder with app.conf, dashboard XML, savedsearches.conf, metadata, README, and manifest
-- [x] Day 8 panel polish added with professional command layout, query history, error log, and Export App button
+- [x] Day 8 panel polish added with professional command layout, query history, error log, Export App button, and Publish to Splunk button
 - [x] Panel Export App writes the current verified Splunk app package to `exports/spl_forge_generated_app`
+- [x] Panel Publish to Splunk writes dashboard XML and a disabled saved-search alert through Splunk REST
 - [x] Root `architecture_diagram.md` added for hackathon submission requirements
 - [x] MIT license added for open-source submission requirement
 
@@ -87,12 +88,12 @@ SPL Forge now has product definition, setup documentation, Day 1 environment gui
 | Agent workflow | Day 3 done | Intent-aware query generation works via mock or configured LLM provider |
 | Self-debug loop | Day 5 done | Executes once, inspects schema and MCP metadata after failure/empty rows, repairs common demo issues, optionally asks LLM for a safe repair, and reruns with capped attempts |
 | Artifact export | Day 7 done | Dashboard Studio JSON, classic dashboard XML, Splunk UI dashboard publish, alert saved-search preview, and local app-folder export exist |
-| Panel UX | Day 8 done | Prompt, run, export, history, error log, execution summary, and artifact previews are in one panel |
+| Panel UX | Day 8 done | Prompt, run, export, publish, history, error log, execution summary, and artifact previews are in one panel |
 | Testing | Started | Extension tests pass locally with VS Code test runner; CI runs with xvfb on Ubuntu |
 
 ## Reality Check
 
-If someone clones repo now, they get strong planning and setup docs plus real extension panel that accepts prompts, explains interpreted query intent, returns stronger demo-safe SPL, executes it through MCP, REST, or mock mode, repairs common failed-login demo query mistakes after schema and MCP metadata inspection, previews Dashboard Studio JSON plus saved-search alert config for dashboard/alert prompts, can publish a generated dashboard into Splunk UI via REST, and can export a minimal Splunk app folder from the panel or CLI. Local self-hosted trial auth fixture queries are rewritten so imported CSV data works in live MCP demos.
+If someone clones repo now, they get strong planning and setup docs plus real extension panel that accepts prompts, explains interpreted query intent, returns stronger demo-safe SPL, executes it through MCP, REST, or mock mode, repairs common failed-login demo query mistakes after schema and MCP metadata inspection, previews Dashboard Studio JSON plus saved-search alert config for dashboard/alert prompts, can publish a generated dashboard plus disabled alert into Splunk UI via REST, and can export a minimal Splunk app folder from the panel or CLI. Local self-hosted trial auth fixture queries are rewritten so imported CSV data works in live MCP demos.
 
 ## Next Logical Build Order
 

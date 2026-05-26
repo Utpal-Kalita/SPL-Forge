@@ -4,6 +4,7 @@ import type { DashboardArtifact } from '../artifacts/dashboard';
 import type { SplunkAppPackage } from '../artifacts/package';
 import type { ForgeConfig } from '../config/env';
 import type { SplunkSearchResult } from '../splunk/execute';
+import type { SplunkPublishResult } from '../splunk/publish';
 
 const panelType = 'splForgeAssistant';
 const defaultPrompt = 'Create a failed login dashboard by country and user agent. Alert if failed attempts exceed 100 in 5 minutes.';
@@ -24,6 +25,7 @@ type PromptResult = {
 type PanelDependencies = {
   extensionUri: vscode.Uri;
   onExportApp(appPackage: SplunkAppPackage): Promise<ExportResult>;
+  onPublishApp(appPackage: SplunkAppPackage): Promise<SplunkPublishResult>;
   onSubmitPrompt(prompt: string): Promise<PromptResult>;
   readConfig(): ForgeConfig;
 };
@@ -54,6 +56,7 @@ type PanelState = {
   history: HistoryItem[];
   lastAppPackage?: SplunkAppPackage;
   lastExport?: ExportResult;
+  lastPublish?: SplunkPublishResult;
   lastPrompt: string;
   lastRawText?: string;
   lastSpl?: string;
@@ -126,6 +129,11 @@ export class SPLForgePanel {
       return;
     }
 
+    if (isPublishMessage(message)) {
+      await this.publishCurrentApp();
+      return;
+    }
+
     if (isHistoryMessage(message)) {
       this.restoreHistoryItem(message.index);
       return;
@@ -164,6 +172,7 @@ export class SPLForgePanel {
         lastDashboard: result.dashboard,
         lastExecution: result.execution,
         lastExport: undefined,
+        lastPublish: undefined,
         lastError: undefined,
         history: [
           {
@@ -241,6 +250,44 @@ export class SPLForgePanel {
     this.render();
   }
 
+  private async publishCurrentApp() {
+    const appPackage = this.state.lastAppPackage;
+
+    if (!appPackage) {
+      this.state = {
+        ...this.state,
+        lastError: 'No packaged app artifact yet. Generate and run SPL first.',
+        status: 'error',
+      };
+      this.render();
+      return;
+    }
+
+    this.state = {
+      ...this.state,
+      lastError: undefined,
+      status: 'running',
+    };
+    this.render();
+
+    try {
+      const result = await this.dependencies.onPublishApp(appPackage);
+      this.state = {
+        ...this.state,
+        lastPublish: result,
+        status: 'success',
+      };
+    } catch (error) {
+      this.state = {
+        ...this.state,
+        lastError: error instanceof Error ? error.message : 'Unknown Splunk publish failure.',
+        status: 'error',
+      };
+    }
+
+    this.render();
+  }
+
   private restoreHistoryItem(index: number) {
     const item = this.state.history[index];
 
@@ -255,6 +302,7 @@ export class SPLForgePanel {
       lastDashboard: item.dashboard,
       lastExecution: item.execution,
       lastExport: undefined,
+      lastPublish: undefined,
       lastError: undefined,
       lastPlanSummary: item.planSummary,
       lastPrompt: item.prompt,
@@ -290,6 +338,7 @@ export function getPanelHtml(input: PanelHtmlInput) {
   const { config, cspSource, extensionUri, state } = input;
   const statusLabel = getStatusLabel(state.status);
   const canExport = Boolean(state.lastAppPackage) && state.status !== 'running';
+  const canPublish = Boolean(state.lastAppPackage) && state.status !== 'running';
   const historyMarkup = formatHistory(state.history);
 
   return `<!DOCTYPE html>
@@ -625,8 +674,10 @@ export function getPanelHtml(input: PanelHtmlInput) {
           <div class="toolbar">
             <button id="generate-button"${state.status === 'running' ? ' disabled' : ''}>Generate + Run SPL</button>
             <button class="secondary" id="export-button"${canExport ? '' : ' disabled'}>Export App</button>
+            <button class="secondary" id="publish-button"${canPublish ? '' : ' disabled'}>Publish to Splunk</button>
           </div>
           ${state.lastExport ? `<div class="meta"><span>Exported: <code>${escapeHtml(state.lastExport.root)}</code></span><span>${state.lastExport.fileCount} files</span></div>` : ''}
+          ${state.lastPublish ? `<div class="meta"><span>Published: <code>${escapeHtml(state.lastPublish.published.join(', '))}</code></span>${state.lastPublish.dashboardUrl ? `<span><a href="${escapeHtml(state.lastPublish.dashboardUrl)}">Open dashboard</a></span>` : ''}</div>` : ''}
           ${state.lastError ? `<div class="error">${escapeHtml(state.lastError)}</div>` : ''}
         </article>
 
@@ -643,6 +694,7 @@ export function getPanelHtml(input: PanelHtmlInput) {
             <li>Result rows or execution errors visible in panel</li>
             <li>Dashboard and alert artifacts previewed from final SPL</li>
             <li>Export App writes importable Splunk app folder from current result</li>
+            <li>Publish to Splunk writes dashboard and disabled alert through REST</li>
           </ul>
         </article>
       </section>
@@ -743,6 +795,7 @@ export function getPanelHtml(input: PanelHtmlInput) {
       const promptInput = document.getElementById('prompt-input');
       const generateButton = document.getElementById('generate-button');
       const exportButton = document.getElementById('export-button');
+      const publishButton = document.getElementById('publish-button');
 
       generateButton?.addEventListener('click', () => {
         const prompt = promptInput?.value ?? '';
@@ -755,6 +808,12 @@ export function getPanelHtml(input: PanelHtmlInput) {
       exportButton?.addEventListener('click', () => {
         vscode.postMessage({
           type: 'exportApp',
+        });
+      });
+
+      publishButton?.addEventListener('click', () => {
+        vscode.postMessage({
+          type: 'publishApp',
         });
       });
 
@@ -905,6 +964,13 @@ function isExportMessage(message: unknown): message is { type: 'exportApp' } {
     && message !== null
     && 'type' in message
     && message.type === 'exportApp';
+}
+
+function isPublishMessage(message: unknown): message is { type: 'publishApp' } {
+  return typeof message === 'object'
+    && message !== null
+    && 'type' in message
+    && message.type === 'publishApp';
 }
 
 function isHistoryMessage(message: unknown): message is { index: number; type: 'restoreHistory' } {

@@ -27,11 +27,25 @@ async function main() {
   const executableXml = buildClassicDashboardXml(result.dashboard.title, result.execution.search, result.dashboard.visualizationType);
   await publishDashboard(config, owner, app, viewName, executableXml);
 
-  const uiBase = env.SPLUNK_WEB_URL ?? config.splunkUrl.replace(/:8089\b/, ':8000').replace(/\/$/, '');
+  const uiBase = buildSplunkWebUrl(config, env);
   console.log(`Published dashboard: ${viewName}`);
   console.log(`Splunk UI: ${uiBase}/app/${encodeURIComponent(app)}/${encodeURIComponent(viewName)}`);
   console.log(`Published search: ${result.execution.search}`);
   console.log(`Rows verified before publish: ${result.execution.rowCount}`);
+}
+
+function buildSplunkWebUrl(config: ForgeConfig, env: EnvMap) {
+  if (env.SPLUNK_WEB_URL) {
+    return env.SPLUNK_WEB_URL.replace(/\/$/, '');
+  }
+
+  const endpoint = new URL(config.splunkUrl);
+  endpoint.protocol = 'http:';
+  endpoint.port = '8000';
+  endpoint.pathname = '';
+  endpoint.search = '';
+  endpoint.hash = '';
+  return endpoint.toString().replace(/\/$/, '');
 }
 
 function publishDashboard(config: ForgeConfig, owner: string, app: string, viewName: string, xml: string) {
@@ -108,11 +122,14 @@ function buildConfig(mode: SplunkMode, env: EnvMap): ForgeConfig {
     splunkMcpToken: env.SPL_FORGE_SPLUNK_MCP_TOKEN ?? env.SPLUNK_MCP_TOKEN,
     splunkMode: mode,
     splunkPassword: env.SPL_FORGE_SPLUNK_PASSWORD ?? env.SPLUNK_PASSWORD,
+    splunkApp: env.SPL_FORGE_SPLUNK_APP ?? 'search',
+    splunkOwner: env.SPL_FORGE_SPLUNK_OWNER ?? 'nobody',
     splunkRepairAutoRun: parseBoolean(env.SPL_FORGE_REPAIR_AUTO_RUN, true),
     splunkSearchLimit: parseInteger(env.SPL_FORGE_SPLUNK_SEARCH_LIMIT, 10),
     splunkSource: env.SPL_FORGE_SPLUNK_SOURCE ?? 'self_hosted_trial',
     splunkToken: env.SPL_FORGE_SPLUNK_TOKEN ?? env.SPLUNK_TOKEN,
     splunkUrl: env.SPL_FORGE_SPLUNK_URL ?? env.SPLUNK_HOST ?? 'https://localhost:8089',
+    splunkWebUrl: env.SPLUNK_WEB_URL,
     splunkUsername: env.SPL_FORGE_SPLUNK_USERNAME ?? env.SPLUNK_USERNAME,
     workspaceName: 'SPL-Forge',
   };

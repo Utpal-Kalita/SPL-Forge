@@ -17,11 +17,14 @@ export type ForgeConfig = {
   splunkAllowSelfSigned: boolean;
   splunkMode: SplunkMode;
   splunkPassword?: string;
+  splunkApp: string;
+  splunkOwner: string;
   splunkRepairAutoRun: boolean;
   splunkSearchLimit: number;
   splunkSource: string;
   splunkToken?: string;
   splunkUrl: string;
+  splunkWebUrl?: string;
   splunkUsername?: string;
   workspaceName: string;
 };
@@ -55,11 +58,14 @@ export function loadForgeConfig(options: LoadForgeConfigOptions = {}): ForgeConf
     ),
     splunkMode,
     splunkPassword: envValue('SPL_FORGE_SPLUNK_PASSWORD') ?? envValue('SPLUNK_PASSWORD'),
+    splunkApp: envValue('SPL_FORGE_SPLUNK_APP') ?? 'search',
+    splunkOwner: envValue('SPL_FORGE_SPLUNK_OWNER') ?? 'nobody',
     splunkRepairAutoRun: parseBoolean(envValue('SPL_FORGE_REPAIR_AUTO_RUN'), true),
     splunkSearchLimit: parseInteger(envValue('SPL_FORGE_SPLUNK_SEARCH_LIMIT'), 10),
     splunkSource: envValue('SPL_FORGE_SPLUNK_SOURCE') ?? 'self_hosted_trial',
     splunkToken: envValue('SPL_FORGE_SPLUNK_TOKEN'),
     splunkUrl: envValue('SPL_FORGE_SPLUNK_URL') ?? envValue('SPLUNK_HOST') ?? 'https://localhost:8089',
+    splunkWebUrl: envValue('SPLUNK_WEB_URL'),
     splunkUsername: envValue('SPL_FORGE_SPLUNK_USERNAME') ?? envValue('SPLUNK_USERNAME'),
     workspaceName,
   };

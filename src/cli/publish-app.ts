@@ -3,6 +3,7 @@ import * as path from 'path';
 import { runForgePrompt } from '../agent/workflow';
 import { buildSplunkAppPackage } from '../artifacts/package';
 import type { ForgeConfig, LlmProvider, SplunkMode } from '../config/env';
+import { publishSplunkAppPackage } from '../splunk/publish';
 
 type EnvMap = Record<string, string | undefined>;
 
@@ -10,33 +11,21 @@ const defaultPrompt = 'Create a failed login dashboard by country and user agent
 
 async function main() {
   const env = loadEnv();
-  const prompt = readArg('--prompt') ?? env.SPL_FORGE_EXPORT_PROMPT ?? defaultPrompt;
+  const prompt = readArg('--prompt') ?? env.SPL_FORGE_PUBLISH_PROMPT ?? defaultPrompt;
   const mode = normalizeMode(readArg('--mode') ?? env.SPL_FORGE_SPLUNK_MODE ?? 'mcp');
-  const outputDir = readArg('--out') ?? env.SPL_FORGE_EXPORT_DIR ?? path.join('exports', 'spl-forge-generated-app');
   const appId = readArg('--app-id') ?? env.SPL_FORGE_EXPORT_APP_ID ?? 'spl_forge_generated_app';
   const config = buildConfig(mode, env);
   const result = await runForgePrompt(prompt, config);
   const appPackage = buildSplunkAppPackage({ appId, result });
-  const root = path.resolve(outputDir);
+  const publishResult = await publishSplunkAppPackage(config, appPackage);
 
-  fs.rmSync(root, { force: true, recursive: true });
-
-  for (const [relativePath, content] of Object.entries(appPackage.files)) {
-    const filePath = path.join(root, relativePath);
-    fs.mkdirSync(path.dirname(filePath), { recursive: true });
-    fs.writeFileSync(filePath, `${content}\n`, 'utf8');
+  console.log(`Published to Splunk app: ${publishResult.app}`);
+  console.log(`Owner: ${publishResult.owner}`);
+  console.log(`Published artifacts: ${publishResult.published.join(', ')}`);
+  if (publishResult.dashboardUrl) {
+    console.log(`Dashboard URL: ${publishResult.dashboardUrl}`);
   }
-
-  console.log(`Exported Splunk app folder: ${root}`);
-  console.log(`App id: ${appPackage.appId}`);
-  console.log(`Files: ${Object.keys(appPackage.files).length}`);
-  console.log(`Rows verified before export: ${result.execution.rowCount}`);
-  if (result.dashboard) {
-    console.log(`Dashboard: default/data/ui/views/${result.dashboard.viewName}.xml`);
-  }
-  if (result.alert) {
-    console.log(`Alert: ${result.alert.title}`);
-  }
+  console.log(`Rows verified before publish: ${result.execution.rowCount}`);
 }
 
 function buildConfig(mode: SplunkMode, env: EnvMap): ForgeConfig {
@@ -47,13 +36,13 @@ function buildConfig(mode: SplunkMode, env: EnvMap): ForgeConfig {
     llmModel: env.SPL_FORGE_LLM_MODEL ?? 'mock-spl-forge-v1',
     llmProvider: normalizeProvider(env.SPL_FORGE_LLM_PROVIDER),
     splunkAllowSelfSigned: parseBoolean(env.SPL_FORGE_SPLUNK_ALLOW_SELF_SIGNED, parseBoolean(env.SPLUNK_VERIFY_SSL, false) === false),
+    splunkApp: env.SPL_FORGE_SPLUNK_APP ?? 'search',
     splunkMcpAllowSelfSigned: parseBoolean(env.SPL_FORGE_SPLUNK_MCP_ALLOW_SELF_SIGNED, false),
     splunkMcpEndpoint: env.SPL_FORGE_SPLUNK_MCP_ENDPOINT ?? env.SPLUNK_MCP_URL,
     splunkMcpToken: env.SPL_FORGE_SPLUNK_MCP_TOKEN ?? env.SPLUNK_MCP_TOKEN,
     splunkMode: mode,
-    splunkPassword: env.SPL_FORGE_SPLUNK_PASSWORD ?? env.SPLUNK_PASSWORD,
-    splunkApp: env.SPL_FORGE_SPLUNK_APP ?? 'search',
     splunkOwner: env.SPL_FORGE_SPLUNK_OWNER ?? 'nobody',
+    splunkPassword: env.SPL_FORGE_SPLUNK_PASSWORD ?? env.SPLUNK_PASSWORD,
     splunkRepairAutoRun: parseBoolean(env.SPL_FORGE_REPAIR_AUTO_RUN, true),
     splunkSearchLimit: parseInteger(env.SPL_FORGE_SPLUNK_SEARCH_LIMIT, 10),
     splunkSource: env.SPL_FORGE_SPLUNK_SOURCE ?? 'self_hosted_trial',

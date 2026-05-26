@@ -5,6 +5,7 @@ import { runForgePrompt } from './agent/workflow';
 import { buildSplunkAppPackage, type SplunkAppPackage } from './artifacts/package';
 import { loadForgeConfig } from './config/env';
 import { SPLForgePanel } from './panels/assistant';
+import { publishSplunkAppPackage } from './splunk/publish';
 
 export function activate(context: vscode.ExtensionContext) {
   const outputChannel = vscode.window.createOutputChannel('SPL Forge');
@@ -17,6 +18,15 @@ export function activate(context: vscode.ExtensionContext) {
         const result = writeSplunkAppPackage(appPackage, context.extensionUri.fsPath);
         outputChannel.appendLine(`[export-app] ${result.root}`);
         outputChannel.appendLine(`[export-app] ${result.fileCount} file(s)`);
+        outputChannel.show(true);
+        return result;
+      },
+      onPublishApp: async (appPackage) => {
+        const result = await publishSplunkAppPackage(readConfig(), appPackage);
+        outputChannel.appendLine(`[publish] ${result.published.join(', ')}`);
+        if (result.dashboardUrl) {
+          outputChannel.appendLine(`[publish] ${result.dashboardUrl}`);
+        }
         outputChannel.show(true);
         return result;
       },

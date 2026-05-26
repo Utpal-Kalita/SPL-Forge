@@ -10,6 +10,7 @@ import { analyzePrompt, extractSpl, generateSplFromPrompt, normalizeGeneratedSpl
 import { repairSplQuery } from '../agent/repair';
 import { runForgePrompt } from '../agent/workflow';
 import { executeSplSearch, rewriteDemoFixtureSearch, widenDemoFixtureTimeRange } from '../splunk/execute';
+import { publishSplunkAppPackage } from '../splunk/publish';
 import { inspectSplunkSchema } from '../splunk/schema';
 
 suite('Extension Test Suite', () => {
@@ -24,13 +25,16 @@ suite('Extension Test Suite', () => {
 		splunkMcpEndpoint: undefined,
 		splunkMcpToken: undefined,
 		splunkAllowSelfSigned: true,
+		splunkApp: 'search',
 		splunkMode: 'mock',
+		splunkOwner: 'nobody',
 		splunkPassword: undefined,
 		splunkRepairAutoRun: true,
 		splunkSearchLimit: 10,
 		splunkSource: 'self_hosted_trial',
 		splunkToken: undefined,
 		splunkUrl: 'https://localhost:8089',
+		splunkWebUrl: 'http://localhost:8000',
 		splunkUsername: undefined,
 		workspaceName: 'SPL-Forge',
 	};
@@ -51,6 +55,7 @@ suite('Extension Test Suite', () => {
 		assert.ok(html.includes('Agentic Splunk Artifact Loop'));
 		assert.ok(html.includes('Generate + Run SPL'));
     assert.ok(html.includes('Export App'));
+    assert.ok(html.includes('Publish to Splunk'));
 		assert.ok(html.includes('failed_login_auth.csv'));
 		assert.ok(html.includes('Provider: mock'));
 		assert.ok(html.includes('Query Plan'));
@@ -241,6 +246,53 @@ suite('Extension Test Suite', () => {
     assert.ok(appPackage.files['default/data/ui/views/failed_login_dashboard.xml'].includes('<dashboard version="1.1">'));
     assert.ok(appPackage.files['README.md'].includes('Rows verified before export'));
     assert.ok(appPackage.files['spl-forge-manifest.json'].includes('"rowCount"'));
+  });
+
+  test('splunk publisher posts dashboard and disabled alert through REST', async () => {
+    const requests: Array<{ body: string; path: string }> = [];
+    const server = http.createServer((request, response) => {
+      const chunks: Buffer[] = [];
+
+      request.on('data', (chunk: Buffer) => chunks.push(chunk));
+      request.on('end', () => {
+        requests.push({
+          body: Buffer.concat(chunks).toString('utf8'),
+          path: request.url ?? '',
+        });
+        response.writeHead(201, { 'Content-Type': 'application/xml' });
+        response.end('<response />');
+      });
+    });
+
+    await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve));
+
+    try {
+      const address = server.address();
+      assert.ok(address && typeof address === 'object');
+      const result = await runForgePrompt(
+        'Create a failed login dashboard by country and user agent. Alert if failed attempts exceed 100 in 5 minutes.',
+        mockConfig,
+      );
+      const appPackage = buildSplunkAppPackage({ result });
+      const published = await publishSplunkAppPackage({
+        ...mockConfig,
+        splunkMode: 'rest',
+        splunkPassword: 'changeme',
+        splunkUrl: `http://127.0.0.1:${address.port}`,
+        splunkUsername: 'admin',
+      }, appPackage);
+
+      assert.strictEqual(published.dashboard, 'failed_login_dashboard');
+      assert.strictEqual(published.alert, 'Failed Login Threshold Alert');
+      assert.strictEqual(requests.length, 2);
+      assert.ok(requests.some((entry) => entry.path === '/servicesNS/nobody/search/data/ui/views'));
+      const alertRequest = requests.find((entry) => entry.path === '/servicesNS/nobody/search/saved/searches');
+      assert.ok(alertRequest);
+      assert.ok(alertRequest.body.includes('disabled=1'));
+      assert.ok(alertRequest.body.includes('Failed+Login+Threshold+Alert'));
+    } finally {
+      server.close();
+    }
   });
 
 	test('repair loop rewrites common wrong fields and auth source hints', () => {

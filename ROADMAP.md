@@ -48,7 +48,7 @@ In summary, Splunk’s own messaging and recent feature releases align perfectly
 - **Day 7: Packaging & Alerts.** Implement export of results. Automatically create a minimal Splunk app or saved search from the generated artifacts. For MVP, exporting as a zip or directory with a simple `app.conf`, queries, and dashboards is enough. Optionally handle alert creation (user prompt “alert on X”). *Deliverable:* A downloadable Splunk app folder or JSON that can be imported, containing the query, dashboard, and alert settings.  
 
 - **Day 8: UI Enhancements.** Polish the VS Code UI. Add a panel or input field for prompts, display query history, show error logs. Provide buttons like “Run” and “Export App”. Ensure the UI flow is smooth. *Deliverable:* A basic but user-friendly extension panel for interaction.  
-  - **Status:** Complete in current MVP panel with prompt input, query history, error log, Generate + Run SPL, and Export App controls.
+  - **Status:** Complete in current MVP panel with prompt input, query history, error log, Generate + Run SPL, Export App, and Publish to Splunk controls.
 
 - **Day 9: Testing & Iteration.** Run multiple test scenarios (different prompts, complex queries). Identify bugs or edge cases. Improve prompt templates or error handling as needed. Ensure SPL Forge can handle at least 2-3 distinct use-cases. *Deliverable:* Stability fixes, improved reliability.  
 

@@ -2,7 +2,7 @@
 
 All notable changes to **SPL Forge** will be documented in this file.
 
-> **Project status:** SPL Forge is pre-release hackathon project for Splunk Agentic Ops Hackathon 2026. Foundation setup, prompt flow, query generation, MCP/REST/mock Splunk execution, self-debugging repair, dashboard preview/publish, alert preview, app-folder export, and panel polish are complete. Zip packaging remains in progress.
+> **Project status:** SPL Forge is pre-release hackathon project for Splunk Agentic Ops Hackathon 2026. Foundation setup, prompt flow, query generation, MCP/REST/mock Splunk execution, self-debugging repair, dashboard preview/publish, disabled alert publish, app-folder export, and panel polish are complete. Zip packaging remains in progress.
 
 ---
 
@@ -112,6 +112,8 @@ All notable changes to **SPL Forge** will be documented in this file.
 - End-to-end failed-login demo flow now covers prompt -> Groq SPL -> MCP execution -> normalized final SPL -> result preview -> dashboard artifact -> alert artifact -> Splunk UI dashboard publish.
 - Minimal Splunk app folder export via `npm run export:app`, including `app.conf`, dashboard XML, `savedsearches.conf`, metadata, README, and manifest.
 - Polished VS Code panel interaction with query history, error log, Run control, and Export App button for the current verified package.
+- Publish to Splunk panel action that writes dashboard XML and a disabled saved-search alert through Splunk REST.
+- `npm run publish:app` CLI smoke path for publishing the same dashboard and disabled alert package.
 
 ### In Progress (Planned for next milestone)
 
