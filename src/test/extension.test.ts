@@ -3,7 +3,7 @@ import * as http from 'http';
 import * as vscode from 'vscode';
 import type { ForgeConfig } from '../config/env';
 import { getPanelHtml } from '../panels/assistant';
-import { analyzePrompt, extractSpl, generateSplFromPrompt, summarizeIntent } from '../agent/generate';
+import { analyzePrompt, extractSpl, generateSplFromPrompt, normalizeGeneratedSpl, summarizeIntent } from '../agent/generate';
 import { repairSplQuery } from '../agent/repair';
 import { runForgePrompt } from '../agent/workflow';
 import { executeSplSearch, rewriteDemoFixtureSearch, widenDemoFixtureTimeRange } from '../splunk/execute';
@@ -86,6 +86,22 @@ suite('Extension Test Suite', () => {
 		assert.ok(result.planSummary.includes('Artifact: alert'));
 		assert.ok(result.spl.includes('| bin _time span=5m'));
 		assert.ok(result.spl.includes('| where failed_logins > 100'));
+	});
+
+	test('generated spl normalization falls back from malformed dashboard alert pipeline', () => {
+		const intent = analyzePrompt('Create a failed login dashboard by country and user agent. Alert if failed attempts exceed 100 in 5 minutes.');
+		const normalized = normalizeGeneratedSpl([
+			'index=main sourcetype=auth action=failure',
+			'| stats count as failed_logins by country, user_agent, user',
+			'| timechart span=5m sum(failed_logins) as failed_logins_5m by country',
+			'| bin user_agent over 10',
+			'| alert action=failure-exceeded threshold=100 duration=5m',
+		].join(' '), intent);
+
+		assert.ok(normalized.includes('| stats count as failed_logins by country user_agent user'));
+		assert.ok(normalized.includes('| sort - failed_logins'));
+		assert.ok(!normalized.includes('| alert'));
+		assert.ok(!normalized.includes('bin user_agent over'));
 	});
 
 	test('mock fallback shapes trend queries for broader time windows', async () => {

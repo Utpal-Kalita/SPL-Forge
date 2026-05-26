@@ -35,6 +35,8 @@ export function repairSplQuery(spl: string, execution: SplunkSearchResult, schem
 
 	repaired = replaceMissingIndex(repaired, schema, changes);
 	repaired = replaceMissingSourcetype(repaired, schema, changes);
+	repaired = removeArtifactCommands(repaired, changes);
+	repaired = removeInvalidBinCommands(repaired, changes);
 	repaired = normalizeFailureFilters(repaired, changes);
 	repaired = replaceFieldAliases(repaired, schema, changes);
 
@@ -58,6 +60,26 @@ export function repairSplQuery(spl: string, execution: SplunkSearchResult, schem
 		repairedSpl: repaired,
 		shouldRetry: repaired !== spl,
 	};
+}
+
+function removeArtifactCommands(spl: string, changes: string[]) {
+	const repaired = spl.replace(/\|\s*alert\b[^\n|]*/gi, '').trim();
+
+	if (repaired !== spl) {
+		changes.push('removed non-search alert artifact command from SPL preview query');
+	}
+
+	return repaired;
+}
+
+function removeInvalidBinCommands(spl: string, changes: string[]) {
+	const repaired = spl.replace(/\|\s*bin\s+\w+\s+over\s+\d+\s*/gi, '').trim();
+
+	if (repaired !== spl) {
+		changes.push('removed invalid bin-over command from generated SPL');
+	}
+
+	return repaired;
 }
 
 function replaceMissingIndex(spl: string, schema: SplunkSchemaSummary, changes: string[]) {
@@ -157,4 +179,3 @@ function widenTimeRange(spl: string) {
 function escapeRegExp(value: string) {
 	return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
-

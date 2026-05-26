@@ -12,7 +12,7 @@ export type GenerateSplResult = {
   spl: string;
 };
 
-type PromptIntent = {
+export type PromptIntent = {
   artifact: 'search' | 'dashboard' | 'alert' | 'dashboard+alert';
   breakdowns: string[];
   focusField?: string;
@@ -73,7 +73,7 @@ export async function generateSplFromPrompt(input: GenerateSplInput, config: For
     prompt: normalizedPrompt,
     providerUsed: config.llmProvider === 'mock' ? config.llmModel : `${config.llmProvider} (mock fallback)`,
     rawText,
-    spl: extractSpl(rawText),
+    spl: normalizeGeneratedSpl(extractSpl(rawText), intent),
   };
 }
 
@@ -121,7 +121,7 @@ async function generateWithGroq(
     prompt,
     providerUsed: `groq:${config.groqModel}`,
     rawText,
-    spl: extractSpl(rawText),
+    spl: normalizeGeneratedSpl(extractSpl(rawText), intent),
   };
 }
 
@@ -169,7 +169,7 @@ async function generateWithOpenAi(
     prompt,
     providerUsed: `openai:${config.llmModel}`,
     rawText,
-    spl: extractSpl(rawText),
+    spl: normalizeGeneratedSpl(extractSpl(rawText), intent),
   };
 }
 
@@ -219,7 +219,7 @@ async function generateWithAnthropic(
     prompt,
     providerUsed: `anthropic:${config.llmModel}`,
     rawText,
-    spl: extractSpl(rawText),
+    spl: normalizeGeneratedSpl(extractSpl(rawText), intent),
   };
 }
 
@@ -231,6 +231,38 @@ export function extractSpl(rawText: string) {
   }
 
   return rawText.trim();
+}
+
+export function normalizeGeneratedSpl(spl: string, intent: PromptIntent) {
+  const normalized = spl
+    .replace(/\|\s*alert\b[^\n|]*/gi, '')
+    .replace(/\|\s*bin\s+\w+\s+over\s+\d+\s*/gi, '')
+    .replace(/\bby\s+([^\n|]+)/gi, (match, fields: string) => `by ${fields.replace(/,\s*/g, ' ').replace(/\s+/g, ' ').trim()}`)
+    .replace(/\s+\n/g, '\n')
+    .replace(/[ \t]+/g, ' ')
+    .trim();
+
+  if (hasUnsafeGeneratedShape(normalized)) {
+    return generateMockSpl(intent);
+  }
+
+  return normalized;
+}
+
+function hasUnsafeGeneratedShape(spl: string) {
+  if (/\|\s*(alert|sendemail|outputlookup|delete|collect)\b/i.test(spl)) {
+    return true;
+  }
+
+  if (/\|\s*stats\b[\s\S]*\|\s*timechart\b/i.test(spl)) {
+    return true;
+  }
+
+  if (/\|\s*bin\s+\w+\s+over\s+\d+/i.test(spl)) {
+    return true;
+  }
+
+  return false;
 }
 
 function buildUserPrompt(prompt: string, intent: PromptIntent) {
@@ -338,6 +370,13 @@ function generateMockSpl(intent: PromptIntent) {
 function buildPipeline(intent: PromptIntent) {
   if (intent.wantsTrend) {
     return [`| timechart span=${resolveTrendSpan(intent)} count as ${metricName(intent)}`];
+  }
+
+  if ((intent.artifact === 'dashboard' || intent.artifact === 'dashboard+alert') && intent.breakdowns.length > 0) {
+    return [
+      `| stats count as ${metricName(intent)} by ${intent.breakdowns.join(' ')}`,
+      `| sort - ${metricName(intent)}`,
+    ];
   }
 
   if (intent.threshold !== undefined && intent.thresholdWindow) {

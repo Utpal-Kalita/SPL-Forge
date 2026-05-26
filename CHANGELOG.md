@@ -98,6 +98,8 @@ All notable changes to **SPL Forge** will be documented in this file.
 - Repair history rendering in the VS Code panel and SPL Forge output channel.
 - Root `architecture_diagram.md` for hackathon submission requirements.
 - MIT license declaration for open-source submission readiness.
+- LLM SPL normalization guardrail that strips non-search artifact commands and falls back to safe primary dashboard SPL when provider output is malformed.
+- CodeQL workflow fallback artifact upload for repositories without code scanning enabled.
 
 ### In Progress (Planned for next milestone)
 
@@ -151,6 +153,7 @@ All notable changes to **SPL Forge** will be documented in this file.
 - Confirmed live REST mode against real Splunk data with `npm run verify:splunk -- --mode rest`.
 - Confirmed live MCP mode against real Splunk data with `npm run verify:splunk -- --mode mcp`.
 - Confirmed combined live REST+MCP verification with `npm run verify:splunk -- --mode all`.
+- Confirmed same backend workflow used by the panel with live Groq and Splunk config returns 12 rows for the failed-login dashboard prompt.
 
 ### Security
 
