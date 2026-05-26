@@ -394,6 +394,7 @@ export function getPanelHtml(input: PanelHtmlInput) {
           <span class="pill">Mode: ${escapeHtml(config.splunkMode)}</span>
           <span class="pill">Source: ${escapeHtml(config.splunkSource)}</span>
           <span class="pill">Endpoint: ${escapeHtml(getSplunkEndpointLabel(config))}</span>
+          <span class="pill">Repair: ${config.splunkRepairAutoRun ? 'auto-rerun' : 'approval required'}</span>
           <span class="pill">Provider: ${escapeHtml(config.llmProvider)}</span>
           <span class="pill">Model: ${escapeHtml(config.llmProvider === 'groq' ? config.groqModel : config.llmModel)}</span>
           <span class="pill status-${state.status}">Status: ${escapeHtml(statusLabel)}</span>

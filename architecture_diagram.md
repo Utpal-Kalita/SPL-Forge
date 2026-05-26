@@ -35,4 +35,3 @@ flowchart LR
 - AI layer: prompt intent parser, provider-backed SPL generation, deterministic mock fallback, and repair reasoning.
 - Splunk layer: MCP-first query execution with REST fallback and mock mode for reliable demos.
 - Safety posture: read-only search execution, bounded search limits, no destructive commands, human approval planned before export.
-

@@ -17,6 +17,7 @@ export type ForgeConfig = {
   splunkAllowSelfSigned: boolean;
   splunkMode: SplunkMode;
   splunkPassword?: string;
+  splunkRepairAutoRun: boolean;
   splunkSearchLimit: number;
   splunkSource: string;
   splunkToken?: string;
@@ -54,6 +55,7 @@ export function loadForgeConfig(options: LoadForgeConfigOptions = {}): ForgeConf
     ),
     splunkMode,
     splunkPassword: envValue('SPL_FORGE_SPLUNK_PASSWORD') ?? envValue('SPLUNK_PASSWORD'),
+    splunkRepairAutoRun: parseBoolean(envValue('SPL_FORGE_REPAIR_AUTO_RUN'), true),
     splunkSearchLimit: parseInteger(envValue('SPL_FORGE_SPLUNK_SEARCH_LIMIT'), 10),
     splunkSource: envValue('SPL_FORGE_SPLUNK_SOURCE') ?? 'self_hosted_trial',
     splunkToken: envValue('SPL_FORGE_SPLUNK_TOKEN'),

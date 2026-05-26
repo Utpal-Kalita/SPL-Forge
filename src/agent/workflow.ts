@@ -1,8 +1,8 @@
 import type { ForgeConfig } from '../config/env';
 import { executeSplSearch, type SplunkSearchResult } from '../splunk/execute';
 import { inspectSplunkSchema, type SplunkSchemaSummary } from '../splunk/schema';
-import { generateSplFromPrompt, type GenerateSplResult } from './generate';
-import { repairSplQuery } from './repair';
+import { analyzePrompt, generateSplFromPrompt, type GenerateSplResult } from './generate';
+import { repairSplWithLlm } from './repair';
 
 export type ForgeRunAttempt = {
 	execution: SplunkSearchResult;
@@ -21,6 +21,7 @@ const maxRepairAttempts = 2;
 
 export async function runForgePrompt(prompt: string, config: ForgeConfig): Promise<ForgeRunResult> {
 	const generation = await generateSplFromPrompt({ prompt }, config);
+	const intent = analyzePrompt(prompt);
 	const attempts: ForgeRunAttempt[] = [];
 	let currentSpl = generation.spl;
 
@@ -37,14 +38,14 @@ export async function runForgePrompt(prompt: string, config: ForgeConfig): Promi
 		}
 
 		const schema = await inspectSplunkSchema(currentSpl, config);
-		const repair = repairSplQuery(currentSpl, execution, schema);
+		const repair = await repairSplWithLlm(prompt, intent, currentSpl, execution, schema, config);
 		attempts[attempts.length - 1] = {
 			...attempts[attempts.length - 1],
 			repairReason: repair.reason,
 			schema,
 		};
 
-		if (!repair.shouldRetry) {
+		if (!repair.shouldRetry || !config.splunkRepairAutoRun) {
 			return finish(generation, attempts);
 		}
 
@@ -68,4 +69,3 @@ function finish(generation: GenerateSplResult, attempts: ForgeRunAttempt[]): For
 		spl: finalAttempt.spl,
 	};
 }
-

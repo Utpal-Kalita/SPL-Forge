@@ -7,6 +7,7 @@ import { analyzePrompt, extractSpl, generateSplFromPrompt, normalizeGeneratedSpl
 import { repairSplQuery } from '../agent/repair';
 import { runForgePrompt } from '../agent/workflow';
 import { executeSplSearch, rewriteDemoFixtureSearch, widenDemoFixtureTimeRange } from '../splunk/execute';
+import { inspectSplunkSchema } from '../splunk/schema';
 
 suite('Extension Test Suite', () => {
 	vscode.window.showInformationMessage('Start all tests.');
@@ -22,6 +23,7 @@ suite('Extension Test Suite', () => {
 		splunkAllowSelfSigned: true,
 		splunkMode: 'mock',
 		splunkPassword: undefined,
+		splunkRepairAutoRun: true,
 		splunkSearchLimit: 10,
 		splunkSource: 'self_hosted_trial',
 		splunkToken: undefined,
@@ -48,6 +50,7 @@ suite('Extension Test Suite', () => {
 		assert.ok(html.includes('Provider: mock'));
 		assert.ok(html.includes('Query Plan'));
 		assert.ok(html.includes('Repair History'));
+		assert.ok(html.includes('Repair: auto-rerun'));
 		assert.ok(html.includes('Execution Summary'));
 	});
 
@@ -300,6 +303,84 @@ suite('Extension Test Suite', () => {
 			assert.ok(result.messages.includes('MCP info: connected'));
 			assert.ok(result.messages.includes('mcp ok'));
 			assert.strictEqual(calls.length, 2);
+		} finally {
+			await close(server);
+		}
+	});
+
+	test('mcp schema inspection calls metadata tools', async () => {
+		const calls: string[] = [];
+		const server = http.createServer((req, res) => {
+			const chunks: Buffer[] = [];
+			req.on('data', (chunk: Buffer) => chunks.push(chunk));
+			req.on('end', () => {
+				const payload = JSON.parse(Buffer.concat(chunks).toString('utf8')) as {
+					params?: {
+						name?: string;
+					};
+				};
+				const toolName = payload.params?.name ?? 'unknown';
+				calls.push(toolName);
+				res.writeHead(200, { 'Content-Type': 'application/json' });
+
+				if (toolName === 'splunk_get_info') {
+					res.end(JSON.stringify({
+						jsonrpc: '2.0',
+						result: { content: [{ text: JSON.stringify({ messages: ['connected'] }), type: 'text' }] },
+					}));
+					return;
+				}
+
+				if (toolName === 'splunk_run_query') {
+					res.end(JSON.stringify({
+						jsonrpc: '2.0',
+						result: {
+							structuredContent: {
+								messages: ['schema probe ok'],
+								results: [{ action: 'failure', country: 'US', user_agent: 'Firefox' }],
+							},
+						},
+					}));
+					return;
+				}
+
+				if (toolName === 'splunk_get_indexes') {
+					res.end(JSON.stringify({
+						jsonrpc: '2.0',
+						result: { structuredContent: { indexes: [{ name: 'main' }, { name: '_internal' }] } },
+					}));
+					return;
+				}
+
+				assert.strictEqual(toolName, 'splunk_get_metadata');
+				res.end(JSON.stringify({
+					jsonrpc: '2.0',
+					result: { structuredContent: { sourcetypes: ['auth', 'splunkd'] } },
+				}));
+			});
+		});
+
+		await listen(server);
+
+		try {
+			const address = server.address();
+			assert.ok(address && typeof address === 'object');
+
+			const schema = await inspectSplunkSchema('index=main sourcetype=auth action=failure | head 1', {
+				...mockConfig,
+				splunkMcpEndpoint: `http://127.0.0.1:${address.port}/mcp`,
+				splunkMcpToken: 'mcp-token',
+				splunkMode: 'mcp',
+				splunkSource: 'remote',
+			});
+
+			assert.deepStrictEqual(calls, ['splunk_get_info', 'splunk_run_query', 'splunk_get_indexes', 'splunk_get_metadata']);
+			assert.ok(schema.indexes.includes('main'));
+			assert.ok(schema.indexes.includes('_internal'));
+			assert.ok(schema.sourcetypes.includes('auth'));
+			assert.ok(schema.sourcetypes.includes('splunkd'));
+			assert.ok(schema.messages.includes('MCP schema splunk_get_indexes: ok'));
+			assert.ok(schema.messages.includes('MCP schema splunk_get_metadata: ok'));
 		} finally {
 			await close(server);
 		}

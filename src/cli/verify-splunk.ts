@@ -139,6 +139,7 @@ function buildConfig(mode: Exclude<SplunkMode, 'mock'>, env: EnvMap): ForgeConfi
 		splunkMcpToken: env.SPL_FORGE_SPLUNK_MCP_TOKEN ?? env.SPLUNK_MCP_TOKEN,
 		splunkMode: mode,
 		splunkPassword: env.SPL_FORGE_SPLUNK_PASSWORD ?? env.SPLUNK_PASSWORD,
+		splunkRepairAutoRun: true,
 		splunkSearchLimit: parseInteger(env.SPL_FORGE_SPLUNK_SEARCH_LIMIT, 10),
 		splunkSource: env.SPL_FORGE_SPLUNK_SOURCE ?? 'remote',
 		splunkToken: env.SPL_FORGE_SPLUNK_TOKEN ?? env.SPLUNK_TOKEN,
@@ -189,4 +190,3 @@ main().catch((error) => {
 	console.error(error instanceof Error ? error.message : String(error));
 	process.exit(1);
 });
-

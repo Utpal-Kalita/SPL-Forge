@@ -1,5 +1,7 @@
 import type { SplunkSearchResult } from '../splunk/execute';
 import type { SplunkSchemaSummary } from '../splunk/schema';
+import type { ForgeConfig } from '../config/env';
+import { extractSpl, normalizeGeneratedSpl, type PromptIntent } from './generate';
 
 export type RepairDecision = {
 	diagnostics: string[];
@@ -60,6 +62,126 @@ export function repairSplQuery(spl: string, execution: SplunkSearchResult, schem
 		repairedSpl: repaired,
 		shouldRetry: repaired !== spl,
 	};
+}
+
+export async function repairSplWithLlm(
+	prompt: string,
+	intent: PromptIntent,
+	spl: string,
+	execution: SplunkSearchResult,
+	schema: SplunkSchemaSummary,
+	config: ForgeConfig,
+): Promise<RepairDecision> {
+	const deterministic = repairSplQuery(spl, execution, schema);
+
+	if (deterministic.shouldRetry) {
+		return deterministic;
+	}
+
+	if (config.llmProvider === 'mock' || (!config.groqApiKey && !config.llmApiKey)) {
+		return deterministic;
+	}
+
+	try {
+		const candidate = await requestLlmRepair(prompt, spl, execution, schema, config);
+		const normalized = normalizeGeneratedSpl(extractSpl(candidate), intent);
+
+		if (normalized && normalized !== spl) {
+			return {
+				diagnostics: deterministic.diagnostics,
+				reason: 'LLM repair candidate accepted',
+				repairedSpl: normalized,
+				shouldRetry: true,
+			};
+		}
+	} catch {
+		return deterministic;
+	}
+
+	return deterministic;
+}
+
+async function requestLlmRepair(
+	prompt: string,
+	spl: string,
+	execution: SplunkSearchResult,
+	schema: SplunkSchemaSummary,
+	config: ForgeConfig,
+) {
+	const content = [
+		'Repair this Splunk SPL query. Return one raw SPL search query only.',
+		'No markdown. No explanation. No alert/output/write commands.',
+		`User request: ${prompt}`,
+		`Failed SPL: ${spl}`,
+		`Execution status: ${execution.status}`,
+		`Row count: ${execution.rowCount}`,
+		`Messages: ${execution.messages.join(' | ') || 'none'}`,
+		`Known indexes: ${schema.indexes.join(', ')}`,
+		`Known sourcetypes: ${schema.sourcetypes.join(', ')}`,
+		`Known fields: ${schema.fields.join(', ')}`,
+	].join('\n');
+
+	if (config.llmProvider === 'groq' && config.groqApiKey) {
+		const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+				Authorization: `Bearer ${config.groqApiKey}`,
+			},
+			body: JSON.stringify({
+				messages: [
+					{ content: 'You repair broken Splunk SPL. Return only a safe read-only search.', role: 'system' },
+					{ content, role: 'user' },
+				],
+				model: config.groqModel,
+				temperature: 0.1,
+			}),
+		});
+		const payload = await response.json() as { choices?: Array<{ message?: { content?: string } }> };
+		return payload.choices?.[0]?.message?.content ?? '';
+	}
+
+	if (config.llmProvider === 'openai' && config.llmApiKey) {
+		const response = await fetch('https://api.openai.com/v1/chat/completions', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+				Authorization: `Bearer ${config.llmApiKey}`,
+			},
+			body: JSON.stringify({
+				messages: [
+					{ content: 'You repair broken Splunk SPL. Return only a safe read-only search.', role: 'system' },
+					{ content, role: 'user' },
+				],
+				model: config.llmModel,
+				temperature: 0.1,
+			}),
+		});
+		const payload = await response.json() as { choices?: Array<{ message?: { content?: string } }> };
+		return payload.choices?.[0]?.message?.content ?? '';
+	}
+
+	if (config.llmProvider === 'anthropic' && config.llmApiKey) {
+		const response = await fetch('https://api.anthropic.com/v1/messages', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+				'anthropic-version': '2023-06-01',
+				'x-api-key': config.llmApiKey,
+			},
+			body: JSON.stringify({
+				max_tokens: 400,
+				messages: [{ content, role: 'user' }],
+				model: config.llmModel,
+				system: 'You repair broken Splunk SPL. Return only a safe read-only search.',
+				temperature: 0.1,
+			}),
+		});
+		const payload = await response.json() as { content?: Array<{ text?: string }> };
+		return payload.content?.map((item) => item.text ?? '').join('\n') ?? '';
+	}
+
+	return '';
 }
 
 function removeArtifactCommands(spl: string, changes: string[]) {

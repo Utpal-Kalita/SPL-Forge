@@ -49,7 +49,10 @@ SPL Forge now has product definition, setup documentation, Day 1 environment gui
 - [x] Live localhost MCP smoke test verified against local Splunk MCP Server
 - [x] Day 5 forge workflow added for generate -> execute -> schema inspect -> repair -> rerun
 - [x] Schema inspection helper added for fields, indexes, sourcetypes, and messages
+- [x] MCP schema inspection now calls `splunk_get_indexes` and `splunk_get_metadata`
 - [x] Deterministic repair rules added for common index, sourcetype, field alias, action value, and time-window failures
+- [x] Optional LLM repair prompt added after deterministic diagnostics
+- [x] Repair auto-rerun policy flag added with panel visibility
 - [x] Repair history added to panel and output channel
 - [x] Root `architecture_diagram.md` added for hackathon submission requirements
 - [x] MIT license added for open-source submission requirement
@@ -76,13 +79,13 @@ SPL Forge now has product definition, setup documentation, Day 1 environment gui
 | Extension code | Started | Prompt UI, panel messaging, provider adapter, output logging present |
 | Splunk connectivity | Day 4 done | MCP, REST, and mock execution adapters exist; local MCP and REST smoke verified |
 | Agent workflow | Day 3 done | Intent-aware query generation works via mock or configured LLM provider |
-| Self-debug loop | Day 5 done | Executes once, inspects schema after failure/empty rows, repairs common demo issues, reruns with capped attempts |
+| Self-debug loop | Day 5 done | Executes once, inspects schema and MCP metadata after failure/empty rows, repairs common demo issues, optionally asks LLM for a safe repair, and reruns with capped attempts |
 | Artifact export | Not started | No packaging code yet |
 | Testing | Started | Extension tests pass locally with VS Code test runner; CI runs with xvfb on Ubuntu |
 
 ## Reality Check
 
-If someone clones repo now, they get strong planning and setup docs plus real extension shell that accepts prompts, explains interpreted query intent, returns stronger demo-safe SPL, executes it through MCP, REST, or mock mode, and repairs common failed-login demo query mistakes after schema inspection. Local self-hosted trial auth fixture queries are rewritten so imported CSV data works in live MCP demos. Export flow is not built yet.
+If someone clones repo now, they get strong planning and setup docs plus real extension shell that accepts prompts, explains interpreted query intent, returns stronger demo-safe SPL, executes it through MCP, REST, or mock mode, and repairs common failed-login demo query mistakes after schema and MCP metadata inspection. Local self-hosted trial auth fixture queries are rewritten so imported CSV data works in live MCP demos. Export flow is not built yet.
 
 ## Next Logical Build Order
 

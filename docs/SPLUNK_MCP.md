@@ -263,15 +263,17 @@ MCP adapter responsibilities:
 
 - connect to configured MCP endpoint
 - validate encrypted token presence
+- call `splunk_get_info` for health check
 - call `splunk_run_query` for generated SPL execution
+- call `splunk_get_indexes` and `splunk_get_metadata` for repair context
 - normalize MCP tool responses into existing SPL Forge execution result shape
 - surface MCP guardrail errors clearly in VS Code panel
+- use schema output as repair-loop context
 
 Future responsibilities:
 
-- call `splunk_get_info` for health check
-- call `splunk_get_indexes` and `splunk_get_metadata` for context
-- use schema output as repair-loop context
+- cache low-risk schema metadata between panel runs
+- expand knowledge-object discovery for dashboard and alert export
 
 ## Environment Proposal
 

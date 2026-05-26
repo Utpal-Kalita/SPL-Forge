@@ -100,6 +100,9 @@ All notable changes to **SPL Forge** will be documented in this file.
 - MIT license declaration for open-source submission readiness.
 - LLM SPL normalization guardrail that strips non-search artifact commands and falls back to safe primary dashboard SPL when provider output is malformed.
 - CodeQL workflow fallback artifact upload for repositories without code scanning enabled.
+- MCP schema discovery now calls `splunk_get_indexes` and `splunk_get_metadata` for repair context.
+- LLM-assisted repair prompt fallback for failed or zero-row searches after deterministic repair rules.
+- `SPL_FORGE_REPAIR_AUTO_RUN` policy flag plus panel indicator for auto-rerun versus approval-required repair mode.
 
 ### In Progress (Planned for next milestone)
 
@@ -107,7 +110,6 @@ All notable changes to **SPL Forge** will be documented in this file.
 - Agent orchestrator for multi-stage workflow (Intent → Generate → Validate → Execute → Repair → Optimize → Package).
 - LLM provider abstraction for OpenAI, Anthropic, or Splunk Hosted Models.
 - Schema service for caching and discovering Splunk metadata (indexes, sourcetypes, fields).
-- Self-debugging repair loop with error detection and automatic query correction.
 - Result preview and visualization support.
 - Artifact generators:
   - Dashboard XML/JSON generation
@@ -133,6 +135,7 @@ All notable changes to **SPL Forge** will be documented in this file.
 - Added Splunk MCP Server path as first-class execution mode, with REST and mock kept as fallbacks.
 - Replaced generic mock SPL output with prompt-aware Splunk-shaped query synthesis for demo data.
 - Tightened provider prompts so model requests include explicit schema hints and primary-query constraint for dashboard+alert prompts.
+- Expanded Day 5 from deterministic-only repairs to deterministic plus optional LLM repair using live schema context.
 
 ### Fixed
 
