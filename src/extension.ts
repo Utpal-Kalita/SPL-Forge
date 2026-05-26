@@ -1,5 +1,8 @@
 import * as vscode from 'vscode';
+import * as fs from 'fs';
+import * as path from 'path';
 import { runForgePrompt } from './agent/workflow';
+import { buildSplunkAppPackage, type SplunkAppPackage } from './artifacts/package';
 import { loadForgeConfig } from './config/env';
 import { SPLForgePanel } from './panels/assistant';
 
@@ -10,6 +13,13 @@ export function activate(context: vscode.ExtensionContext) {
   const disposable = vscode.commands.registerCommand('spl-forge.openPanel', () => {
     SPLForgePanel.createOrShow({
       extensionUri: context.extensionUri,
+      onExportApp: async (appPackage) => {
+        const result = writeSplunkAppPackage(appPackage, context.extensionUri.fsPath);
+        outputChannel.appendLine(`[export-app] ${result.root}`);
+        outputChannel.appendLine(`[export-app] ${result.fileCount} file(s)`);
+        outputChannel.show(true);
+        return result;
+      },
       onSubmitPrompt: async (prompt) => {
         const config = readConfig();
 
@@ -40,9 +50,10 @@ export function activate(context: vscode.ExtensionContext) {
 
         return {
           alert: result.alert,
+          appPackage: buildSplunkAppPackage({ result }),
           dashboard: result.dashboard,
           execution,
-          llmModel: config.llmModel,
+          llmModel: config.llmProvider === 'groq' ? config.groqModel : config.llmModel,
           planSummary: result.planSummary,
           providerLabel: result.providerUsed,
           rawText: result.rawText,
@@ -58,3 +69,20 @@ export function activate(context: vscode.ExtensionContext) {
 }
 
 export function deactivate() {}
+
+function writeSplunkAppPackage(appPackage: SplunkAppPackage, extensionRootPath: string) {
+  const root = path.join(extensionRootPath, 'exports', appPackage.appId);
+
+  fs.rmSync(root, { force: true, recursive: true });
+
+  for (const [relativePath, content] of Object.entries(appPackage.files)) {
+    const filePath = path.join(root, relativePath);
+    fs.mkdirSync(path.dirname(filePath), { recursive: true });
+    fs.writeFileSync(filePath, `${content}\n`, 'utf8');
+  }
+
+  return {
+    fileCount: Object.keys(appPackage.files).length,
+    root,
+  };
+}

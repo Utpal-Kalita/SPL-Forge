@@ -2,7 +2,7 @@
 
 All notable changes to **SPL Forge** will be documented in this file.
 
-> **Project status:** SPL Forge is pre-release hackathon project for Splunk Agentic Ops Hackathon 2026. Foundation setup, prompt flow, query generation, MCP/REST/mock Splunk execution, self-debugging repair, dashboard preview/publish, and alert preview are complete. Full Splunk app packaging remains in progress.
+> **Project status:** SPL Forge is pre-release hackathon project for Splunk Agentic Ops Hackathon 2026. Foundation setup, prompt flow, query generation, MCP/REST/mock Splunk execution, self-debugging repair, dashboard preview/publish, alert preview, app-folder export, and panel polish are complete. Zip packaging remains in progress.
 
 ---
 
@@ -111,11 +111,12 @@ All notable changes to **SPL Forge** will be documented in this file.
 - Dashboard publisher now uses the verified executable Splunk search, including local demo field extraction.
 - End-to-end failed-login demo flow now covers prompt -> Groq SPL -> MCP execution -> normalized final SPL -> result preview -> dashboard artifact -> alert artifact -> Splunk UI dashboard publish.
 - Minimal Splunk app folder export via `npm run export:app`, including `app.conf`, dashboard XML, `savedsearches.conf`, metadata, README, and manifest.
+- Polished VS Code panel interaction with query history, error log, Run control, and Export App button for the current verified package.
 
 ### In Progress (Planned for next milestone)
 
 - Backend API routes for the forge pipeline (intent analysis, SPL generation, validation, execution, optimization, artifact generation).
-- Package/export workflow for writing generated artifacts into a reusable Splunk app directory.
+- Zip packaging for generated Splunk app exports.
 - Human approval controls before writing generated artifacts to disk or Splunk.
 - Artifact generators still needed for:
   - Saved search creation

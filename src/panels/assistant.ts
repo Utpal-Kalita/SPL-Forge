@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import type { AlertArtifact } from '../artifacts/alert';
 import type { DashboardArtifact } from '../artifacts/dashboard';
+import type { SplunkAppPackage } from '../artifacts/package';
 import type { ForgeConfig } from '../config/env';
 import type { SplunkSearchResult } from '../splunk/execute';
 
@@ -9,6 +10,7 @@ const defaultPrompt = 'Create a failed login dashboard by country and user agent
 
 type PromptResult = {
   alert?: AlertArtifact;
+  appPackage?: SplunkAppPackage;
   dashboard?: DashboardArtifact;
   execution: SplunkSearchResult;
   llmModel: string;
@@ -21,11 +23,37 @@ type PromptResult = {
 
 type PanelDependencies = {
   extensionUri: vscode.Uri;
+  onExportApp(appPackage: SplunkAppPackage): Promise<ExportResult>;
   onSubmitPrompt(prompt: string): Promise<PromptResult>;
   readConfig(): ForgeConfig;
 };
 
+type ExportResult = {
+  fileCount: number;
+  root: string;
+};
+
+type HistoryItem = {
+  alert?: AlertArtifact;
+  appPackage?: SplunkAppPackage;
+  dashboard?: DashboardArtifact;
+  elapsedMs: number;
+  execution: SplunkSearchResult;
+  planSummary: string;
+  prompt: string;
+  provider: string;
+  rawText: string;
+  repairSummary: string;
+  rowCount: number;
+  spl: string;
+  status: SplunkSearchResult['status'];
+  timestamp: string;
+};
+
 type PanelState = {
+  history: HistoryItem[];
+  lastAppPackage?: SplunkAppPackage;
+  lastExport?: ExportResult;
   lastPrompt: string;
   lastRawText?: string;
   lastSpl?: string;
@@ -46,6 +74,7 @@ export class SPLForgePanel {
   private readonly disposables: vscode.Disposable[] = [];
   private readonly panel: vscode.WebviewPanel;
   private state: PanelState = {
+    history: [],
     lastPrompt: defaultPrompt,
     status: 'idle',
   };
@@ -92,6 +121,16 @@ export class SPLForgePanel {
   }
 
   private async handleMessage(message: unknown) {
+    if (isExportMessage(message)) {
+      await this.exportCurrentApp();
+      return;
+    }
+
+    if (isHistoryMessage(message)) {
+      this.restoreHistoryItem(message.index);
+      return;
+    }
+
     if (!isPromptMessage(message)) {
       return;
     }
@@ -121,9 +160,30 @@ export class SPLForgePanel {
 
       this.state = {
         lastAlert: result.alert,
+        lastAppPackage: result.appPackage,
         lastDashboard: result.dashboard,
         lastExecution: result.execution,
+        lastExport: undefined,
         lastError: undefined,
+        history: [
+          {
+            alert: result.alert,
+            appPackage: result.appPackage,
+            dashboard: result.dashboard,
+            elapsedMs: result.execution.elapsedMs,
+            execution: result.execution,
+            planSummary: result.planSummary,
+            prompt,
+            provider: `${result.providerLabel} / ${result.llmModel}`,
+            rawText: result.rawText,
+            repairSummary: result.repairSummary,
+            rowCount: result.execution.rowCount,
+            spl: result.spl,
+            status: result.execution.status,
+            timestamp: new Date().toLocaleTimeString(),
+          },
+          ...this.state.history,
+        ].slice(0, 6),
         lastPlanSummary: result.planSummary,
         lastPrompt: prompt,
         lastProvider: `${result.providerLabel} / ${result.llmModel}`,
@@ -140,6 +200,70 @@ export class SPLForgePanel {
       };
     }
 
+    this.render();
+  }
+
+  private async exportCurrentApp() {
+    const appPackage = this.state.lastAppPackage;
+
+    if (!appPackage) {
+      this.state = {
+        ...this.state,
+        lastError: 'No packaged app artifact yet. Generate and run SPL first.',
+        status: 'error',
+      };
+      this.render();
+      return;
+    }
+
+    this.state = {
+      ...this.state,
+      lastError: undefined,
+      status: 'running',
+    };
+    this.render();
+
+    try {
+      const result = await this.dependencies.onExportApp(appPackage);
+      this.state = {
+        ...this.state,
+        lastExport: result,
+        status: 'success',
+      };
+    } catch (error) {
+      this.state = {
+        ...this.state,
+        lastError: error instanceof Error ? error.message : 'Unknown export failure.',
+        status: 'error',
+      };
+    }
+
+    this.render();
+  }
+
+  private restoreHistoryItem(index: number) {
+    const item = this.state.history[index];
+
+    if (!item) {
+      return;
+    }
+
+    this.state = {
+      ...this.state,
+      lastAlert: item.alert,
+      lastAppPackage: item.appPackage,
+      lastDashboard: item.dashboard,
+      lastExecution: item.execution,
+      lastExport: undefined,
+      lastError: undefined,
+      lastPlanSummary: item.planSummary,
+      lastPrompt: item.prompt,
+      lastProvider: item.provider,
+      lastRawText: item.rawText,
+      lastRepairSummary: item.repairSummary,
+      lastSpl: item.spl,
+      status: item.status === 'success' ? 'success' : 'warning',
+    };
     this.render();
   }
 
@@ -165,6 +289,8 @@ type PanelHtmlInput = {
 export function getPanelHtml(input: PanelHtmlInput) {
   const { config, cspSource, extensionUri, state } = input;
   const statusLabel = getStatusLabel(state.status);
+  const canExport = Boolean(state.lastAppPackage) && state.status !== 'running';
+  const historyMarkup = formatHistory(state.history);
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -179,18 +305,21 @@ export function getPanelHtml(input: PanelHtmlInput) {
     <style>
       :root {
         color-scheme: light dark;
-        --bg: #08131a;
-        --bg-soft: #0f2029;
-        --card: #132c38;
-        --card-alt: #173544;
-        --text: #f2f7f9;
-        --muted: #b7cad3;
-        --accent: #7ef0c8;
-        --accent-strong: #20c997;
-        --warn: #ffd166;
-        --danger: #ff7b7b;
-        --border: rgba(255, 255, 255, 0.1);
-        --shadow: 0 18px 40px rgba(0, 0, 0, 0.24);
+        --bg: #0f172a;
+        --panel: #111827;
+        --panel-2: #182235;
+        --surface: #f8fafc;
+        --surface-soft: #eef2f7;
+        --text: #f8fafc;
+        --text-light: #0f172a;
+        --muted: #b8c5d6;
+        --muted-light: #475569;
+        --accent: #22c55e;
+        --accent-strong: #16a34a;
+        --warn: #f59e0b;
+        --danger: #ef4444;
+        --border: rgba(148, 163, 184, 0.28);
+        --shadow: 0 14px 30px rgba(0, 0, 0, 0.22);
       }
 
       * {
@@ -199,40 +328,38 @@ export function getPanelHtml(input: PanelHtmlInput) {
 
       body {
         margin: 0;
-        font-family: Georgia, 'Times New Roman', serif;
-        background:
-          radial-gradient(circle at top right, rgba(126, 240, 200, 0.18), transparent 30%),
-          linear-gradient(180deg, var(--bg), #060d12 62%);
+        font-family: 'Fira Sans', Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        background: linear-gradient(180deg, var(--bg), #111827 68%);
         color: var(--text);
       }
 
       main {
         max-width: 1100px;
         margin: 0 auto;
-        padding: 28px;
+        padding: 24px;
       }
 
       .hero,
       .card {
         border: 1px solid var(--border);
-        border-radius: 24px;
+        border-radius: 8px;
         box-shadow: var(--shadow);
       }
 
       .hero {
-        padding: 24px;
-        background: linear-gradient(145deg, rgba(19, 44, 56, 0.96), rgba(12, 26, 34, 0.92));
+        padding: 22px;
+        background: linear-gradient(145deg, rgba(17, 24, 39, 0.98), rgba(24, 34, 53, 0.96));
       }
 
       .card {
-        padding: 18px;
-        background: linear-gradient(180deg, rgba(23, 53, 68, 0.96), rgba(13, 32, 41, 0.96));
+        padding: 16px;
+        background: linear-gradient(180deg, rgba(24, 34, 53, 0.98), rgba(17, 24, 39, 0.98));
       }
 
       .eyebrow {
         letter-spacing: 0.12em;
         text-transform: uppercase;
-        color: var(--accent);
+        color: #86efac;
         font-size: 12px;
       }
 
@@ -246,6 +373,7 @@ export function getPanelHtml(input: PanelHtmlInput) {
       h1 {
         font-size: 34px;
         margin-top: 10px;
+        letter-spacing: 0;
       }
 
       h2 {
@@ -255,6 +383,14 @@ export function getPanelHtml(input: PanelHtmlInput) {
       p {
         color: var(--muted);
         line-height: 1.6;
+      }
+
+      .toolbar {
+        align-items: center;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 14px;
       }
 
       .grid {
@@ -276,9 +412,9 @@ export function getPanelHtml(input: PanelHtmlInput) {
 
       .pill {
         padding: 8px 12px;
-        border-radius: 999px;
-        background: rgba(126, 240, 200, 0.12);
-        border: 1px solid rgba(126, 240, 200, 0.25);
+        border-radius: 8px;
+        background: rgba(34, 197, 94, 0.12);
+        border: 1px solid rgba(34, 197, 94, 0.28);
         color: var(--text);
         font-size: 12px;
       }
@@ -313,24 +449,47 @@ export function getPanelHtml(input: PanelHtmlInput) {
         width: 100%;
         min-height: 120px;
         resize: vertical;
-        padding: 14px;
-        border-radius: 18px;
+        padding: 12px;
+        border-radius: 8px;
         border: 1px solid var(--border);
-        background: rgba(4, 13, 18, 0.8);
+        background: rgba(15, 23, 42, 0.88);
         color: var(--text);
         font: inherit;
         line-height: 1.5;
       }
 
+      textarea:focus-visible,
+      button:focus-visible,
+      .history-item:focus-visible {
+        outline: 2px solid var(--accent);
+        outline-offset: 2px;
+      }
+
       button {
-        margin-top: 14px;
         border: 0;
-        border-radius: 999px;
-        padding: 12px 18px;
-        background: linear-gradient(135deg, var(--accent), var(--accent-strong));
-        color: #03281e;
+        border-radius: 8px;
+        min-height: 40px;
+        padding: 10px 14px;
+        background: var(--accent);
+        color: #052e16;
         font-weight: 700;
         cursor: pointer;
+        transition: background-color 180ms ease, border-color 180ms ease, color 180ms ease;
+      }
+
+      button:hover:not(:disabled) {
+        background: var(--accent-strong);
+      }
+
+      button.secondary {
+        background: transparent;
+        border: 1px solid var(--border);
+        color: var(--text);
+      }
+
+      button.secondary:hover:not(:disabled) {
+        border-color: rgba(34, 197, 94, 0.55);
+        color: #bbf7d0;
       }
 
       button:disabled {
@@ -358,11 +517,41 @@ export function getPanelHtml(input: PanelHtmlInput) {
         margin: 12px 0 0;
         padding: 14px;
         overflow-x: auto;
-        border-radius: 16px;
-        background: rgba(3, 9, 12, 0.65);
+        border-radius: 8px;
+        background: rgba(3, 7, 18, 0.78);
         border: 1px solid var(--border);
         color: #dffaf2;
         white-space: pre-wrap;
+      }
+
+      .history-list {
+        display: grid;
+        gap: 8px;
+        margin-top: 12px;
+      }
+
+      .history-item {
+        background: rgba(15, 23, 42, 0.74);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        color: var(--text);
+        cursor: pointer;
+        display: grid;
+        gap: 4px;
+        padding: 10px;
+        text-align: left;
+        transition: border-color 180ms ease, background-color 180ms ease;
+      }
+
+      .history-item:hover {
+        background: rgba(30, 41, 59, 0.88);
+        border-color: rgba(34, 197, 94, 0.46);
+      }
+
+      .history-meta {
+        color: var(--muted);
+        font-family: 'Fira Code', 'SFMono-Regular', Consolas, monospace;
+        font-size: 11px;
       }
 
       .meta {
@@ -387,6 +576,24 @@ export function getPanelHtml(input: PanelHtmlInput) {
       a {
         color: var(--accent);
       }
+
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          transition: none !important;
+        }
+      }
+
+      @media (max-width: 520px) {
+        main {
+          padding: 14px;
+        }
+
+        h1 {
+          font-size: 28px;
+        }
+      }
     </style>
   </head>
   <body>
@@ -397,7 +604,7 @@ export function getPanelHtml(input: PanelHtmlInput) {
         <p>
           Prompt now generates SPL, executes it, inspects schema on failure or zero rows,
           repairs common field/index/sourcetype mistakes, and reruns with capped attempts.
-          Final working SPL now produces dashboard and alert artifact previews before export.
+          Final working SPL now produces dashboard, alert, and Splunk app export artifacts.
         </p>
         <div class="pill-row">
           <span class="pill">Mode: ${escapeHtml(config.splunkMode)}</span>
@@ -415,12 +622,16 @@ export function getPanelHtml(input: PanelHtmlInput) {
           <h2>Prompt</h2>
           <label for="prompt-input">Describe search, dashboard, or alert intent.</label>
           <textarea id="prompt-input" placeholder="Describe Splunk artifact you want...">${escapeHtml(state.lastPrompt)}</textarea>
-          <button id="generate-button"${state.status === 'running' ? ' disabled' : ''}>Generate + Run SPL</button>
+          <div class="toolbar">
+            <button id="generate-button"${state.status === 'running' ? ' disabled' : ''}>Generate + Run SPL</button>
+            <button class="secondary" id="export-button"${canExport ? '' : ' disabled'}>Export App</button>
+          </div>
+          ${state.lastExport ? `<div class="meta"><span>Exported: <code>${escapeHtml(state.lastExport.root)}</code></span><span>${state.lastExport.fileCount} files</span></div>` : ''}
           ${state.lastError ? `<div class="error">${escapeHtml(state.lastError)}</div>` : ''}
         </article>
 
         <article class="card">
-          <h2>Workflow Checklist</h2>
+          <h2>Day 8 Panel Flow</h2>
           <ul>
             <li>Natural-language prompt accepted in panel</li>
             <li>Intent parser and LLM adapter generate SPL</li>
@@ -431,7 +642,22 @@ export function getPanelHtml(input: PanelHtmlInput) {
             <li>Provider + model logged in output channel</li>
             <li>Result rows or execution errors visible in panel</li>
             <li>Dashboard and alert artifacts previewed from final SPL</li>
+            <li>Export App writes importable Splunk app folder from current result</li>
           </ul>
+        </article>
+      </section>
+
+      <section class="grid two">
+        <article class="card">
+          <h2>Query History</h2>
+          <div class="history-list">
+            ${historyMarkup}
+          </div>
+        </article>
+
+        <article class="card">
+          <h2>Error Log</h2>
+          <pre>${escapeHtml(formatErrorLog(state))}</pre>
         </article>
       </section>
 
@@ -488,9 +714,9 @@ export function getPanelHtml(input: PanelHtmlInput) {
         <article class="card">
           <h2>Next Build Targets</h2>
           <ol>
-            <li>Saved search packaging</li>
-            <li>Splunk app directory export</li>
-            <li>Human approval before writing artifacts</li>
+            <li>Zip package download</li>
+            <li>Human approval gate before enabling alerts</li>
+            <li>Dashboard import validation from panel</li>
           </ol>
         </article>
       </section>
@@ -516,12 +742,29 @@ export function getPanelHtml(input: PanelHtmlInput) {
       const vscode = acquireVsCodeApi();
       const promptInput = document.getElementById('prompt-input');
       const generateButton = document.getElementById('generate-button');
+      const exportButton = document.getElementById('export-button');
 
       generateButton?.addEventListener('click', () => {
         const prompt = promptInput?.value ?? '';
         vscode.postMessage({
           type: 'submitPrompt',
           prompt,
+        });
+      });
+
+      exportButton?.addEventListener('click', () => {
+        vscode.postMessage({
+          type: 'exportApp',
+        });
+      });
+
+      document.querySelectorAll('[data-history-index]').forEach((item) => {
+        item.addEventListener('click', () => {
+          const index = Number(item.getAttribute('data-history-index'));
+          vscode.postMessage({
+            type: 'restoreHistory',
+            index,
+          });
         });
       });
     </script>
@@ -616,6 +859,38 @@ function formatAlertArtifact(alert: AlertArtifact | undefined) {
   ].join('\n');
 }
 
+function formatHistory(history: HistoryItem[]) {
+  if (history.length === 0) {
+    return '<div class="history-meta">No prompt history yet.</div>';
+  }
+
+  return history
+    .map((item, index) => [
+      `<button class="history-item" data-history-index="${index}">`,
+      `<span>${escapeHtml(item.prompt)}</span>`,
+      `<span class="history-meta">${escapeHtml(item.timestamp)} | ${escapeHtml(item.status)} | ${item.rowCount} rows | ${item.elapsedMs}ms</span>`,
+      '</button>',
+    ].join(''))
+    .join('');
+}
+
+function formatErrorLog(state: PanelState) {
+  const lines = [
+    `Panel status: ${state.status}`,
+    `Last repair: ${state.lastRepairSummary ?? 'none'}`,
+  ];
+
+  if (state.lastExecution?.messages.length) {
+    lines.push(`Splunk messages: ${state.lastExecution.messages.join(' | ')}`);
+  }
+
+  if (state.lastError) {
+    lines.push(`Panel error: ${state.lastError}`);
+  }
+
+  return lines.join('\n');
+}
+
 function isPromptMessage(message: unknown): message is { prompt: string; type: 'submitPrompt' } {
   return typeof message === 'object'
     && message !== null
@@ -623,6 +898,22 @@ function isPromptMessage(message: unknown): message is { prompt: string; type: '
     && 'prompt' in message
     && message.type === 'submitPrompt'
     && typeof message.prompt === 'string';
+}
+
+function isExportMessage(message: unknown): message is { type: 'exportApp' } {
+  return typeof message === 'object'
+    && message !== null
+    && 'type' in message
+    && message.type === 'exportApp';
+}
+
+function isHistoryMessage(message: unknown): message is { index: number; type: 'restoreHistory' } {
+  return typeof message === 'object'
+    && message !== null
+    && 'type' in message
+    && 'index' in message
+    && message.type === 'restoreHistory'
+    && typeof message.index === 'number';
 }
 
 function escapeHtml(value: string) {

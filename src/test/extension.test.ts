@@ -41,6 +41,7 @@ suite('Extension Test Suite', () => {
 			cspSource: 'vscode-resource:',
 			extensionUri: 'file:///tmp/spl-forge',
 			state: {
+				history: [],
 				lastPrompt: 'Create failed login dashboard',
 				lastPlanSummary: 'Artifact: dashboard | Focus: failed logins',
 				status: 'idle',
@@ -49,6 +50,7 @@ suite('Extension Test Suite', () => {
 
 		assert.ok(html.includes('Agentic Splunk Artifact Loop'));
 		assert.ok(html.includes('Generate + Run SPL'));
+    assert.ok(html.includes('Export App'));
 		assert.ok(html.includes('failed_login_auth.csv'));
 		assert.ok(html.includes('Provider: mock'));
 		assert.ok(html.includes('Query Plan'));
@@ -57,6 +59,8 @@ suite('Extension Test Suite', () => {
     assert.ok(html.includes('Execution Summary'));
     assert.ok(html.includes('Dashboard Artifact'));
     assert.ok(html.includes('Alert Artifact'));
+    assert.ok(html.includes('Query History'));
+    assert.ok(html.includes('Error Log'));
   });
 
 	test('extract spl removes fenced markdown', () => {

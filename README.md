@@ -122,6 +122,7 @@ Current repository assets:
 - Classic XML dashboard publish path via `npm run publish:dashboard` for Splunk UI verification
 - Alert saved-search preview generated from threshold prompts
 - Minimal Splunk app folder export via `npm run export:app`
+- Polished VS Code panel flow with query history, error log, Run, and Export App controls
 - Root architecture diagram and MIT license for hackathon submission readiness
 
 ## Documentation
