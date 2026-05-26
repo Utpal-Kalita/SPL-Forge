@@ -115,6 +115,7 @@ Current repository assets:
 - Setup guides for VS Code, Splunk, and first-run workflow
 - Supporting docs for architecture, demo flow, and contribution expectations
 - Brand banner and repository presentation assets
+- Simple and complex auth sample datasets in `samples/`
 - VS Code extension shell with intent-aware SPL generation and query plan feedback
 - MCP/REST/mock Splunk execution path with result preview in the panel
 - Day 5 self-debugging loop that inspects schema after failed or empty execution, repairs common SPL mistakes, and reruns with capped attempts

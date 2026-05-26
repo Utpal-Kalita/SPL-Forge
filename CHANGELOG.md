@@ -116,6 +116,7 @@ All notable changes to **SPL Forge** will be documented in this file.
 - `npm run publish:app` CLI smoke path for publishing the same dashboard and disabled alert package.
 - Day 9 prompt stability coverage for trend-by-country, top source-IP, successful-login, threshold-window, and unsafe provider-output scenarios.
 - Ten-prompt Groq/MCP smoke verifier via `npm run verify:prompts -- --mode mcp`.
+- Complex auth security sample dataset for richer risk, MFA, privileged-action, app, role, and session demos.
 
 ### In Progress (Planned for next milestone)
 

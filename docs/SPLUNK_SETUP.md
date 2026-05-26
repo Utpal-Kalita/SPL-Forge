@@ -65,6 +65,17 @@ For MVP failed-login scenario, ensure logs include:
 - sourcetype
 - index
 
+For richer Day 9/Day 10 testing, `samples/complex_auth_security.csv` also includes:
+
+- destination system
+- app name
+- outcome
+- risk score
+- MFA result
+- role
+- device
+- session ID
+
 ## Suggested Demo Dataset
 
 Use authentication or access logs with enough records to support:
@@ -74,6 +85,11 @@ Use authentication or access logs with enough records to support:
 - top countries
 - top user agents
 - threshold-based alert example
+
+Included fixtures:
+
+- `samples/failed_login_auth.csv` with `sourcetype=auth`
+- `samples/complex_auth_security.csv` with `sourcetype=auth_complex`
 
 ## MCP Preparation
 
