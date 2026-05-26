@@ -40,7 +40,8 @@
     "check-types": "tsc --noEmit",
     "lint": "eslint src",
     "test": "vscode-test",
-    "package:vsix": "npm run package && npx @vscode/vsce package"
+    "package:vsix": "npm run package && npx @vscode/vsce package",
+    "verify:splunk": "npm run compile-tests && node out/cli/verify-splunk.js"
   },
   "devDependencies": {
     "@types/vscode": "^1.120.0",

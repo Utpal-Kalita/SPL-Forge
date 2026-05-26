@@ -91,6 +91,7 @@ All notable changes to **SPL Forge** will be documented in this file.
 - GitHub Actions Markdown link check workflow for documentation health.
 - GitHub Actions Gitleaks workflow for committed secret scanning.
 - Dependabot configuration for weekly npm and GitHub Actions update pull requests.
+- Live Splunk verification CLI via `npm run verify:splunk` for REST and MCP smoke tests against real data.
 
 ### In Progress (Planned for next milestone)
 
@@ -138,6 +139,12 @@ All notable changes to **SPL Forge** will be documented in this file.
 - Fixed documentation links from `docs/` pages to root-level `PRD.md` and `ROADMAP.md` so Markdown link checks pass.
 - Fixed GitHub Actions dependency scanning by replacing unsupported Dependency Review usage with portable `npm audit`.
 - Fixed TypeScript type resolution robustness by explicitly including Node and Mocha ambient types.
+
+### Verified
+
+- Confirmed live REST mode against real Splunk data with `npm run verify:splunk -- --mode rest`.
+- Confirmed live MCP mode against real Splunk data with `npm run verify:splunk -- --mode mcp`.
+- Confirmed combined live REST+MCP verification with `npm run verify:splunk -- --mode all`.
 
 ### Security
 
