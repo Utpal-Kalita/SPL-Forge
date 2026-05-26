@@ -177,7 +177,7 @@ function buildTitle(prompt: string, intent: PromptIntent) {
   return compact ? titleCase(compact) : 'SPL Forge Dashboard';
 }
 
-function buildClassicDashboardXml(
+export function buildClassicDashboardXml(
   title: string,
   spl: string,
   visualizationType: DashboardArtifact['visualizationType'],

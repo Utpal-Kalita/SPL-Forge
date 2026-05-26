@@ -3,6 +3,7 @@ import * as http from 'http';
 import * as https from 'https';
 import * as path from 'path';
 import { runForgePrompt } from '../agent/workflow';
+import { buildClassicDashboardXml } from '../artifacts/dashboard';
 import type { ForgeConfig, LlmProvider, SplunkMode } from '../config/env';
 
 type EnvMap = Record<string, string | undefined>;
@@ -23,11 +24,13 @@ async function main() {
   const app = env.SPL_FORGE_SPLUNK_APP ?? 'search';
   const owner = env.SPL_FORGE_SPLUNK_OWNER ?? 'nobody';
   const viewName = env.SPL_FORGE_DASHBOARD_VIEW ?? result.dashboard.viewName;
-  await publishDashboard(config, owner, app, viewName, result.dashboard.classicXml);
+  const executableXml = buildClassicDashboardXml(result.dashboard.title, result.execution.search, result.dashboard.visualizationType);
+  await publishDashboard(config, owner, app, viewName, executableXml);
 
   const uiBase = env.SPLUNK_WEB_URL ?? config.splunkUrl.replace(/:8089\b/, ':8000').replace(/\/$/, '');
   console.log(`Published dashboard: ${viewName}`);
   console.log(`Splunk UI: ${uiBase}/app/${encodeURIComponent(app)}/${encodeURIComponent(viewName)}`);
+  console.log(`Published search: ${result.execution.search}`);
   console.log(`Rows verified before publish: ${result.execution.rowCount}`);
 }
 

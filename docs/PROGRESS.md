@@ -59,7 +59,7 @@ SPL Forge now has product definition, setup documentation, Day 1 environment gui
 - [x] Alert artifact generator added for saved-search configuration previews
 - [x] Panel now renders alert title, threshold condition, schedule, and savedsearches.conf draft
 - [x] Dashboard artifact now includes classic XML that can be loaded into Splunk UI
-- [x] `npm run publish:dashboard` publishes the generated dashboard to Splunk UI through REST
+- [x] `npm run publish:dashboard` publishes the generated dashboard to Splunk UI through REST using the verified executable search
 - [x] Root `architecture_diagram.md` added for hackathon submission requirements
 - [x] MIT license added for open-source submission requirement
 

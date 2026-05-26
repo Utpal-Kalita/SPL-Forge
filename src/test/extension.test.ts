@@ -2,7 +2,7 @@ import * as assert from 'assert';
 import * as http from 'http';
 import * as vscode from 'vscode';
 import { generateAlertArtifact } from '../artifacts/alert';
-import { generateDashboardArtifact } from '../artifacts/dashboard';
+import { buildClassicDashboardXml, generateDashboardArtifact } from '../artifacts/dashboard';
 import type { ForgeConfig } from '../config/env';
 import { getPanelHtml } from '../panels/assistant';
 import { analyzePrompt, extractSpl, generateSplFromPrompt, normalizeGeneratedSpl, summarizeIntent } from '../agent/generate';
@@ -192,6 +192,18 @@ suite('Extension Test Suite', () => {
     assert.ok(dashboard.dashboardJson.includes('"ds.search"'));
     assert.ok(dashboard.classicXml.includes('<option name="charting.chart">bar</option>'));
     assert.strictEqual(dashboard.viewName, 'failed_login_dashboard');
+  });
+
+  test('classic dashboard xml escapes executable search', () => {
+    const xml = buildClassicDashboardXml(
+      'Failed Login Dashboard',
+      'index=main sourcetype=auth | where user!="root" AND failed_logins > 0',
+      'bar',
+    );
+
+    assert.ok(xml.includes('Failed Login Dashboard'));
+    assert.ok(xml.includes('user!=&quot;root&quot;'));
+    assert.ok(xml.includes('failed_logins &gt; 0'));
   });
 
   test('alert artifact generates saved search preview from threshold intent', () => {
