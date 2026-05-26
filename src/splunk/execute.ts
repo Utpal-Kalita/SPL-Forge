@@ -366,6 +366,10 @@ export function rewriteDemoFixtureSearch(search: string, config: ForgeConfig) {
     return search;
   }
 
+  if (/index=main/.test(search) && /sourcetype=auth_complex/.test(search)) {
+    return rewriteComplexAuthFixtureSearch(search);
+  }
+
   if (!/index=main/.test(search) || !/sourcetype=auth/.test(search) || /rex\s+field=_raw/.test(search)) {
     return search;
   }
@@ -387,6 +391,27 @@ export function rewriteDemoFixtureSearch(search: string, config: ForgeConfig) {
     : ' | where timestamp!="timestamp"';
 
   return `${normalizedHead} ${extractionPipeline}${filterPipeline}${tail ? ` ${tail}` : ''}`.trim();
+}
+
+function rewriteComplexAuthFixtureSearch(search: string) {
+  if (/rex\s+field=_raw/.test(search)) {
+    return search;
+  }
+
+  const trimmed = search.trim();
+  const pipeIndex = trimmed.indexOf('|');
+  const head = pipeIndex === -1 ? trimmed : trimmed.slice(0, pipeIndex).trim();
+  const tail = pipeIndex === -1 ? '' : trimmed.slice(pipeIndex);
+  const normalizedHead = head
+    .replace(/\s+/g, ' ')
+    .trim();
+  const extractionPipeline = [
+    '| rex field=_raw "^(?<timestamp>[^,]+),(?<user>[^,]+),(?<src>[^,]+),(?<dest>[^,]+),(?<app>[^,]+),(?<country>[^,]+),(?<user_agent>[^,]+),(?<action>[^,]+),(?<outcome>[^,]+),(?<risk_score>[^,]+),(?<mfa_result>[^,]+),(?<role>[^,]+),(?<device>[^,]+),(?<session_id>[^,]+),(?<row_sourcetype>[^,]+),(?<row_index>[^,]+)$"',
+    '| where timestamp!="timestamp"',
+    '| eval risk_score=tonumber(risk_score)',
+  ].join(' ');
+
+  return `${normalizedHead} ${extractionPipeline}${tail ? ` ${tail}` : ''}`.trim();
 }
 
 function formatNetworkError(error: unknown) {

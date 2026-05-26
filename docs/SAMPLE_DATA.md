@@ -113,3 +113,17 @@ Show failed and blocked login attempts by source IP and user agent for the compl
 ```text
 Create a privileged action dashboard by user, app, and country. Alert on risk score over 85.
 ```
+
+## Automated Prompt Verification
+
+After importing both CSV files into local Splunk, run the real Groq/MCP prompt suite:
+
+```bash
+npm run verify:prompts -- --mode mcp --all --delay-ms 2500
+```
+
+For only the complex dataset scenarios:
+
+```bash
+npm run verify:prompts -- --mode mcp --complex --delay-ms 2500
+```

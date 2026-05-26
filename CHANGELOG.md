@@ -115,8 +115,10 @@ All notable changes to **SPL Forge** will be documented in this file.
 - Publish to Splunk panel action that writes dashboard XML and a disabled saved-search alert through Splunk REST.
 - `npm run publish:app` CLI smoke path for publishing the same dashboard and disabled alert package.
 - Day 9 prompt stability coverage for trend-by-country, top source-IP, successful-login, threshold-window, and unsafe provider-output scenarios.
-- Ten-prompt Groq/MCP smoke verifier via `npm run verify:prompts -- --mode mcp`.
+- Sixteen-prompt Groq/MCP smoke verifier via `npm run verify:prompts -- --mode mcp --all --delay-ms 2500`.
 - Complex auth security sample dataset for richer risk, MFA, privileged-action, app, role, and session demos.
+- Complex prompt generation support for `auth_complex` searches, including risk score, MFA failures, privileged activity, service-account activity, impossible-travel style grouping, and failed/blocked outcome dashboards.
+- Prompt verifier mode switches: default simple auth suite, `--complex` for complex sample data, and `--all` for full coverage.
 
 ### In Progress (Planned for next milestone)
 

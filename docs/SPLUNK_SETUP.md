@@ -133,11 +133,20 @@ If you imported `samples/failed_login_auth.csv` with simple oneshot ingest, Splu
 SPL Forge now compensates for that in `self_hosted_trial` mode:
 
 - auth demo queries are rewritten with `rex field=_raw ...`
+- complex auth demo queries for `samples/complex_auth_security.csv` are rewritten with `rex field=_raw ...` and `risk_score=tonumber(risk_score)`
 - header row is filtered out with `where timestamp!="timestamp"`
 - action filters are converted into working `where action="failure"` or `where action="success"`
 - stale prompt windows can auto-retry with `earliest=0`
 
 This means MCP and REST demos can still work on local fixture import without custom props/transforms setup.
+
+For repeatable prompt verification against real Groq plus local Splunk MCP:
+
+```bash
+npm run verify:prompts -- --mode mcp --all --delay-ms 2500
+```
+
+Use `--complex` to run only the `auth_complex` prompt suite after importing `samples/complex_auth_security.csv`.
 
 ## REST Preparation
 

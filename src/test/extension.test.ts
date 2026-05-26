@@ -178,6 +178,32 @@ suite('Extension Test Suite', () => {
     assert.ok(result.spl.includes('| stats count as successful_logins by country user'));
   });
 
+  test('complex auth prompt generates risk-aware SPL', async () => {
+    const result = await generateSplFromPrompt({
+      prompt: 'Create a high-risk authentication dashboard using sourcetype auth_complex. Show max risk score and event count by country, app, role, and user. Alert if risk_score exceeds 90.',
+    }, mockConfig);
+
+    assert.ok(result.planSummary.includes('Sourcetype: auth_complex'));
+    assert.ok(result.planSummary.includes('Risk threshold: > 90'));
+    assert.ok(result.spl.includes('sourcetype=auth_complex'));
+    assert.ok(result.spl.includes('max(risk_score) as max_risk'));
+    assert.ok(result.spl.includes('| where max_risk > 90'));
+  });
+
+  test('complex auth normalization rejects wrong action outcome filters', () => {
+    const intent = analyzePrompt('Show blocked and failed auth_complex events by outcome, app, country, role, and device with max risk score.');
+    const normalized = normalizeGeneratedSpl(
+      'index=main OR index=complex sourcetype=auth_complex action=failure OR action=blocked | stats max(risk_score) as max_risk_score by outcome app country role device',
+      intent,
+    );
+
+    assert.ok(normalized.includes('index=main sourcetype=auth_complex'));
+    assert.ok(normalized.includes('| where outcome="failure" OR outcome="blocked"'));
+    assert.ok(normalized.includes('stats count as auth_events max(risk_score) as max_risk'));
+    assert.ok(!normalized.includes('index=complex'));
+    assert.ok(!normalized.includes('action=blocked'));
+  });
+
 	test('mock splunk adapter returns grouped rows', async () => {
 		const result = await executeSplSearch('index=main sourcetype=auth action=failure | stats count as failed_logins by country user_agent | sort - failed_logins', mockConfig);
 
@@ -605,6 +631,20 @@ suite('Extension Test Suite', () => {
 		assert.ok(rewritten.includes('| where timestamp!="timestamp" AND action="failure"'));
 		assert.ok(rewritten.includes('| stats count by country user_agent'));
 	});
+
+  test('demo fixture rewrite parses complex auth csv fields and risk score', () => {
+    const rewritten = rewriteDemoFixtureSearch(
+      'index=main sourcetype=auth_complex earliest=0 | stats count max(risk_score) as max_risk by user app role',
+      mockConfig,
+    );
+
+    assert.ok(rewritten.includes('| rex field=_raw'));
+    assert.ok(rewritten.includes('(?<dest>[^,]+)'));
+    assert.ok(rewritten.includes('(?<session_id>[^,]+)'));
+    assert.ok(rewritten.includes('| where timestamp!="timestamp"'));
+    assert.ok(rewritten.includes('| eval risk_score=tonumber(risk_score)'));
+    assert.ok(rewritten.includes('| stats count max(risk_score) as max_risk by user app role'));
+  });
 
 	test('demo fixture rewrite leaves unrelated searches untouched', () => {
 		const untouched = rewriteDemoFixtureSearch('index=_internal earliest=-15m | head 5', mockConfig);

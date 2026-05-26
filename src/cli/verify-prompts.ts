@@ -84,18 +84,90 @@ const promptCases: PromptCase[] = [
   },
 ];
 
+const complexPromptCases: PromptCase[] = [
+  {
+    name: 'complex-high-risk-dashboard',
+    prompt: 'Create a high-risk authentication dashboard using sourcetype auth_complex. Show max risk score and event count by country, app, role, and user. Alert if risk_score exceeds 90.',
+    requireDashboard: true,
+    requireRows: true,
+    requiredSpl: [
+      'sourcetype=auth_complex',
+      'stats count as auth_events max(risk_score) as max_risk avg(risk_score) as avg_risk',
+      'where max_risk > 90',
+    ],
+  },
+  {
+    name: 'complex-privileged-activity',
+    prompt: 'Create a suspicious privileged activity dashboard using sourcetype auth_complex. Find privileged or admin users with failed, blocked, or privileged_action events. Break down by user, src, app, country, and role. Alert if risk_score over 85.',
+    requireDashboard: true,
+    requireRows: true,
+    requiredSpl: [
+      'sourcetype=auth_complex',
+      'role="admin" OR role="privileged" OR action="privileged_action"',
+      'stats count as privileged_events max(risk_score) as max_risk',
+      'where max_risk > 85',
+    ],
+  },
+  {
+    name: 'complex-mfa-investigation',
+    prompt: 'Create an MFA failure investigation dashboard using sourcetype auth_complex. Show users where mfa_result is denied, timeout, or not_challenged, grouped by user, src, country, device, app, and mfa_result.',
+    requireDashboard: true,
+    requireRows: true,
+    requiredSpl: [
+      'sourcetype=auth_complex',
+      'mfa_result="denied" OR mfa_result="timeout" OR mfa_result="not_challenged"',
+      'stats count as mfa_events max(risk_score) as max_risk by user src country device app mfa_result',
+    ],
+  },
+  {
+    name: 'complex-service-account-monitoring',
+    prompt: 'Create a service account monitoring dashboard using sourcetype auth_complex. Track service role activity for api_token and pipeline_deploy actions by user, src, app, dest, action, and outcome.',
+    requireDashboard: true,
+    requireRows: true,
+    requiredSpl: [
+      'sourcetype=auth_complex',
+      'role="service" OR action="api_token" OR action="pipeline_deploy"',
+      'stats count as service_events max(risk_score) as max_risk values(outcome) as outcomes by user src app dest action outcome',
+    ],
+  },
+  {
+    name: 'complex-impossible-travel',
+    prompt: 'Create an impossible-travel style dashboard using sourcetype auth_complex. Find the same user logging in from multiple countries or unknown devices. Group by user, country, src, device, app, and session_id.',
+    requireDashboard: true,
+    requireRows: true,
+    requiredSpl: [
+      'sourcetype=auth_complex',
+      'stats dc(country) as country_count',
+      'where country_count > 1',
+    ],
+  },
+  {
+    name: 'complex-blocked-failed-overview',
+    prompt: 'Show blocked and failed auth_complex events by outcome, app, country, role, and device with max risk score.',
+    requireRows: true,
+    requiredSpl: [
+      'sourcetype=auth_complex',
+      'where outcome="failure" OR outcome="blocked"',
+      'stats count as auth_events max(risk_score) as max_risk',
+    ],
+  },
+];
+
 async function main() {
   const env = loadEnv();
   const mode = normalizeMode(readArg('--mode') ?? env.SPL_FORGE_SPLUNK_MODE ?? 'mock');
   const config = buildConfig(mode, env);
+  const cases = selectPromptCases();
+  const delayMs = parseInteger(readArg('--delay-ms'), 0);
   const failures: string[] = [];
 
   console.log(`SPL Forge prompt verification`);
   console.log(`Mode: ${mode}`);
-  console.log(`Cases: ${promptCases.length}`);
+  console.log(`Cases: ${cases.length}`);
+  console.log(`Delay: ${delayMs}ms`);
 
-  for (const [index, promptCase] of promptCases.entries()) {
-    const label = `${index + 1}/${promptCases.length} ${promptCase.name}`;
+  for (const [index, promptCase] of cases.entries()) {
+    const label = `${index + 1}/${cases.length} ${promptCase.name}`;
 
     try {
       const result = await runForgePrompt(promptCase.prompt, config);
@@ -117,6 +189,10 @@ async function main() {
       failures.push(`${label}: ${error instanceof Error ? error.message : String(error)}`);
       console.log(`FAIL ${label}: ${error instanceof Error ? error.message : String(error)}`);
     }
+
+    if (delayMs > 0 && index < cases.length - 1) {
+      await sleep(delayMs);
+    }
   }
 
   if (failures.length > 0) {
@@ -128,6 +204,18 @@ async function main() {
   }
 
   console.log('\nAll prompt verification cases passed.');
+}
+
+function selectPromptCases() {
+  if (hasArg('--complex')) {
+    return complexPromptCases;
+  }
+
+  if (hasArg('--all')) {
+    return [...promptCases, ...complexPromptCases];
+  }
+
+  return promptCases;
 }
 
 function validateResult(promptCase: PromptCase, result: Awaited<ReturnType<typeof runForgePrompt>>, haystack: string) {
@@ -215,6 +303,14 @@ function loadEnv(): EnvMap {
 function readArg(name: string) {
   const index = process.argv.indexOf(name);
   return index >= 0 ? process.argv[index + 1] : undefined;
+}
+
+function hasArg(name: string) {
+  return process.argv.includes(name);
+}
+
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 function normalizeProvider(value: string | undefined): LlmProvider {

@@ -19,9 +19,17 @@ export type PromptIntent = {
   earliest?: string;
   latest?: string;
   limit?: number;
+  riskThreshold?: number;
+  sourcetype: 'auth' | 'auth_complex';
   threshold?: number;
   thresholdWindow?: string;
+  wantsImpossibleTravel: boolean;
+  wantsFailedOrBlockedOutcomes: boolean;
   wantsFailedLogins: boolean;
+  wantsHighRisk: boolean;
+  wantsMfa: boolean;
+  wantsPrivileged: boolean;
+  wantsServiceAccount: boolean;
   wantsSuccessLogins: boolean;
   wantsTrend: boolean;
 };
@@ -32,6 +40,10 @@ const sampleSchemaSummary = [
   'sourcetype=auth',
   'fields=timestamp,user,src,country,user_agent,action,sourcetype,index',
   'failure values use action=failure',
+  'Complex demo schema:',
+  'sourcetype=auth_complex',
+  'fields=timestamp,user,src,dest,app,country,user_agent,action,outcome,risk_score,mfa_result,role,device,session_id,sourcetype,index',
+  'complex outcome values include success,failure,blocked',
 ].join(' ');
 
 const generationSystemPrompt = [
@@ -276,6 +288,42 @@ function hasUnsafeGeneratedShape(spl: string) {
 function hasIntentMismatch(spl: string, intent: PromptIntent) {
   const metric = metricName(intent);
 
+  if (!new RegExp(`\\bsourcetype=${intent.sourcetype}\\b`).test(spl)) {
+    return true;
+  }
+
+  if (intent.sourcetype === 'auth_complex') {
+    if (/\bindex=complex\b|\baction=(failure|blocked|success)\b/.test(spl)) {
+      return true;
+    }
+
+    if (intent.riskThreshold !== undefined && !/\brisk_score\b|\bmax_risk\b/.test(spl)) {
+      return true;
+    }
+
+    if (intent.wantsMfa && !/\bmfa_result\b/.test(spl)) {
+      return true;
+    }
+
+    if (intent.wantsPrivileged && !/\bprivileged\b|\brole\b/.test(spl)) {
+      return true;
+    }
+
+    if (intent.wantsServiceAccount && !/\brole="service"\b|\bapi_token\b|\bpipeline_deploy\b/.test(spl)) {
+      return true;
+    }
+
+    if (intent.wantsImpossibleTravel && !/\bdc\(country\)\s+as\s+country_count\b/.test(spl)) {
+      return true;
+    }
+
+    if (intent.wantsFailedOrBlockedOutcomes && !/\boutcome\b/.test(spl)) {
+      return true;
+    }
+
+    return false;
+  }
+
   if (intent.wantsFailedLogins && !/\baction=failure\b/.test(spl)) {
     return true;
   }
@@ -295,6 +343,20 @@ function hasIntentMismatch(spl: string, intent: PromptIntent) {
 
     for (const breakdown of intent.breakdowns) {
       if (!new RegExp(`\\bby\\b[^|]*\\b${breakdown}\\b`, 'i').test(spl)) {
+        return true;
+      }
+    }
+  }
+
+  if (!intent.wantsTrend && (intent.artifact === 'dashboard' || intent.artifact === 'dashboard+alert') && intent.breakdowns.length > 0) {
+    const statsIndex = searchIndex(spl, new RegExp(`\\|\\s*stats\\s+count\\s+as\\s+${metric}\\s+by\\b`, 'i'));
+
+    if (statsIndex === -1) {
+      return true;
+    }
+
+    for (const breakdown of intent.breakdowns) {
+      if (!new RegExp(`\\|\\s*stats\\s+count\\s+as\\s+${metric}\\s+by\\b[^|]*\\b${breakdown}\\b`, 'i').test(spl)) {
         return true;
       }
     }
@@ -362,9 +424,32 @@ export function analyzePrompt(prompt: string): PromptIntent {
     breakdowns.add('src');
   }
 
+  if (/\bapp\b|application/.test(lowerPrompt)) {
+    breakdowns.add('app');
+  }
+
+  if (/\bdest\b|destination|system/.test(lowerPrompt)) {
+    breakdowns.add('dest');
+  }
+
+  if (/\brole\b|admin|privileged|service account/.test(lowerPrompt)) {
+    breakdowns.add('role');
+  }
+
+  if (/\bdevice\b|unknown device/.test(lowerPrompt)) {
+    breakdowns.add('device');
+  }
+
+  if (/session/.test(lowerPrompt)) {
+    breakdowns.add('session_id');
+  }
+
   const thresholdMatch = lowerPrompt.match(/(?:exceed|over|above|greater than)\s+(\d+)/);
   const thresholdWindowMatch = lowerPrompt.match(/in\s+(\d+)\s+(minutes|minute|hours|hour|days|day)/);
   const limitMatch = lowerPrompt.match(/\btop\s+(\d+)\b|\blimit\s+(\d+)\b/);
+  const riskThresholdMatch = lowerPrompt.match(/risk(?:_score| score)?\s*(?:is\s+)?(?:exceeds|exceed|over|above|greater than|>=?)\s*(\d+)/)
+    ?? lowerPrompt.match(/(?:exceeds|exceed|over|above|greater than|>=?)\s*(\d+)\s*(?:risk|risk_score|risk score)/);
+  const sourcetype = inferSourcetype(lowerPrompt);
 
   return {
     artifact: dashboard && alert ? 'dashboard+alert' : dashboard ? 'dashboard' : alert ? 'alert' : 'search',
@@ -373,9 +458,17 @@ export function analyzePrompt(prompt: string): PromptIntent {
     earliest: normalizeTimeWindow(lowerPrompt),
     latest: 'now',
     limit: limitMatch ? Number(limitMatch[1] ?? limitMatch[2]) : undefined,
+    riskThreshold: riskThresholdMatch ? Number(riskThresholdMatch[1]) : undefined,
+    sourcetype,
     threshold: thresholdMatch ? Number(thresholdMatch[1]) : undefined,
     thresholdWindow: thresholdWindowMatch ? `${thresholdWindowMatch[1]} ${thresholdWindowMatch[2]}` : undefined,
+    wantsImpossibleTravel: /impossible travel|multiple countries|more than \d+ countries/.test(lowerPrompt),
+    wantsFailedOrBlockedOutcomes: /\bblocked\b|failed auth_complex|failed events|outcome=failure|outcome failure/.test(lowerPrompt),
     wantsFailedLogins: /failed login|failed auth|failed attempts?|login failure|auth failure|unsuccessful login|login errors?/.test(lowerPrompt),
+    wantsHighRisk: /high.risk|risk_score|risk score|risky|suspicious/.test(lowerPrompt),
+    wantsMfa: /\bmfa\b|multi.factor|challenge/.test(lowerPrompt),
+    wantsPrivileged: /privileged|admin|root/.test(lowerPrompt),
+    wantsServiceAccount: /service account|service role|api_token|pipeline_deploy|token usage/.test(lowerPrompt),
     wantsSuccessLogins: /successful login|success login|login success|successful auth/.test(lowerPrompt),
     wantsTrend: /\bover time\b|trend|timeline|timechart|per minute|per hour/.test(lowerPrompt),
   };
@@ -383,6 +476,8 @@ export function analyzePrompt(prompt: string): PromptIntent {
 
 export function summarizeIntent(intent: PromptIntent) {
   const parts = [`Artifact: ${intent.artifact}`];
+
+  parts.push(`Sourcetype: ${intent.sourcetype}`);
 
   if (intent.wantsFailedLogins) {
     parts.push('Focus: failed logins');
@@ -408,6 +503,10 @@ export function summarizeIntent(intent: PromptIntent) {
     parts.push(`Threshold: > ${intent.threshold}${intent.thresholdWindow ? ` in ${intent.thresholdWindow}` : ''}`);
   }
 
+  if (intent.riskThreshold !== undefined) {
+    parts.push(`Risk threshold: > ${intent.riskThreshold}`);
+  }
+
   if (intent.limit !== undefined) {
     parts.push(`Limit: top ${intent.limit}`);
   }
@@ -420,13 +519,13 @@ export function summarizeIntent(intent: PromptIntent) {
 }
 
 function generateMockSpl(intent: PromptIntent) {
-  const head = ['index=main', 'sourcetype=auth'];
+  const head = ['index=main', `sourcetype=${intent.sourcetype}`];
 
-  if (intent.wantsFailedLogins) {
+  if (intent.sourcetype === 'auth' && intent.wantsFailedLogins) {
     head.push('action=failure');
   }
 
-  if (intent.wantsSuccessLogins) {
+  if (intent.sourcetype === 'auth' && intent.wantsSuccessLogins) {
     head.push('action=success');
   }
 
@@ -443,6 +542,10 @@ function generateMockSpl(intent: PromptIntent) {
 }
 
 function buildPipeline(intent: PromptIntent) {
+  if (intent.sourcetype === 'auth_complex') {
+    return buildComplexPipeline(intent);
+  }
+
   if (intent.wantsTrend) {
     const byClause = intent.breakdowns.length > 0 ? ` by ${intent.breakdowns.join(' ')}` : '';
     return [`| timechart span=${resolveTrendSpan(intent)} count as ${metricName(intent)}${byClause}`];
@@ -493,6 +596,70 @@ function buildPipeline(intent: PromptIntent) {
   }
 
   return ['| head 25'];
+}
+
+function buildComplexPipeline(intent: PromptIntent) {
+  const riskThreshold = intent.riskThreshold ?? intent.threshold;
+  const outcomeFilter = intent.wantsFailedOrBlockedOutcomes ? ['| where outcome="failure" OR outcome="blocked"'] : [];
+
+  if (intent.wantsImpossibleTravel) {
+    return [
+      '| stats dc(country) as country_count values(country) as countries values(src) as src values(device) as devices values(app) as apps max(risk_score) as max_risk by user',
+      '| where country_count > 1',
+      '| sort - country_count - max_risk',
+      ...limitPipeline(intent),
+    ];
+  }
+
+  if (intent.wantsMfa) {
+    return [
+      '| where mfa_result="denied" OR mfa_result="timeout" OR mfa_result="not_challenged"',
+      '| stats count as mfa_events max(risk_score) as max_risk by user src country device app mfa_result',
+      '| sort - max_risk',
+      ...limitPipeline(intent),
+    ];
+  }
+
+  if (intent.wantsServiceAccount) {
+    return [
+      '| where role="service" OR action="api_token" OR action="pipeline_deploy"',
+      '| stats count as service_events max(risk_score) as max_risk values(outcome) as outcomes by user src app dest action outcome',
+      '| sort - service_events - max_risk',
+      ...limitPipeline(intent),
+    ];
+  }
+
+  if (intent.wantsPrivileged) {
+    return [
+      '| where role="admin" OR role="privileged" OR action="privileged_action"',
+      '| stats count as privileged_events max(risk_score) as max_risk values(outcome) as outcomes by user src app country role',
+      ...(riskThreshold !== undefined ? [`| where max_risk > ${riskThreshold}`] : []),
+      '| sort - max_risk',
+      ...limitPipeline(intent),
+    ];
+  }
+
+  if (intent.wantsHighRisk || riskThreshold !== undefined) {
+    const fields = intent.breakdowns.length > 0 ? intent.breakdowns : ['country', 'app', 'role', 'user'];
+    return [
+      ...outcomeFilter,
+      `| stats count as auth_events max(risk_score) as max_risk avg(risk_score) as avg_risk by ${fields.join(' ')}`,
+      ...(riskThreshold !== undefined ? [`| where max_risk > ${riskThreshold}`] : []),
+      '| sort - max_risk',
+      ...limitPipeline(intent),
+    ];
+  }
+
+  if (intent.breakdowns.length > 0) {
+    return [
+      ...outcomeFilter,
+      `| stats count as auth_events max(risk_score) as max_risk by ${intent.breakdowns.join(' ')}`,
+      '| sort - auth_events - max_risk',
+      ...limitPipeline(intent),
+    ];
+  }
+
+  return ['| stats count as auth_events max(risk_score) as max_risk by outcome action app role country', '| sort - max_risk'];
 }
 
 function limitPipeline(intent: PromptIntent) {
@@ -604,6 +771,14 @@ function inferFocusField(prompt: string) {
   }
 
   return undefined;
+}
+
+function inferSourcetype(prompt: string): PromptIntent['sourcetype'] {
+  if (/auth_complex|risk_score|risk score|\bmfa\b|privileged|service account|impossible travel|blocked|destination|session/.test(prompt)) {
+    return 'auth_complex';
+  }
+
+  return 'auth';
 }
 
 type OpenAiChatCompletionResponse = {
