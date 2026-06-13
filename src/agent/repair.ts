@@ -1,7 +1,7 @@
 import type { SplunkSearchResult } from '../splunk/execute';
 import type { SplunkSchemaSummary } from '../splunk/schema';
 import type { ForgeConfig } from '../config/env';
-import { extractSpl, normalizeGeneratedSpl, type PromptIntent } from './generate';
+import { extractSpl, normalizeGeneratedSpl, requestSplunkModelText, type PromptIntent } from './generate';
 
 export type RepairDecision = {
 	diagnostics: string[];
@@ -78,7 +78,7 @@ export async function repairSplWithLlm(
 		return deterministic;
 	}
 
-	if (config.llmProvider === 'mock' || (!config.groqApiKey && !config.llmApiKey)) {
+	if (config.llmProvider !== 'splunk') {
 		return deterministic;
 	}
 
@@ -121,67 +121,7 @@ async function requestLlmRepair(
 		`Known fields: ${schema.fields.join(', ')}`,
 	].join('\n');
 
-	if (config.llmProvider === 'groq' && config.groqApiKey) {
-		const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-				Authorization: `Bearer ${config.groqApiKey}`,
-			},
-			body: JSON.stringify({
-				messages: [
-					{ content: 'You repair broken Splunk SPL. Return only a safe read-only search.', role: 'system' },
-					{ content, role: 'user' },
-				],
-				model: config.groqModel,
-				temperature: 0.1,
-			}),
-		});
-		const payload = await response.json() as { choices?: Array<{ message?: { content?: string } }> };
-		return payload.choices?.[0]?.message?.content ?? '';
-	}
-
-	if (config.llmProvider === 'openai' && config.llmApiKey) {
-		const response = await fetch('https://api.openai.com/v1/chat/completions', {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-				Authorization: `Bearer ${config.llmApiKey}`,
-			},
-			body: JSON.stringify({
-				messages: [
-					{ content: 'You repair broken Splunk SPL. Return only a safe read-only search.', role: 'system' },
-					{ content, role: 'user' },
-				],
-				model: config.llmModel,
-				temperature: 0.1,
-			}),
-		});
-		const payload = await response.json() as { choices?: Array<{ message?: { content?: string } }> };
-		return payload.choices?.[0]?.message?.content ?? '';
-	}
-
-	if (config.llmProvider === 'anthropic' && config.llmApiKey) {
-		const response = await fetch('https://api.anthropic.com/v1/messages', {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-				'anthropic-version': '2023-06-01',
-				'x-api-key': config.llmApiKey,
-			},
-			body: JSON.stringify({
-				max_tokens: 400,
-				messages: [{ content, role: 'user' }],
-				model: config.llmModel,
-				system: 'You repair broken Splunk SPL. Return only a safe read-only search.',
-				temperature: 0.1,
-			}),
-		});
-		const payload = await response.json() as { content?: Array<{ text?: string }> };
-		return payload.content?.map((item) => item.text ?? '').join('\n') ?? '';
-	}
-
-	return '';
+	return requestSplunkModelText(content, config);
 }
 
 function removeArtifactCommands(spl: string, changes: string[]) {

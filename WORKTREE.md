@@ -2,11 +2,11 @@
 
 ## Project Overview
 
-**SPL Forge** is an AI-native agentic IDE for Splunk that turns natural language into working SPL queries, dashboards, alerts, and deployable Splunk apps. It autonomously generates, tests, debugs, and fixes queries using the Splunk MCP Server.
+**SPL Forge** is an AI-native VS Code extension MVP for Splunk that turns natural language into working SPL queries, dashboards, alerts, and app-ready Splunk artifacts. It runs a workflow loop for generation, execution, schema inspection, repair, export, and REST publish through MCP, REST, or mock Splunk modes.
 
 
-- **Status**: Foundation/MVP Development
-- **License**: Not specified
+- **Status**: Working hackathon MVP with known pending gaps documented in README
+- **License**: MIT
 
 ---
 
@@ -280,5 +280,4 @@ Refer to `vsc-extension-quickstart.md` and `docs/VS_CODE_SETUP.md` for detailed 
 - **Product Requirements**: [PRD.md](./PRD.md)
 - **Roadmap**: [ROADMAP.md](./ROADMAP.md)
 - **Architecture**: [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md)
-
 

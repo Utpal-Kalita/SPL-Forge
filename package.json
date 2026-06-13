@@ -44,9 +44,11 @@
     "package:vsix": "npm run package && npx @vscode/vsce package",
     "verify:prompts": "npm run compile-tests && node out/cli/verify-prompts.js",
     "verify:splunk": "npm run compile-tests && node out/cli/verify-splunk.js",
+    "verify:submission": "npm run compile-tests && node out/cli/verify-submission.js",
     "publish:dashboard": "npm run compile-tests && node out/cli/publish-dashboard.js",
     "publish:app": "npm run compile-tests && node out/cli/publish-app.js",
-    "export:app": "npm run compile-tests && node out/cli/export-app.js"
+    "export:app": "npm run compile-tests && node out/cli/export-app.js",
+    "dashboard": "npm run compile-tests && node out/cli/dashboard-server.js"
   },
   "devDependencies": {
     "@types/vscode": "^1.120.0",

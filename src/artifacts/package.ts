@@ -20,6 +20,8 @@ export function buildSplunkAppPackage(options: { appId?: string; result: ForgeRu
   const files: Record<string, string> = {
     'README.md': buildReadme(result),
     'default/app.conf': buildAppConf(),
+    'default/props.conf': buildPropsConf(),
+    'default/transforms.conf': buildTransformsConf(),
     'metadata/default.meta': buildDefaultMeta(),
   };
 
@@ -72,6 +74,29 @@ function buildDefaultMeta() {
     '[]',
     'access = read : [ * ], write : [ admin ]',
     'export = system',
+  ].join('\n');
+}
+
+function buildPropsConf() {
+  return [
+    '[auth]',
+    'SHOULD_LINEMERGE = false',
+    'INDEXED_EXTRACTIONS = csv',
+    'FIELD_NAMES = timestamp,user,src,country,user_agent,action,sourcetype,index',
+    'KV_MODE = none',
+    '',
+    '[auth_complex]',
+    'SHOULD_LINEMERGE = false',
+    'INDEXED_EXTRACTIONS = csv',
+    'FIELD_NAMES = timestamp,user,src,dest,app,country,user_agent,action,outcome,risk_score,mfa_result,role,device,session_id,sourcetype,index',
+    'KV_MODE = none',
+  ].join('\n');
+}
+
+function buildTransformsConf() {
+  return [
+    '# Reserved for future generated lookup and field-transform stanzas.',
+    '# props.conf carries CSV field extraction for demo sourcetypes today.',
   ].join('\n');
 }
 
@@ -163,6 +188,15 @@ function buildReadme(result: ForgeRunResult) {
     `- Execution status: ${result.execution.status}`,
     `- Rows verified before export: ${result.execution.rowCount}`,
     `- Fields: ${result.execution.fields.join(', ') || 'none'}`,
+    `- Dashboard generated: ${result.dashboard ? 'yes' : 'no'}`,
+    `- Disabled alert generated: ${result.alert ? 'yes' : 'no'}`,
+    '',
+    '## Readiness Notes',
+    '',
+    '- Generated app includes `props.conf` CSV extraction stanzas for `auth` and `auth_complex` demo sourcetypes.',
+    '- REST publish path creates or updates dashboard XML and disabled saved-search alert, then reloads those knowledge-object endpoints.',
+    '- Full Splunk app install automation is not claimed here; manual app-folder import remains supported.',
+    '- Splunk model generation is configured outside the exported app through MCP AI Assistant tool or Splunk-hosted model endpoint.',
     '',
     '## Manual Import',
     '',

@@ -2,15 +2,15 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as vscode from 'vscode';
 
-export type LlmProvider = 'groq' | 'openai' | 'anthropic' | 'local' | 'mock';
+export type LlmProvider = 'splunk' | 'local' | 'mock';
 export type SplunkMode = 'mcp' | 'mock' | 'rest';
 
 export type ForgeConfig = {
-  llmApiKey?: string;
-  groqApiKey?: string;
-  groqModel: string;
   llmModel: string;
   llmProvider: LlmProvider;
+  splunkModelEndpoint?: string;
+  splunkModelToken?: string;
+  splunkModelTool: string;
   splunkMcpAllowSelfSigned: boolean;
   splunkMcpEndpoint?: string;
   splunkMcpToken?: string;
@@ -44,11 +44,11 @@ export function loadForgeConfig(options: LoadForgeConfigOptions = {}): ForgeConf
   const splunkMode = normalizeSplunkMode(envValue('SPL_FORGE_SPLUNK_MODE'));
 
   return {
-    llmApiKey: envValue('SPL_FORGE_LLM_API_KEY'),
-    groqApiKey: envValue('GROQ_API_KEY') ?? envValue('SPL_FORGE_GROQ_API_KEY'),
-    groqModel: envValue('GROQ_MODEL') ?? 'llama-3.1-8b-instant',
     llmModel: envValue('SPL_FORGE_LLM_MODEL') ?? defaultModelForProvider(llmProvider),
     llmProvider,
+    splunkModelEndpoint: envValue('SPL_FORGE_SPLUNK_MODEL_ENDPOINT'),
+    splunkModelToken: envValue('SPL_FORGE_SPLUNK_MODEL_TOKEN') ?? envValue('SPL_FORGE_SPLUNK_TOKEN') ?? envValue('SPLUNK_TOKEN'),
+    splunkModelTool: envValue('SPL_FORGE_SPLUNK_MODEL_TOOL') ?? 'saia_generate_spl',
     splunkMcpAllowSelfSigned: parseBoolean(envValue('SPL_FORGE_SPLUNK_MCP_ALLOW_SELF_SIGNED'), false),
     splunkMcpEndpoint: envValue('SPL_FORGE_SPLUNK_MCP_ENDPOINT') ?? envValue('SPLUNK_MCP_URL'),
     splunkMcpToken: envValue('SPL_FORGE_SPLUNK_MCP_TOKEN') ?? envValue('SPLUNK_MCP_TOKEN'),
@@ -103,11 +103,11 @@ function parseEnvFile(filePath: string) {
 }
 
 function normalizeProvider(value: string | undefined): LlmProvider {
-  if (value === 'groq' || value === 'openai' || value === 'anthropic' || value === 'local' || value === 'mock') {
+  if (value === 'splunk' || value === 'local' || value === 'mock') {
     return value;
   }
 
-  return 'mock';
+  return 'splunk';
 }
 
 function normalizeSplunkMode(value: string | undefined): SplunkMode {
@@ -115,7 +115,7 @@ function normalizeSplunkMode(value: string | undefined): SplunkMode {
     return value;
   }
 
-  return 'mock';
+  return 'mcp';
 }
 
 function parseBoolean(value: string | undefined, fallback: boolean) {
@@ -137,12 +137,8 @@ function parseInteger(value: string | undefined, fallback: number) {
 
 function defaultModelForProvider(provider: LlmProvider) {
   switch (provider) {
-    case 'groq':
-      return 'llama-3.1-8b-instant';
-    case 'openai':
-      return 'gpt-4.1-mini';
-    case 'anthropic':
-      return 'claude-3-5-sonnet-latest';
+    case 'splunk':
+      return 'splunk-hosted-model';
     case 'local':
       return 'local-spl-forge';
     case 'mock':

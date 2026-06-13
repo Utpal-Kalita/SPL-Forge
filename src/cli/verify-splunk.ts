@@ -128,11 +128,11 @@ function buildConfig(mode: Exclude<SplunkMode, 'mock'>, env: EnvMap): ForgeConfi
 	}
 
 	return {
-		groqApiKey: undefined,
-		groqModel: env.GROQ_MODEL ?? 'llama-3.1-8b-instant',
-		llmApiKey: undefined,
 		llmModel: 'mock-spl-forge-v1',
 		llmProvider: 'mock',
+		splunkModelEndpoint: undefined,
+		splunkModelToken: undefined,
+		splunkModelTool: 'saia_generate_spl',
 		splunkAllowSelfSigned: parseBoolean(env.SPL_FORGE_SPLUNK_ALLOW_SELF_SIGNED, parseBoolean(env.SPLUNK_VERIFY_SSL, false) === false),
 		splunkMcpAllowSelfSigned: parseBoolean(env.SPL_FORGE_SPLUNK_MCP_ALLOW_SELF_SIGNED, false),
 		splunkMcpEndpoint: env.SPL_FORGE_SPLUNK_MCP_ENDPOINT ?? env.SPLUNK_MCP_URL,

@@ -53,7 +53,7 @@ Responsible for:
 - query execution
 - field and schema inspection
 - environment capability detection
-- MCP, REST, or mock mode switching
+- MCP or REST mode switching
 
 ### 4. Artifact Layer
 
@@ -137,8 +137,8 @@ Day 2 currently supports:
 - prompt entry inside webview panel
 - webview message passing into extension runtime
 - `.env.local`-aware config loading
-- optional OpenAI or Anthropic API calls
-- deterministic mock fallback when no API key configured
+- Splunk MCP AI Assistant tool calls or direct Splunk-hosted model endpoint calls
+- raw provider output and parsed SPL rendering in panel
 - raw provider output and parsed SPL rendering in panel
 - output channel logging for prompt/provider/result
 

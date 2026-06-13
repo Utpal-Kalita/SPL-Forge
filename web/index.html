@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SPL Forge Dashboard</title>
+    <style>
+      :root {
+        --bg: #07120d;
+        --card: rgba(10, 24, 17, 0.88);
+        --card-strong: rgba(13, 38, 25, 0.96);
+        --border: rgba(88, 214, 141, 0.24);
+        --text: #eefcf3;
+        --muted: #a8c8b6;
+        --accent: #31d158;
+        --accent-2: #f7c948;
+        --danger: #ff6b6b;
+        --shadow: 0 24px 80px rgba(0, 0, 0, 0.36);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background:
+          radial-gradient(circle at 16% 16%, rgba(49, 209, 88, 0.22), transparent 32%),
+          radial-gradient(circle at 88% 4%, rgba(247, 201, 72, 0.13), transparent 26%),
+          linear-gradient(135deg, #06100b 0%, #0b1d13 48%, #020603 100%);
+        color: var(--text);
+        font-family: Avenir Next, Trebuchet MS, Verdana, sans-serif;
+      }
+
+      main {
+        width: min(1180px, calc(100% - 32px));
+        margin: 0 auto;
+        padding: 28px 0;
+      }
+
+      .hero,
+      .card {
+        border: 1px solid var(--border);
+        box-shadow: var(--shadow);
+        backdrop-filter: blur(18px);
+      }
+
+      .hero {
+        border-radius: 30px;
+        padding: 28px;
+        background: linear-gradient(145deg, rgba(8, 28, 16, 0.96), rgba(4, 12, 8, 0.84));
+        position: relative;
+        overflow: hidden;
+      }
+
+      .hero::after {
+        content: "";
+        position: absolute;
+        width: 260px;
+        height: 260px;
+        right: -80px;
+        top: -90px;
+        border-radius: 999px;
+        border: 44px solid rgba(49, 209, 88, 0.14);
+      }
+
+      .eyebrow {
+        color: var(--accent);
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+      }
+
+      h1 {
+        margin: 10px 0 6px;
+        font-size: clamp(40px, 8vw, 86px);
+        letter-spacing: -0.07em;
+        line-height: 0.92;
+      }
+
+      h2 {
+        margin: 0 0 12px;
+        font-size: 19px;
+      }
+
+      p {
+        color: var(--muted);
+        line-height: 1.65;
+        max-width: 720px;
+      }
+
+      .grid {
+        display: grid;
+        gap: 18px;
+        margin-top: 18px;
+      }
+
+      .two {
+        grid-template-columns: minmax(0, 0.92fr) minmax(320px, 1.08fr);
+      }
+
+      .three {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .card {
+        border-radius: 24px;
+        padding: 18px;
+        background: var(--card);
+      }
+
+      textarea {
+        width: 100%;
+        min-height: 150px;
+        resize: vertical;
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        padding: 14px;
+        background: rgba(2, 6, 3, 0.72);
+        color: var(--text);
+        font: inherit;
+        line-height: 1.55;
+      }
+
+      button {
+        border: 0;
+        border-radius: 999px;
+        padding: 12px 16px;
+        background: var(--accent);
+        color: #041307;
+        cursor: pointer;
+        font-weight: 800;
+      }
+
+      button.secondary {
+        background: transparent;
+        border: 1px solid var(--border);
+        color: var(--text);
+      }
+
+      button:disabled {
+        cursor: progress;
+        opacity: 0.55;
+      }
+
+      .toolbar,
+      .pills {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 14px;
+      }
+
+      .pill {
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        color: var(--muted);
+        font-size: 12px;
+        padding: 8px 11px;
+      }
+
+      pre {
+        overflow: auto;
+        min-height: 120px;
+        max-height: 420px;
+        margin: 0;
+        border-radius: 18px;
+        border: 1px solid rgba(168, 200, 182, 0.18);
+        padding: 14px;
+        background: rgba(0, 0, 0, 0.42);
+        color: #dfffe7;
+        white-space: pre-wrap;
+      }
+
+      .metric {
+        min-height: 124px;
+        background: var(--card-strong);
+      }
+
+      .metric b {
+        display: block;
+        font-size: 32px;
+        margin-bottom: 8px;
+      }
+
+      .error {
+        color: var(--danger);
+      }
+
+      @media (max-width: 860px) {
+        .two,
+        .three {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <section class="hero">
+        <div class="eyebrow">Standalone Browser Dashboard</div>
+        <h1>SPL Forge</h1>
+        <p>
+          Generate SPL through Splunk-hosted model wiring, execute against Splunk, repair with schema feedback,
+          preview dashboard and alert artifacts, export app files, and publish reviewed dashboard plus disabled alert.
+        </p>
+        <div class="pills" id="config"></div>
+      </section>
+
+      <section class="grid two">
+        <article class="card">
+          <h2>Prompt</h2>
+          <textarea id="prompt">Create a failed login dashboard by country and user agent for the last 30 minutes. Alert if failed attempts exceed 100 in 5 minutes.</textarea>
+          <div class="toolbar">
+            <button id="run">Generate + Run</button>
+            <button class="secondary" id="export" disabled>Export App</button>
+            <button class="secondary" id="publish" disabled>Publish to Splunk</button>
+          </div>
+          <p id="status">Idle.</p>
+        </article>
+
+        <article class="card">
+          <h2>Plan</h2>
+          <pre id="plan">No run yet.</pre>
+        </article>
+      </section>
+
+      <section class="grid three">
+        <article class="card metric">
+          <b id="rows">0</b>
+          <span>Rows verified</span>
+        </article>
+        <article class="card metric">
+          <b id="mode">-</b>
+          <span>Splunk mode</span>
+        </article>
+        <article class="card metric">
+          <b id="provider">-</b>
+          <span>Model provider</span>
+        </article>
+      </section>
+
+      <section class="grid two">
+        <article class="card">
+          <h2>Parsed SPL</h2>
+          <pre id="spl">No SPL yet.</pre>
+        </article>
+        <article class="card">
+          <h2>Execution</h2>
+          <pre id="execution">No execution yet.</pre>
+        </article>
+      </section>
+
+      <section class="grid two">
+        <article class="card">
+          <h2>Dashboard Artifact</h2>
+          <pre id="dashboard">No dashboard yet.</pre>
+        </article>
+        <article class="card">
+          <h2>Alert Artifact</h2>
+          <pre id="alert">No alert yet.</pre>
+        </article>
+      </section>
+    </main>
+
+    <script>
+      const els = {
+        alert: document.getElementById('alert'),
+        config: document.getElementById('config'),
+        dashboard: document.getElementById('dashboard'),
+        execution: document.getElementById('execution'),
+        export: document.getElementById('export'),
+        mode: document.getElementById('mode'),
+        plan: document.getElementById('plan'),
+        prompt: document.getElementById('prompt'),
+        provider: document.getElementById('provider'),
+        publish: document.getElementById('publish'),
+        rows: document.getElementById('rows'),
+        run: document.getElementById('run'),
+        spl: document.getElementById('spl'),
+        status: document.getElementById('status'),
+      };
+
+      async function loadConfig() {
+        const config = await fetchJson('/api/config');
+        els.mode.textContent = config.splunkMode;
+        els.provider.textContent = config.llmProvider;
+        els.config.innerHTML = [
+          `Mode: ${config.splunkMode}`,
+          `Source: ${config.splunkSource}`,
+          `Provider: ${config.llmProvider}`,
+          `Model: ${config.llmModel}`,
+        ].map((value) => `<span class="pill">${escapeHtml(value)}</span>`).join('');
+      }
+
+      async function runPrompt() {
+        setBusy(true, 'Running forge workflow...');
+        try {
+          const result = await fetchJson('/api/run', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ prompt: els.prompt.value }),
+          });
+          els.export.disabled = false;
+          els.publish.disabled = false;
+          els.rows.textContent = String(result.execution.rowCount);
+          els.plan.textContent = result.planSummary;
+          els.spl.textContent = result.spl;
+          els.execution.textContent = JSON.stringify(result.execution, null, 2);
+          els.dashboard.textContent = result.dashboard ? `${result.dashboard.title}\n\n${result.dashboard.dashboardJson}` : 'No dashboard requested.';
+          els.alert.textContent = result.alert ? result.alert.savedSearchConf : 'No alert requested.';
+          setBusy(false, `Done. Provider: ${result.providerUsed}`);
+        } catch (error) {
+          setBusy(false, error.message, true);
+        }
+      }
+
+      async function postAction(path, label) {
+        setBusy(true, `${label}...`);
+        try {
+          const result = await fetchJson(path, { method: 'POST' });
+          setBusy(false, JSON.stringify(result));
+        } catch (error) {
+          setBusy(false, error.message, true);
+        }
+      }
+
+      async function fetchJson(path, options) {
+        const response = await fetch(path, options);
+        const payload = await response.json();
+        if (!response.ok) {
+          throw new Error(payload.error || response.statusText);
+        }
+        return payload;
+      }
+
+      function setBusy(busy, message, isError = false) {
+        els.run.disabled = busy;
+        els.status.className = isError ? 'error' : '';
+        els.status.textContent = message;
+      }
+
+      function escapeHtml(value) {
+        return String(value)
+          .replaceAll('&', '&amp;')
+          .replaceAll('<', '&lt;')
+          .replaceAll('>', '&gt;')
+          .replaceAll('"', '&quot;')
+          .replaceAll("'", '&#039;');
+      }
+
+      els.run.addEventListener('click', runPrompt);
+      els.export.addEventListener('click', () => postAction('/api/export', 'Exporting app'));
+      els.publish.addEventListener('click', () => postAction('/api/publish', 'Publishing to Splunk'));
+      loadConfig().catch((error) => setBusy(false, error.message, true));
+    </script>
+  </body>
+</html>

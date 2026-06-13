@@ -11,6 +11,8 @@
 
 ---
 
+> Implementation status: this PRD includes future/product ambition. Current repository implementation includes a VS Code webview MVP, standalone browser dashboard, Splunk-only model adapter through MCP AI Assistant tool or Splunk-hosted endpoint, MCP/REST/mock Splunk execution, app-folder export, and dashboard/disabled-alert REST publish. Full app install automation and true separate sub-agent runtime are not implemented yet.
+
 ## 1. Executive Summary
 
 SPL Forge is a VS Code extension and optional web dashboard that acts as an autonomous AI development partner for Splunk. A user describes what they want in plain English, and SPL Forge generates the required Splunk Processing Language (SPL), tests it against a real Splunk environment, reads execution errors, introspects available indexes/sourcetypes/fields, repairs the query, and then turns the validated query into reusable Splunk artifacts such as dashboards, alerts, reports, and app packages.
@@ -774,7 +776,7 @@ SPL Forge has four main parts:
                                  ▼             ▼
                  ┌────────────────────┐   ┌────────────────────┐
                  │ LLM Provider        │   │ Splunk Connector    │
-                 │ Hosted Model/OpenAI │   │ MCP / REST / Mock   │
+                 │ Splunk Hosted Model │   │ MCP / REST           │
                  └────────────────────┘   └─────────┬──────────┘
                                                      │
                                                      ▼
@@ -795,7 +797,6 @@ SPL Forge has four main parts:
 | `SplunkConnector` | Run searches and fetch metadata |
 | `MCPConnector` | Talk to Splunk MCP Server / Gateway |
 | `RESTConnector` | Fallback connector for Splunk REST API |
-| `MockConnector` | Deterministic demo connector |
 | `SchemaService` | Cache indexes, sourcetypes, fields, samples |
 | `ArtifactGenerator` | Generate dashboards, alerts, saved searches, app folder |
 | `RunLogger` | Store local audit trail of each agent run |
@@ -818,8 +819,8 @@ SPL Forge has four main parts:
 | Testing | Vitest | Fast TS unit tests |
 | Linting | ESLint | Code quality |
 | Secrets | VS Code SecretStorage | Avoid token leakage |
-| Splunk access | MCP first, REST fallback, mock mode | Reliable demo + real integration path |
-| AI model | Splunk Hosted Models if available; otherwise OpenAI/Anthropic/local model adapter | Keeps provider flexible |
+| Splunk access | MCP first, REST fallback | Reliable demo + real integration path |
+| AI model | Splunk Hosted Models | Aligns directly with hackathon requirements |
 
 ### 15.2 Optional Post-MVP Stack
 
@@ -924,7 +925,6 @@ spl-forge/
       safety.ts
     providers/
       LLMProvider.ts
-      OpenAIProvider.ts
       SplunkHostedModelProvider.ts
     splunk/
       SplunkConnector.ts
@@ -1027,8 +1027,8 @@ Example MVP contribution configuration:
         },
         "splForge.modelProvider": {
           "type": "string",
-          "enum": ["splunk-hosted", "openai", "anthropic", "local", "mock"],
-          "default": "mock",
+          "enum": ["splunk", "local", "mock"],
+          "default": "splunk",
           "description": "Model provider used by SPL Forge."
         },
         "splForge.maxRepairAttempts": {
@@ -1430,7 +1430,7 @@ interface SPLForgeSettings {
   defaultIndex?: string;
   defaultEarliest?: string;
   defaultLatest?: string;
-  modelProvider: "splunk-hosted" | "openai" | "anthropic" | "local" | "mock";
+  modelProvider: "splunk" | "local" | "mock";
   maxRepairAttempts: number;
   demoMode: boolean;
 }
@@ -1442,7 +1442,7 @@ Store secrets using VS Code SecretStorage:
 
 - Splunk token.
 - MCP bearer token.
-- OpenAI/Anthropic API key if used.
+- Splunk model token if direct model endpoint is used.
 - Splunk username/password only if token flow is unavailable.
 
 Never store secrets in:
@@ -1664,7 +1664,7 @@ Goals:
 
 Deliverables:
 
-- Generated SPL can run in mock mode and/or live Splunk.
+- Generated SPL can run in live Splunk.
 - Result preview table works.
 
 ### Day 6 — Repair Loop
@@ -1746,7 +1746,7 @@ The project is ready to submit when:
 - [ ] VS Code extension runs locally.
 - [ ] Prompt UI accepts natural language.
 - [ ] SPL generation works.
-- [ ] Query execution works in at least mock mode and preferably live mode.
+- [ ] Query execution works in live Splunk.
 - [ ] One broken SPL example is automatically repaired.
 - [ ] Schema context is shown or simulated.
 - [ ] Result preview is visible.
@@ -1764,7 +1764,7 @@ The project is ready to submit when:
 
 | Metric | Target |
 |---|---|
-| Demo workflow completion | 100% in mock mode |
+| Demo workflow completion | 100% in live Splunk mode |
 | SPL repair attempts | Query fixed within 2 attempts |
 | Time from prompt to final SPL | Under 60 seconds in demo |
 | Export success | App folder generated every time |
@@ -1788,11 +1788,11 @@ The project is ready to submit when:
 
 | Risk | Impact | Mitigation |
 |---|---|---|
-| MCP access is delayed | Live integration blocked | Build REST fallback and mock mode |
+| MCP access is delayed | Live integration blocked | Build REST fallback |
 | LLM generates invalid JSON | Agent breaks | Use Zod validation and retry prompt |
 | Generated SPL is wrong | Trust issue | Always execute and show repair loop |
 | Scope is too broad | Demo unfinished | Focus on one polished workflow |
-| Splunk setup takes too long | Lost build time | Use sample data and mock connector early |
+| Splunk setup takes too long | Lost build time | Use sample data and REST fallback early |
 | Dashboard format complexity | Export fails | Generate simple dashboard or JSON first |
 | Security concerns | Judges distrust automation | Human approval, read-only default, audit logs |
 | UI takes too much time | Weak demo | Use simple webview with clear timeline |

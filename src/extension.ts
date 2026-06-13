@@ -24,6 +24,7 @@ export function activate(context: vscode.ExtensionContext) {
       onPublishApp: async (appPackage) => {
         const result = await publishSplunkAppPackage(readConfig(), appPackage);
         outputChannel.appendLine(`[publish] ${result.published.join(', ')}`);
+        outputChannel.appendLine(`[reload] ${result.reloaded.join(', ') || 'none'}`);
         if (result.dashboardUrl) {
           outputChannel.appendLine(`[publish] ${result.dashboardUrl}`);
         }
@@ -63,7 +64,7 @@ export function activate(context: vscode.ExtensionContext) {
           appPackage: buildSplunkAppPackage({ result }),
           dashboard: result.dashboard,
           execution,
-          llmModel: config.llmProvider === 'groq' ? config.groqModel : config.llmModel,
+          llmModel: config.llmModel,
           planSummary: result.planSummary,
           providerLabel: result.providerUsed,
           rawText: result.rawText,

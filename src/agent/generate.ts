@@ -1,3 +1,5 @@
+import * as http from 'http';
+import * as https from 'https';
 import type { ForgeConfig } from '../config/env';
 
 export type GenerateSplInput = {
@@ -67,16 +69,8 @@ export async function generateSplFromPrompt(input: GenerateSplInput, config: For
   const intent = analyzePrompt(normalizedPrompt);
   const planSummary = summarizeIntent(intent);
 
-  if (config.llmProvider === 'groq' && config.groqApiKey) {
-    return generateWithGroq(normalizedPrompt, config, intent, planSummary);
-  }
-
-  if (config.llmProvider === 'openai' && config.llmApiKey) {
-    return generateWithOpenAi(normalizedPrompt, config, intent, planSummary);
-  }
-
-  if (config.llmProvider === 'anthropic' && config.llmApiKey) {
-    return generateWithAnthropic(normalizedPrompt, config, intent, planSummary);
+  if (config.llmProvider === 'splunk') {
+    return generateWithSplunkHostedModel(normalizedPrompt, config, intent, planSummary);
   }
 
   const rawText = generateMockSpl(intent);
@@ -90,150 +84,192 @@ export async function generateSplFromPrompt(input: GenerateSplInput, config: For
   };
 }
 
-async function generateWithGroq(
+async function generateWithSplunkHostedModel(
   prompt: string,
   config: ForgeConfig,
   intent: PromptIntent,
   planSummary: string,
 ): Promise<GenerateSplResult> {
-  const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${config.groqApiKey}`,
-    },
-    body: JSON.stringify({
-      model: config.groqModel,
-      temperature: 0.2,
-      messages: [
-        {
-          role: 'system',
-          content: generationSystemPrompt,
-        },
-        {
-          role: 'user',
-          content: buildUserPrompt(prompt, intent),
-        },
-      ],
-    }),
-  });
-
-  if (!response.ok) {
-    throw new Error(`Groq request failed: ${response.status} ${response.statusText}`);
-  }
-
-  const payload = (await response.json()) as OpenAiChatCompletionResponse;
-  const rawText = payload.choices[0]?.message?.content?.trim();
+  const rawText = await requestSplunkModelText(buildUserPrompt(prompt, intent), config);
 
   if (!rawText) {
-    throw new Error('Groq response missing content.');
+    throw new Error('Splunk Hosted Model response missing content.');
   }
 
   return {
     planSummary,
     prompt,
-    providerUsed: `groq:${config.groqModel}`,
+    providerUsed: `splunk:${config.llmModel}`,
     rawText,
     spl: normalizeGeneratedSpl(extractSpl(rawText), intent),
   };
 }
 
-async function generateWithOpenAi(
-  prompt: string,
-  config: ForgeConfig,
-  intent: PromptIntent,
-  planSummary: string,
-): Promise<GenerateSplResult> {
-  const response = await fetch('https://api.openai.com/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${config.llmApiKey}`,
-    },
-    body: JSON.stringify({
+export async function requestSplunkModelText(prompt: string, config: ForgeConfig) {
+  if (config.splunkMcpEndpoint && config.splunkMcpToken) {
+    const response = await postModelRequest(
+      config.splunkMcpEndpoint,
+      {
+        Accept: 'application/json, text/event-stream',
+        Authorization: `Bearer ${config.splunkMcpToken}`,
+        'Content-Type': 'application/json',
+      },
+      JSON.stringify({
+        id: `spl-forge-splunk-model-${Date.now()}`,
+        jsonrpc: '2.0',
+        method: 'tools/call',
+        params: {
+          arguments: {
+            input: prompt,
+            instruction: generationSystemPrompt,
+            model: config.llmModel,
+            prompt,
+          },
+          name: config.splunkModelTool,
+        },
+      }),
+      config.splunkMcpAllowSelfSigned,
+    );
+
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      throw new Error(`Splunk model MCP request failed: HTTP ${response.statusCode}`);
+    }
+
+    return extractModelText(response.body).trim();
+  }
+
+  if (!config.splunkModelEndpoint) {
+    throw new Error('Splunk model provider requires SPL_FORGE_SPLUNK_MCP_ENDPOINT plus SPL_FORGE_SPLUNK_MCP_TOKEN, or SPL_FORGE_SPLUNK_MODEL_ENDPOINT.');
+  }
+
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+  };
+
+  if (config.splunkModelToken) {
+    headers.Authorization = `Bearer ${config.splunkModelToken}`;
+  }
+
+  const response = await postModelRequest(
+    config.splunkModelEndpoint,
+    headers,
+    JSON.stringify({
       model: config.llmModel,
       temperature: 0.2,
-      messages: [
-        {
-          role: 'system',
-          content: generationSystemPrompt,
-        },
-        {
-          role: 'user',
-          content: buildUserPrompt(prompt, intent),
-        },
-      ],
+      input: prompt,
+      instruction: generationSystemPrompt,
+      prompt,
     }),
-  });
+    config.splunkAllowSelfSigned,
+  );
 
-  if (!response.ok) {
-    throw new Error(`OpenAI request failed: ${response.status} ${response.statusText}`);
+  if (response.statusCode < 200 || response.statusCode >= 300) {
+    throw new Error(`Splunk model endpoint request failed: HTTP ${response.statusCode}`);
   }
 
-  const payload = (await response.json()) as OpenAiChatCompletionResponse;
-  const rawText = payload.choices[0]?.message?.content?.trim();
-
-  if (!rawText) {
-    throw new Error('OpenAI response missing content.');
-  }
-
-  return {
-    planSummary,
-    prompt,
-    providerUsed: `openai:${config.llmModel}`,
-    rawText,
-    spl: normalizeGeneratedSpl(extractSpl(rawText), intent),
-  };
+  return extractModelText(response.body).trim();
 }
 
-async function generateWithAnthropic(
-  prompt: string,
-  config: ForgeConfig,
-  intent: PromptIntent,
-  planSummary: string,
-): Promise<GenerateSplResult> {
-  const response = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': config.llmApiKey ?? '',
-      'anthropic-version': '2023-06-01',
-    },
-    body: JSON.stringify({
-      model: config.llmModel,
-      max_tokens: 400,
-      temperature: 0.2,
-      system: generationSystemPrompt,
-      messages: [
-        {
-          role: 'user',
-          content: buildUserPrompt(prompt, intent),
-        },
-      ],
-    }),
+type ModelHttpResponse = {
+  body: string;
+  statusCode: number;
+};
+
+function postModelRequest(
+  endpoint: string,
+  headers: Record<string, string>,
+  body: string,
+  allowSelfSigned: boolean,
+): Promise<ModelHttpResponse> {
+  return new Promise((resolve, reject) => {
+    const url = new URL(endpoint);
+    const isHttps = url.protocol === 'https:';
+    const transport = isHttps ? https : http;
+
+    const request = transport.request({
+      hostname: url.hostname,
+      method: 'POST',
+      path: `${url.pathname}${url.search}`,
+      port: url.port ? Number(url.port) : (isHttps ? 443 : 80),
+      headers: {
+        ...headers,
+        'Content-Length': String(Buffer.byteLength(body)),
+      },
+      rejectUnauthorized: isHttps ? !allowSelfSigned : undefined,
+    }, (response) => {
+      const chunks: Buffer[] = [];
+
+      response.on('data', (chunk: Buffer | string) => {
+        chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+      });
+
+      response.on('end', () => {
+        resolve({
+          body: Buffer.concat(chunks).toString('utf8'),
+          statusCode: response.statusCode ?? 0,
+        });
+      });
+    });
+
+    request.on('error', reject);
+    request.write(body);
+    request.end();
   });
+}
 
-  if (!response.ok) {
-    throw new Error(`Anthropic request failed: ${response.status} ${response.statusText}`);
+function extractModelText(raw: string): string {
+  const body = parseSseData(raw);
+
+  try {
+    const payload = JSON.parse(body) as SplunkModelResponse;
+    return findFirstText(payload) ?? '';
+  } catch {
+    return body;
+  }
+}
+
+function parseSseData(raw: string) {
+  const trimmed = raw.trim();
+
+  if (!trimmed.startsWith('event:') && !trimmed.startsWith('data:')) {
+    return trimmed;
   }
 
-  const payload = (await response.json()) as AnthropicMessageResponse;
-  const rawText = payload.content
-    .map((item) => ('text' in item ? item.text : ''))
-    .join('\n')
-    .trim();
+  return trimmed
+    .split(/\r?\n/)
+    .find((line) => line.startsWith('data:'))
+    ?.slice('data:'.length)
+    .trim() ?? trimmed;
+}
 
-  if (!rawText) {
-    throw new Error('Anthropic response missing content.');
+function findFirstText(value: unknown): string | undefined {
+  if (typeof value === 'string') {
+    return value;
   }
 
-  return {
-    planSummary,
-    prompt,
-    providerUsed: `anthropic:${config.llmModel}`,
-    rawText,
-    spl: normalizeGeneratedSpl(extractSpl(rawText), intent),
-  };
+  if (Array.isArray(value)) {
+    for (const item of value) {
+      const text = findFirstText(item);
+      if (text) {
+        return text;
+      }
+    }
+    return undefined;
+  }
+
+  if (typeof value !== 'object' || value === null) {
+    return undefined;
+  }
+
+  const record = value as Record<string, unknown>;
+  for (const key of ['text', 'content', 'output', 'completion', 'answer', 'response']) {
+    const text = findFirstText(record[key]);
+    if (text) {
+      return text;
+    }
+  }
+
+  return findFirstText(record.result) ?? findFirstText(record.structuredContent);
 }
 
 export function extractSpl(rawText: string) {
@@ -781,22 +817,4 @@ function inferSourcetype(prompt: string): PromptIntent['sourcetype'] {
   return 'auth';
 }
 
-type OpenAiChatCompletionResponse = {
-  choices: Array<{
-    message?: {
-      content?: string;
-    };
-  }>;
-};
-
-type AnthropicMessageResponse = {
-  content: Array<
-    | {
-        text: string;
-        type: 'text';
-      }
-    | {
-        type: string;
-      }
-  >;
-};
+type SplunkModelResponse = Record<string, unknown>;

@@ -116,7 +116,7 @@ Create a privileged action dashboard by user, app, and country. Alert on risk sc
 
 ## Automated Prompt Verification
 
-After importing both CSV files into local Splunk, run the real Groq/MCP prompt suite:
+After importing both CSV files into local Splunk, run the real Splunk-model-plus-MCP prompt suite:
 
 ```bash
 npm run verify:prompts -- --mode mcp --all --delay-ms 2500

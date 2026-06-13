@@ -1,5 +1,7 @@
 # SPL Forge: Self-Debugging Agentic IDE for Splunk – Roadmap
 
+> Implementation status: this roadmap includes product ambition beyond the current code. Current repository implementation includes a VS Code webview MVP, standalone browser dashboard, Splunk-only model adapter through MCP AI Assistant tool or Splunk-hosted endpoint, MCP/REST/mock Splunk execution, app-folder export, and dashboard/disabled-alert REST publish. Full app install automation and true separate sub-agent runtime are not implemented yet.
+
 ## Executive Summary  
 **SPL Forge** is an AI-powered integrated development environment that transforms natural-language requirements into working Splunk searches, dashboards, alerts, and apps. It extends Splunk’s VS Code extension with an LLM-based agent that *writes, tests, debugs,* and *packages* Splunk artifacts end-to-end. This roadmap outlines a phased plan: a 10-day MVP to demonstrate core capabilities, followed by expansion into a full product that leverages Splunk’s new AI platform (MCP Server, AI Assistant, hosted models) and modern LLMs. The goal is to dramatically accelerate Splunk development: automate repetitive SPL coding and debugging tasks, improve developer productivity, and reduce errors. In the **Vision** and **Why Now** sections we highlight market timing – Splunk itself calls 2026 “the year of the Agentic AI Revolution”【21†L7-L15】 and now provides tools (MCP, hosted models, AI Assistant) to enable this vision. The roadmap then details the MVP build (with daily milestones), post-MVP features, community and ecosystem plans, monetization strategy, and demo plan. Quantitative and qualitative success metrics are defined to measure adoption (e.g. user growth, productivity gains) and impact (error reduction, developer satisfaction). This plan is designed to be persuasive to investors (clear phases, ROI paths, tech stack) and understandable to Splunk users and developers.
 
@@ -24,7 +26,7 @@ Several converging trends make this the right moment for SPL Forge:
 
 - **Splunk’s New Platform Capabilities:** Splunk is releasing tools specifically for AI integration. In early 2026 they made the **Model Context Protocol (MCP) Server** generally available【21†L55-L64】. MCP provides “a secure, standardized bridge between your intelligent agents and your Splunk data”【21†L57-L64】, solving the “Island Problem” where AI tools couldn’t easily query Splunk. Splunk is also launching hosted AI models (fine-tuned for log data) and the Splunk AI Assistant (an LLM-backed query builder). The Agentic Ops hackathon materials explicitly recommend using MCP and the AI Assistant: *“Splunk MCP server to connect AI agents securely to Splunk”* and *“Splunk AI Assistant to generate and edit SPL queries using natural language”*【30†L68-L74】. In short, the infrastructure and APIs needed to connect LLMs to Splunk now exist.
 
-- **Mature LLM Technology:** Large language models (LLMs) have proven they can generate code snippets from prompts. Free or low-cost APIs (OpenAI GPT, Anthropic Claude, open-source LLaMA derivatives) are readily available. Checkmarx notes that modern AI dev tools “use large language models, embeddings, and automation agents to accelerate coding, testing, security, DevOps, and documentation workflows”【19†L232-L241】. These tools reduce repetitive work and help teams ship faster. Splunk Forge rides this trend by applying LLMs specifically to Splunk’s domain.
+- **Mature LLM Technology:** Large language models (LLMs) have proven they can generate code snippets from prompts. Splunk now exposes hosted AI capabilities and MCP-connected AI Assistant flows that fit this use case directly. Checkmarx notes that modern AI dev tools “use large language models, embeddings, and automation agents to accelerate coding, testing, security, DevOps, and documentation workflows”【19†L232-L241】. These tools reduce repetitive work and help teams ship faster. Splunk Forge rides this trend by applying LLMs specifically to Splunk’s domain.
 
 - **Market Opportunity:** Despite many “chatbot” copilots, few products target Splunk development end-to-end. Splunk’s hackathon encourages “Platform” category ideas that “make it easier to create, extend, and automate with Splunk”【30†L55-L63】. Investors and early adopters will value a solution that demonstrably speeds up Splunk deployment and reduces errors. 
 
@@ -35,7 +37,7 @@ In summary, Splunk’s own messaging and recent feature releases align perfectly
 
 - **Day 1: Setup & Planning.** Set up development environment. Install Splunk Enterprise or Cloud dev instance and the official Splunk VS Code extension【24†L46-L54】. Scaffold a new VS Code extension (TypeScript/Node.js) for SPL Forge. Define architecture (see later). Prepare sample data in Splunk (e.g. web_logs index). *Deliverable:* Dev environment ready; architecture diagram draft.  
 
-- **Day 2: LLM Integration.** Integrate an LLM API (e.g. OpenAI GPT or an open-source LLM) into the extension. Implement a simple chat/prompt function. Test with a placeholder: user types English, LLM returns a raw SPL string. *Deliverable:* Text input in VS Code panel passes through LLM; results logged.  
+- **Day 2: Splunk Model Integration.** Integrate a Splunk-hosted model path into the extension through MCP AI Assistant tooling or a direct Splunk model endpoint. Implement a simple chat/prompt function. Test with a placeholder: user types English, model returns a raw SPL string. *Deliverable:* Text input in VS Code panel passes through Splunk AI; results logged.  
 
 - **Day 3: Query Generation.** Build the prompt engineering: given user intent, generate a full Splunk query. Example: user input “failed login attempts by user in last 5 mins”, LLM should output valid SPL (e.g. `index=security sourcetype=auth action=failed | stats count by user`). *Deliverable:* Sample prompts yield reasonable SPL queries.  
 
@@ -51,7 +53,7 @@ In summary, Splunk’s own messaging and recent feature releases align perfectly
   - **Status:** Complete in current MVP panel with prompt input, query history, error log, Generate + Run SPL, Export App, and Publish to Splunk controls.
 
 - **Day 9: Testing & Iteration.** Run multiple test scenarios (different prompts, complex queries). Identify bugs or edge cases. Improve prompt templates or error handling as needed. Ensure SPL Forge can handle at least 2-3 distinct use-cases. *Deliverable:* Stability fixes, improved reliability.  
-  - **Status:** In progress with added coverage for trend-by-country, top source-IP, successful-login, alert-window, generic auth investigation, and unsafe provider-output scenarios. Ten real Groq/MCP prompts pass through `npm run verify:prompts -- --mode mcp`.
+  - **Status:** In progress with added coverage for trend-by-country, top source-IP, successful-login, alert-window, generic auth investigation, and unsafe provider-output scenarios. Real Splunk-model-plus-MCP prompts pass through `npm run verify:prompts -- --mode mcp`.
 
 - **Day 10: Demo Prep.** Prepare the hackathon demo script and sample data sets. Record or rehearse the 3-minute walkthrough (see below). Finalize architecture diagram and README. *Deliverable:* Demo video storyboard ready; final working prototype.  
 
@@ -64,7 +66,7 @@ After the 10-day MVP, we enter an iterative expansion phase. Key activities incl
 
 | Phase | Timeframe | Key Deliverables | Resources (approx) | 
 |---|---|---|---|
-| **Phase 1: MVP (Core Prototype)** | 10 days | Functional prototype: VS Code extension that can interpret NL prompts into Splunk queries, run them via API/MCP, auto-fix errors, and generate a basic dashboard/app. Initial demo scenarios (2-3 cases). | 1–2 engineers, Splunk dev instance (free license), LLM API access |
+| **Phase 1: MVP (Core Prototype)** | 10 days | Functional prototype: VS Code extension that can interpret NL prompts into Splunk queries, run them via API/MCP, auto-fix errors, and generate a basic dashboard/app. Initial demo scenarios (2-3 cases). | 1–2 engineers, Splunk dev instance (free license), Splunk AI access |
 | **Phase 2: Beta (Feature Expansion)** | 1–3 months | Feature-rich beta: multi-turn conversation support; advanced prompt templates; support for SPL2 and saved searches; richer UI (syntax highlighting, logs); multi-platform (VS Code + simple web UI); integration with Splunk DevOps (CI/CD pipelines); initial security/testing (e.g. linting of generated SPL). Onboard 10–20 beta users; gather feedback. | 2–3 devs (adding UI/UX), product manager/tester, cloud for hosting extension backend if needed |
 | **Phase 3: Public Release & Growth** | 6–12 months | Official release: polished product (or Splunk App) with documentation, tutorials, and support. Integration with Splunkbase and marketing. Community forums and plugins (e.g. GitHub repo, examples). Possible plugins for IDEs beyond VS Code. Early monetization models (see below). Goal: 500+ users/orgs, positive NPS. | 3–5 devs, 1 community/marketing lead, partnerships (e.g. Splunk incubation program) |
 | **Phase 4: Long-term Ecosystem** | 12–24 months+ | Mature platform: extensible APIs for custom agents; support for multi-cloud Splunk; enterprise features (SSO, audit logging); marketplace of pre-built “intents” or query templates; partnerships (e.g. Splunk OEM). 10k+ orgs adoption. Continual innovation with emerging AI/ML (see Future). | Full team (5–10 engineers, product, marketing), possible venture or Splunk backing, ongoing Ops/infra costs |
@@ -154,11 +156,11 @@ flowchart LR
 
 **Tech Stack Recommendation:** 
 - **Front-end/UI:** Visual Studio Code Extension (TypeScript/Node.js) with custom React or plain WebView panels for the UI. This allows in-editor rendering of prompts, logs, and query results.  
-- **LLM Backend:** Initially integrate OpenAI’s GPT or Anthropic’s Claude via API (fast to MVP), or use open-source LLaMA/CodeLLaMA models locally (for cost saving). Optionally leverage Splunk’s hosted models via MCP.  
+- **LLM Backend:** Use Splunk-hosted models through MCP AI Assistant tooling or a direct Splunk model endpoint.  
 - **Splunk Access:** Splunk Enterprise (dev licence) or Splunk Cloud (trial) as the data source. Use Splunk’s REST API or the MCP server for running queries and retrieving fields. The Splunk Python SDK (for prototyping scripts) or Splunk’s REST endpoints (as used by the official extension) can be used.  
 - **Infrastructure:** A modest server or cloud VM (2–4 vCPUs, 8–16GB RAM) to host Splunk and possibly a local LLM. Splunk itself can run on this (development mode). The extension mostly runs on the user’s machine.  
 - **DevOps:** Git for version control; GitHub Actions or similar for CI (could run tests of generated queries).  
-- **Cost Estimates (MVP):** Splunk Developer license is free. A small VM ($20–$50/month) covers Splunk and an LLM container. Using OpenAI for say 1000 queries/month might cost <$50. Thus initial infra cost could be <$100/month. Most cost is developer time.  
+- **Cost Estimates (MVP):** Splunk Developer license is free. A small VM ($20–$50/month) covers Splunk for local development. Most cost is developer time.  
 
 ## Success Metrics  
 To gauge success, we track both **quantitative** and **qualitative** metrics:

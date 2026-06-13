@@ -15,10 +15,7 @@ All notable changes to **SPL Forge** will be documented in this file.
 - First working webview panel scaffold in `src/panels/assistant.ts`.
 - Day 2 prompt submission flow from panel to extension runtime.
 - `.env.local`-aware runtime config loader in `src/config/env.ts`.
-- LLM generation adapter in `src/agent/generate.ts` with:
-  - OpenAI chat completions support
-  - Anthropic messages API support
-  - deterministic mock fallback when API credentials are absent
+- LLM generation adapter in `src/agent/generate.ts` with Splunk-hosted model support.
 - Raw provider output and parsed SPL rendering inside webview panel.
 - Query plan summary returned from generation pipeline and rendered in panel.
 - Intent parser in `src/agent/generate.ts` for:
@@ -34,7 +31,7 @@ All notable changes to **SPL Forge** will be documented in this file.
   - time-trend searches
   - success and failure login prompt variants
 - Splunk execution adapter in `src/splunk/execute.ts` with:
-  - deterministic mock execution mode
+  - deterministic internal test adapter for fixture-backed development
   - MCP execution mode for `splunk_run_query`
   - MCP preflight support for `splunk_get_info`
   - REST execution mode for `/services/search/jobs/export`
@@ -109,13 +106,13 @@ All notable changes to **SPL Forge** will be documented in this file.
 - Alert artifact preview in the VS Code panel and output-channel alert logging.
 - Classic XML dashboard artifact and `npm run publish:dashboard` REST publisher for Splunk UI verification.
 - Dashboard publisher now uses the verified executable Splunk search, including local demo field extraction.
-- End-to-end failed-login demo flow now covers prompt -> Groq SPL -> MCP execution -> normalized final SPL -> result preview -> dashboard artifact -> alert artifact -> Splunk UI dashboard publish.
+- End-to-end failed-login demo flow now covers prompt -> Splunk-model SPL -> MCP execution -> normalized final SPL -> result preview -> dashboard artifact -> alert artifact -> Splunk UI dashboard publish.
 - Minimal Splunk app folder export via `npm run export:app`, including `app.conf`, dashboard XML, `savedsearches.conf`, metadata, README, and manifest.
 - Polished VS Code panel interaction with query history, error log, Run control, and Export App button for the current verified package.
 - Publish to Splunk panel action that writes dashboard XML and a disabled saved-search alert through Splunk REST.
 - `npm run publish:app` CLI smoke path for publishing the same dashboard and disabled alert package.
 - Day 9 prompt stability coverage for trend-by-country, top source-IP, successful-login, threshold-window, and unsafe provider-output scenarios.
-- Sixteen-prompt Groq/MCP smoke verifier via `npm run verify:prompts -- --mode mcp --all --delay-ms 2500`.
+- Sixteen-prompt Splunk-model/MCP smoke verifier via `npm run verify:prompts -- --mode mcp --all --delay-ms 2500`.
 - Complex auth security sample dataset for richer risk, MFA, privileged-action, app, role, and session demos.
 - Complex prompt generation support for `auth_complex` searches, including risk score, MFA failures, privileged activity, service-account activity, impossible-travel style grouping, and failed/blocked outcome dashboards.
 - Prompt verifier mode switches: default simple auth suite, `--complex` for complex sample data, and `--all` for full coverage.
@@ -171,7 +168,7 @@ All notable changes to **SPL Forge** will be documented in this file.
 - Confirmed live REST mode against real Splunk data with `npm run verify:splunk -- --mode rest`.
 - Confirmed live MCP mode against real Splunk data with `npm run verify:splunk -- --mode mcp`.
 - Confirmed combined live REST+MCP verification with `npm run verify:splunk -- --mode all`.
-- Confirmed same backend workflow used by the panel with live Groq and Splunk config returns 12 rows for the failed-login dashboard prompt.
+- Confirmed same backend workflow used by the panel with live Splunk model and Splunk config returns rows for the failed-login dashboard prompt.
 - Confirmed generated failed-login dashboard publishes to Splunk UI at `/app/search/failed_login_dashboard`.
 - Confirmed local test suite passes with 24 VS Code extension tests.
 
@@ -241,7 +238,7 @@ All notable changes to **SPL Forge** will be documented in this file.
 - Recommended tech stack documentation:
   - Frontend: React/Next.js, TypeScript, Tailwind CSS, Monaco Editor, Recharts/ECharts
   - Backend: Python FastAPI or Node.js/NestJS
-  - Orchestration: LangGraph or OpenAI Agents SDK
+  - Orchestration: LangGraph or equivalent workflow runtime
   - Validation: Pydantic or Zod schemas
   - Queue/Cache: Redis
   - State: PostgreSQL
@@ -267,7 +264,7 @@ All notable changes to **SPL Forge** will be documented in this file.
   - Developer Productivity: query generation and refinement
 - Demo flow blueprint for checkout latency investigation scenario.
 - Proposed repository structure for production-ready codebase organization.
-- Sample .env configuration template for Splunk, MCP, OpenAI, Redis, and database settings.
+- Sample .env configuration template for Splunk, MCP, Redis, and database settings.
 - Example API design specification with request/response schemas.
 - Agent output JSON examples showing expected data structures.
 - Originality statement explaining the "forge model" as core differentiator.

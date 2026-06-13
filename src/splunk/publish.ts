@@ -11,6 +11,7 @@ export type SplunkPublishResult = {
   dashboardUrl?: string;
   owner: string;
   published: string[];
+  reloaded: string[];
 };
 
 type SavedSearch = {
@@ -23,6 +24,7 @@ export async function publishSplunkAppPackage(config: ForgeConfig, appPackage: S
   const app = config.splunkApp || 'search';
   const owner = config.splunkOwner || 'nobody';
   const published: string[] = [];
+  const reloaded: string[] = [];
   const dashboard = findDashboard(appPackage);
   const alert = parseSavedSearch(appPackage.files['default/savedsearches.conf']);
 
@@ -33,11 +35,15 @@ export async function publishSplunkAppPackage(config: ForgeConfig, appPackage: S
   if (dashboard) {
     await publishDashboard(config, owner, app, dashboard.viewName, dashboard.xml);
     published.push(`dashboard:${dashboard.viewName}`);
+    await reloadEndpoint(config, owner, app, 'data/ui/views');
+    reloaded.push('data/ui/views');
   }
 
   if (alert) {
     await publishSavedSearch(config, owner, app, alert);
     published.push(`alert:${alert.name}`);
+    await reloadEndpoint(config, owner, app, 'saved/searches');
+    reloaded.push('saved/searches');
   }
 
   const uiBase = buildSplunkWebUrl(config);
@@ -49,6 +55,7 @@ export async function publishSplunkAppPackage(config: ForgeConfig, appPackage: S
     dashboardUrl: dashboard ? `${uiBase}/app/${encodeURIComponent(app)}/${encodeURIComponent(dashboard.viewName)}` : undefined,
     owner,
     published,
+    reloaded,
   };
 }
 
@@ -160,6 +167,13 @@ function publishSavedSearch(config: ForgeConfig, owner: string, app: string, sav
   }).then((response) => {
     assertSuccess(response, 'Alert publish');
   });
+}
+
+function reloadEndpoint(config: ForgeConfig, owner: string, app: string, endpoint: string) {
+  return postForm(config, `/servicesNS/${encodeURIComponent(owner)}/${encodeURIComponent(app)}/${endpoint}/_reload`, {})
+    .then((response) => {
+      assertSuccess(response, `${endpoint} reload`);
+    });
 }
 
 function assertSuccess(response: { body: string; statusCode: number }, label: string) {

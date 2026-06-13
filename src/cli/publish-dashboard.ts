@@ -111,11 +111,11 @@ function postForm(config: ForgeConfig, pathname: string, values: Record<string, 
 
 function buildConfig(mode: SplunkMode, env: EnvMap): ForgeConfig {
   return {
-    groqApiKey: env.GROQ_API_KEY ?? env.SPL_FORGE_GROQ_API_KEY,
-    groqModel: env.GROQ_MODEL ?? 'llama-3.1-8b-instant',
-    llmApiKey: env.SPL_FORGE_LLM_API_KEY,
-    llmModel: env.SPL_FORGE_LLM_MODEL ?? 'mock-spl-forge-v1',
+    llmModel: env.SPL_FORGE_LLM_MODEL ?? 'splunk-hosted-model',
     llmProvider: normalizeProvider(env.SPL_FORGE_LLM_PROVIDER),
+    splunkModelEndpoint: env.SPL_FORGE_SPLUNK_MODEL_ENDPOINT,
+    splunkModelToken: env.SPL_FORGE_SPLUNK_MODEL_TOKEN ?? env.SPL_FORGE_SPLUNK_TOKEN ?? env.SPLUNK_TOKEN,
+    splunkModelTool: env.SPL_FORGE_SPLUNK_MODEL_TOOL ?? 'saia_generate_spl',
     splunkAllowSelfSigned: parseBoolean(env.SPL_FORGE_SPLUNK_ALLOW_SELF_SIGNED, parseBoolean(env.SPLUNK_VERIFY_SSL, false) === false),
     splunkMcpAllowSelfSigned: parseBoolean(env.SPL_FORGE_SPLUNK_MCP_ALLOW_SELF_SIGNED, false),
     splunkMcpEndpoint: env.SPL_FORGE_SPLUNK_MCP_ENDPOINT ?? env.SPLUNK_MCP_URL,
@@ -169,11 +169,11 @@ function readArg(name: string) {
 }
 
 function normalizeProvider(value: string | undefined): LlmProvider {
-  if (value === 'groq' || value === 'openai' || value === 'anthropic' || value === 'local' || value === 'mock') {
+  if (value === 'splunk' || value === 'local' || value === 'mock') {
     return value;
   }
 
-  return 'mock';
+  return 'splunk';
 }
 
 function normalizeMode(value: string): SplunkMode {

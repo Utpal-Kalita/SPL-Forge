@@ -37,7 +37,6 @@ For SPL Forge MVP:
 
 - Use Splunk MCP Server app as the primary integration path.
 - Use REST only for fallback and write-style operations that MCP does not cover yet.
-- Use mock mode for deterministic local testing.
 - Do not depend on legacy cloud-hosted SCS endpoint for new deployments.
 - Use encrypted MCP tokens for MCP access.
 - Keep direct Splunk REST tokens separate from MCP encrypted tokens.

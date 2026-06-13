@@ -17,10 +17,11 @@ suite('Extension Test Suite', () => {
 	vscode.window.showInformationMessage('Start all tests.');
 
 	const mockConfig: ForgeConfig = {
-		groqApiKey: undefined,
-		groqModel: 'llama-3.1-8b-instant',
 		llmModel: 'mock-spl-forge-v1',
 		llmProvider: 'mock',
+		splunkModelEndpoint: undefined,
+		splunkModelToken: undefined,
+		splunkModelTool: 'saia_generate_spl',
 		splunkMcpAllowSelfSigned: false,
 		splunkMcpEndpoint: undefined,
 		splunkMcpToken: undefined,
@@ -94,6 +95,45 @@ suite('Extension Test Suite', () => {
 		assert.ok(result.spl.includes('index=main sourcetype=auth action=failure earliest=-30m latest=now'));
 		assert.ok(result.spl.includes('| stats count as failed_logins by country user_agent'));
 	});
+
+  test('splunk model provider accepts Splunk-hosted endpoint response', async () => {
+    const server = http.createServer((request, response) => {
+      const chunks: Buffer[] = [];
+      request.on('data', (chunk: Buffer) => chunks.push(chunk));
+      request.on('end', () => {
+        assert.strictEqual(request.method, 'POST');
+        assert.strictEqual(request.headers.authorization, 'Bearer splunk-model-token');
+        const payload = JSON.parse(Buffer.concat(chunks).toString('utf8')) as { prompt?: string };
+        assert.ok(payload.prompt?.includes('User request: Create a failed login dashboard by country.'));
+        response.writeHead(200, { 'Content-Type': 'application/json' });
+        response.end(JSON.stringify({
+          output: 'index=main sourcetype=auth action=failure | stats count as failed_logins by country | sort - failed_logins',
+        }));
+      });
+    });
+
+    await listen(server);
+
+    try {
+      const address = server.address();
+      assert.ok(address && typeof address === 'object');
+      const result = await generateSplFromPrompt({
+        prompt: 'Create a failed login dashboard by country.',
+      }, {
+        ...mockConfig,
+        llmModel: 'splunk-hosted-model',
+        llmProvider: 'splunk',
+        splunkModelEndpoint: `http://127.0.0.1:${address.port}/model`,
+        splunkModelToken: 'splunk-model-token',
+      });
+
+      assert.strictEqual(result.providerUsed, 'splunk:splunk-hosted-model');
+      assert.ok(result.spl.includes('sourcetype=auth'));
+      assert.ok(result.spl.includes('by country'));
+    } finally {
+      await close(server);
+    }
+  });
 
 	test('mock fallback shapes threshold alert queries', async () => {
 		const result = await generateSplFromPrompt({
@@ -306,11 +346,15 @@ suite('Extension Test Suite', () => {
 
     assert.strictEqual(appPackage.appId, 'spl_forge_generated_app');
     assert.ok(appPackage.files['default/app.conf'].includes('SPL Forge Generated App'));
+    assert.ok(appPackage.files['default/props.conf'].includes('[auth]'));
+    assert.ok(appPackage.files['default/props.conf'].includes('[auth_complex]'));
+    assert.ok(appPackage.files['default/transforms.conf'].includes('Reserved for future generated lookup'));
     assert.ok(appPackage.files['metadata/default.meta'].includes('export = system'));
     assert.ok(appPackage.files['default/savedsearches.conf'].includes('[Failed Login Threshold Alert]'));
     assert.ok(appPackage.files['default/savedsearches.conf'].includes('| bin _time span=5m'));
     assert.ok(appPackage.files['default/data/ui/views/failed_login_dashboard.xml'].includes('<dashboard version="1.1">'));
     assert.ok(appPackage.files['README.md'].includes('Rows verified before export'));
+    assert.ok(appPackage.files['README.md'].includes('Full Splunk app install automation is not claimed'));
     assert.ok(appPackage.files['spl-forge-manifest.json'].includes('"rowCount"'));
   });
 
@@ -350,8 +394,11 @@ suite('Extension Test Suite', () => {
 
       assert.strictEqual(published.dashboard, 'failed_login_dashboard');
       assert.strictEqual(published.alert, 'Failed Login Threshold Alert');
-      assert.strictEqual(requests.length, 2);
+      assert.deepStrictEqual(published.reloaded, ['data/ui/views', 'saved/searches']);
+      assert.strictEqual(requests.length, 4);
       assert.ok(requests.some((entry) => entry.path === '/servicesNS/nobody/search/data/ui/views'));
+      assert.ok(requests.some((entry) => entry.path === '/servicesNS/nobody/search/data/ui/views/_reload'));
+      assert.ok(requests.some((entry) => entry.path === '/servicesNS/nobody/search/saved/searches/_reload'));
       const alertRequest = requests.find((entry) => entry.path === '/servicesNS/nobody/search/saved/searches');
       assert.ok(alertRequest);
       assert.ok(alertRequest.body.includes('disabled=1'));

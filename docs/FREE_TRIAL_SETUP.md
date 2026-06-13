@@ -145,7 +145,6 @@ SPL_FORGE_SPLUNK_SEARCH_LIMIT=10
 ## When to Use Other Modes
 
 - Use Splunk Cloud sandbox if you need hosted environment.
-- Use mock mode if live Splunk unreliable during demo.
 - Use MCP mode if Splunk MCP Server already configured.
 
 ## Related Docs

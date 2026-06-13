@@ -661,7 +661,7 @@ export function getPanelHtml(input: PanelHtmlInput) {
           <span class="pill">Endpoint: ${escapeHtml(getSplunkEndpointLabel(config))}</span>
           <span class="pill">Repair: ${config.splunkRepairAutoRun ? 'auto-rerun' : 'approval required'}</span>
           <span class="pill">Provider: ${escapeHtml(config.llmProvider)}</span>
-          <span class="pill">Model: ${escapeHtml(config.llmProvider === 'groq' ? config.groqModel : config.llmModel)}</span>
+          <span class="pill">Model: ${escapeHtml(config.llmModel)}</span>
           <span class="pill status-${state.status}">Status: ${escapeHtml(statusLabel)}</span>
         </div>
       </section>
@@ -677,7 +677,7 @@ export function getPanelHtml(input: PanelHtmlInput) {
             <button class="secondary" id="publish-button"${canPublish ? '' : ' disabled'}>Publish to Splunk</button>
           </div>
           ${state.lastExport ? `<div class="meta"><span>Exported: <code>${escapeHtml(state.lastExport.root)}</code></span><span>${state.lastExport.fileCount} files</span></div>` : ''}
-          ${state.lastPublish ? `<div class="meta"><span>Published: <code>${escapeHtml(state.lastPublish.published.join(', '))}</code></span>${state.lastPublish.dashboardUrl ? `<span><a href="${escapeHtml(state.lastPublish.dashboardUrl)}">Open dashboard</a></span>` : ''}</div>` : ''}
+          ${state.lastPublish ? `<div class="meta"><span>Published: <code>${escapeHtml(state.lastPublish.published.join(', '))}</code></span><span>Reloaded: <code>${escapeHtml(state.lastPublish.reloaded.join(', ') || 'none')}</code></span>${state.lastPublish.dashboardUrl ? `<span><a href="${escapeHtml(state.lastPublish.dashboardUrl)}">Open dashboard</a></span>` : ''}</div>` : ''}
           ${state.lastError ? `<div class="error">${escapeHtml(state.lastError)}</div>` : ''}
         </article>
 
@@ -694,7 +694,7 @@ export function getPanelHtml(input: PanelHtmlInput) {
             <li>Result rows or execution errors visible in panel</li>
             <li>Dashboard and alert artifacts previewed from final SPL</li>
             <li>Export App writes importable Splunk app folder from current result</li>
-            <li>Publish to Splunk writes dashboard and disabled alert through REST</li>
+            <li>Publish to Splunk writes dashboard and disabled alert through REST, then reloads those knowledge-object endpoints</li>
           </ul>
         </article>
       </section>

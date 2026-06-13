@@ -10,7 +10,7 @@ Need environment where SPL Forge can:
 - inspect fields
 - validate generated SPL
 - preview results
-- simulate repair loop
+- run the repair loop against live Splunk feedback
 
 ## Supported Modes
 
@@ -18,7 +18,6 @@ Choose one:
 
 - MCP mode for agent-friendly integration
 - REST mode for direct API execution
-- Mock mode for demo-safe offline flow
 
 ## Recommended Development Options
 
@@ -43,14 +42,6 @@ Best for realistic hosted environment.
 - Create restricted service account
 - Confirm API access
 - Load sample data or use provided datasets
-
-### Option 3: Mock Mode
-
-Best for hackathon fallback.
-
-- Prepare example field schema
-- Prepare mock query responses
-- Prepare at least one intentional failure case
 
 ## Minimum Data Needed
 
@@ -124,7 +115,7 @@ splunk_run_query
 
 It also uses `splunk_get_info` as lightweight preflight when MCP mode runs.
 
-SPL Forge normalizes returned MCP tool content into same execution summary and result preview shape used by REST and mock modes.
+SPL Forge normalizes returned MCP tool content into same execution summary and result preview shape used by REST mode.
 
 ### Local Trial Fixture Notes
 
@@ -140,7 +131,7 @@ SPL Forge now compensates for that in `self_hosted_trial` mode:
 
 This means MCP and REST demos can still work on local fixture import without custom props/transforms setup.
 
-For repeatable prompt verification against real Groq plus local Splunk MCP:
+For repeatable prompt verification against the real Splunk model plus local Splunk MCP:
 
 ```bash
 npm run verify:prompts -- --mode mcp --all --delay-ms 2500
@@ -189,16 +180,6 @@ The Day 4 REST adapter posts generated SPL to:
 
 It requests JSON output and renders returned rows, fields, messages, and errors in the VS Code panel.
 
-### Mock Execution Environment
-
-For offline or demo-safe work:
-
-```bash
-SPL_FORGE_SPLUNK_MODE=mock
-```
-
-Mock mode uses deterministic failed-login fixture-shaped rows. It supports grouped `stats`, simple `timechart`, and raw row preview for the current demo queries.
-
 ## Security Rules
 
 - Never commit Splunk passwords or tokens
@@ -209,7 +190,7 @@ Mock mode uses deterministic failed-login fixture-shaped rows. It supports group
 ## Demo Validation Checklist
 
 - Can run sample SPL query successfully
-- Can run generated SPL from SPL Forge panel in `mock` mode
+- Can run generated SPL from SPL Forge panel using live Splunk model wiring
 - Can show execution summary and result preview in VS Code
 - Can retrieve field metadata
 - Can show one broken query example
@@ -232,11 +213,14 @@ What Splunk environment must support:
 - compute threshold over time window
 - return enough data for chart preview
 
-## Fallback Plan
+## Submission Gate
 
-If live Splunk fails during demo:
+Before submitting to the hackathon, confirm:
 
-1. Switch to mock mode
+1. `SPL_FORGE_LLM_PROVIDER=splunk`
+2. `SPL_FORGE_SPLUNK_MODE=mcp` or `rest`
+3. Splunk MCP AI Assistant tool or Splunk-hosted model endpoint is reachable
+4. `npm run verify:submission` passes
 2. Reuse same prompt
 3. Show generated SPL
 4. Show simulated failure

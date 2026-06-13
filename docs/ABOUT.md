@@ -2,6 +2,8 @@
 
 **SPL FORGE** is an agentic Splunk operations workbench that turns natural-language operational intent into safe, validated, production-ready Splunk assets: SPL searches, correlation rules, dashboards, alerts, runbooks, investigation timelines, and reusable app components.
 
+> Implementation status: this document describes product vision. Current repository implementation includes a VS Code webview MVP, standalone browser dashboard, Splunk-only model adapter through MCP AI Assistant tool or Splunk-hosted endpoint, MCP/REST/mock Splunk execution, app-folder export, and dashboard/disabled-alert REST publish. Full app install automation and true separate sub-agent runtime are not implemented yet.
+
 The project is designed for the **Splunk Agentic Ops Hackathon** and focuses on developer productivity, observability, security, and platform extensibility by combining **Splunk**, **Splunk MCP Server**, **Splunk AI capabilities**, and a controlled multi-agent workflow.
 
 ---
@@ -693,7 +695,7 @@ Outputs:
 ### Backend
 
 - Python FastAPI or Node.js/NestJS.
-- LangGraph, OpenAI Agents SDK, or similar orchestration framework.
+- LangGraph or similar orchestration framework.
 - Pydantic or Zod for schema validation.
 - Async workers for long-running searches.
 - REST API for UI-to-agent communication.
@@ -1019,7 +1021,8 @@ SPLUNK_TOKEN=your_splunk_token
 SPLUNK_VERIFY_SSL=false
 SPLUNK_DEFAULT_INDEX=main
 SPLUNK_MCP_URL=http://localhost:9000
-OPENAI_API_KEY=your_model_key
+SPL_FORGE_LLM_PROVIDER=splunk
+SPL_FORGE_SPLUNK_MODEL_TOOL=saia_generate_spl
 APP_ENV=development
 REDIS_URL=redis://localhost:6379
 DATABASE_URL=postgresql://user:password@localhost:5432/splforge

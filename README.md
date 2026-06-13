@@ -17,7 +17,7 @@
 
 ## Overview
 
-SPL Forge is product concept and build plan for self-debugging Splunk development environment. It is designed to help developers, security teams, and operations engineers describe outcome in natural language and get back validated Splunk artifacts ready for deployment.
+SPL Forge is working VS Code extension MVP for self-debugging Splunk development. It helps developers, security teams, and operations engineers describe an outcome in natural language and get back validated SPL plus app-ready Splunk artifacts.
 
 Core workflow:
 
@@ -45,7 +45,7 @@ SPL Forge addresses that gap with agentic, execution-aware development loop buil
 - Support for Splunk-aware context such as indexes, sourcetypes, and fields
 - Export flows for dashboards, alerts, reports, and lightweight app packaging
 - Human-in-the-loop approvals before execution and export
-- Demo-safe support for MCP, REST fallback, or mock environments
+- Real Splunk runtime support through MCP or REST execution
 - Local Splunk Enterprise development environment for rapid iteration
 
 ## Product Direction
@@ -58,7 +58,7 @@ According to PRD, SPL Forge is being designed as:
 - Foundation for broader AI-native Splunk development operations
 - Self-hosted local development path aligned with Splunk free trial and Developer License flow
 
-Initial demo scenario is centered on failed-login monitoring, where system generates query, detects or simulates error, repairs it with schema context, previews results, and exports dashboard and alert package.
+Initial demo scenario is centered on failed-login monitoring, where system generates query, detects a live runtime or schema issue, repairs it with schema context, previews results, and exports dashboard and alert package.
 
 ## Intended Users
 
@@ -74,12 +74,12 @@ Initial demo scenario is centered on failed-login monitoring, where system gener
 | --- | --- |
 | IDE | VS Code extension |
 | Language | TypeScript and Node.js |
-| UI | Webview-based interface, with optional web dashboard |
+| UI | VS Code webview panel plus standalone browser dashboard |
 | Validation | Structured schema and artifact validation |
-| Splunk connectivity | Splunk MCP Server, REST fallback, or mock connector |
+| Splunk connectivity | Splunk MCP Server or Splunk REST API |
 | Local Splunk | Self-hosted Splunk Enterprise free trial with Developer License |
-| AI layer | Hosted models or provider adapters |
-| Export | Dashboard, alert, report, and app-ready artifact generation |
+| AI layer | Splunk MCP AI Assistant tool or Splunk-hosted model endpoint |
+| Export | Dashboard, alert, saved search, props.conf, metadata, and app-ready folder generation |
 
 ## Quick Start
 
@@ -106,7 +106,7 @@ See [`docs/FREE_TRIAL_SETUP.md`](./docs/FREE_TRIAL_SETUP.md) for full Splunk set
 
 ## Current Status
 
-This repository currently captures product definition and roadmap for MVP. It is best understood as project foundation rather than finished implementation.
+This repository now contains a working hackathon MVP. It includes a VS Code panel, standalone browser dashboard, Splunk-only model adapter, and partial app deployment path. Complete Splunk app install automation is still pending.
 
 Current repository assets:
 
@@ -117,17 +117,46 @@ Current repository assets:
 - Brand banner and repository presentation assets
 - Simple and complex auth sample datasets in `samples/`
 - VS Code extension shell with intent-aware SPL generation and query plan feedback
-- MCP/REST/mock Splunk execution path with result preview in the panel
+- MCP/REST Splunk execution path with result preview in the panel
 - Day 5 self-debugging loop that inspects schema after failed or empty execution, repairs common SPL mistakes, and reruns with capped attempts
 - Day 6 Dashboard Studio JSON preview generated from final working SPL for dashboard prompts
 - Classic XML dashboard publish path via `npm run publish:dashboard` for Splunk UI verification
 - Dashboard plus disabled alert publish path via `npm run publish:app` or the panel Publish to Splunk button
 - Alert saved-search preview generated from threshold prompts
 - Minimal Splunk app folder export via `npm run export:app`
+- Generated app includes `props.conf` CSV field extraction stanzas for `auth` and `auth_complex` demo sourcetypes
+- Publish flow reloads dashboard and saved-search REST endpoints after create/update
+- Splunk-only model provider path through configurable MCP AI Assistant tool (`SPL_FORGE_SPLUNK_MODEL_TOOL`) or direct Splunk-hosted model endpoint
+- Standalone browser dashboard via `npm run dashboard -- --mode mcp` or `npm run dashboard -- --mode rest`
 - Sixteen-prompt smoke verifier via `npm run verify:prompts -- --mode mcp --all --delay-ms 2500`
+- Submission verifier via `npm run verify:submission`
 - Polished VS Code panel flow with query history, error log, Run, Export App, and Publish to Splunk controls
 - Day 9 stability coverage for trend breakdowns, successful-login prompts, source-IP grouping, threshold alerts, unsafe provider output, and complex `auth_complex` risk/MFA/privileged/service-account prompts
 - Root architecture diagram and MIT license for hackathon submission readiness
+
+## Reality Check
+
+- Splunk Hosted Models: implemented as configurable Splunk MCP AI Assistant tool or direct Splunk model endpoint. Submission mode is intended to use one of these live Splunk paths, not a third-party or mock model.
+- Standalone web dashboard: implemented as local browser dashboard served by `npm run dashboard`.
+- Complete app deployment: partial. SPL Forge exports an app folder and publishes dashboard plus disabled alert through REST with endpoint reloads. Full app install/reload automation is not claimed.
+- True multi-agent architecture: not implemented. Current runtime is one workflow loop with generation, execution, schema inspection, repair, artifact export, and publish stages.
+
+## Submission Check
+
+Before recording or submitting, run:
+
+```bash
+npm run verify:submission
+```
+
+This command checks:
+
+- root `LICENSE`
+- root `architecture_diagram.md`
+- commit history on or after 2026-05-18
+- remote Git reachability
+- live Splunk model generation
+- live Splunk search execution in `mcp` or `rest` mode
 
 ## Documentation
 
