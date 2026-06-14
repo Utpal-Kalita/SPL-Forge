@@ -2,10 +2,10 @@
 
 ## Project Overview
 
-**SPL Forge** is an AI-native VS Code extension MVP for Splunk that turns natural language into working SPL queries, dashboards, alerts, and app-ready Splunk artifacts. It runs a workflow loop for generation, execution, schema inspection, repair, export, and REST publish through MCP, REST, or mock Splunk modes.
+**SPL Forge** is an AI-native VS Code extension for Splunk that turns natural language into working SPL queries, dashboards, alerts, and app-ready Splunk artifacts. It runs a workflow loop for generation, execution, schema inspection, repair, export, and REST publish through MCP, REST, or mock Splunk modes.
 
 
-- **Status**: Working hackathon MVP with known pending gaps documented in README
+- **Status**: Working product implementation with known pending gaps documented in README
 - **License**: MIT
 
 ---
@@ -27,7 +27,7 @@ SPL-Forge/
 │   ├── VS_CODE_SETUP.md        # VS Code extension setup
 │   ├── SPLUNK_SETUP.md         # Splunk environment setup
 │   ├── ARCHITECTURE.md         # System architecture
-│   └── DEMO_RUNBOOK.md         # Demo scenario walkthrough
+│   └── WALKTHROUGH_RUNBOOK.md  # Product workflow walkthrough
 ├── src/                        # Source code directory
 │   ├── extension.ts            # Main VS Code extension entry point
 │   └── test/                   # Test directory
@@ -39,7 +39,7 @@ SPL-Forge/
 ├── README.md                   # Main project documentation
 ├── CHANGELOG.md                # Version history
 ├── vsc-extension-quickstart.md # VS Code extension quickstart
-├── ROADMAP.md                  # MVP and Future Roadmap
+├── ROADMAP.md                  # Release and future roadmap
 └── PRD.md                      # Product requirements (root level)
 ```
 
@@ -73,7 +73,7 @@ SPL-Forge/
 | `ROADMAP.md` | Development timeline and feature planning |
 | `CHANGELOG.md` | Release notes and version history |
 | `docs/ARCHITECTURE.md` | System design and technical architecture |
-| `docs/DEMO_RUNBOOK.md` | Step-by-step demo workflow scenario |
+| `docs/WALKTHROUGH_RUNBOOK.md` | Step-by-step product workflow walkthrough |
 | `docs/VS_CODE_SETUP.md` | Extension installation and configuration |
 | `docs/SPLUNK_SETUP.md` | Splunk environment prerequisites |
 | `docs/QUICKSTART.md` | Getting started guide |
@@ -251,15 +251,17 @@ Intent → Generate SPL → Execute → Inspect → Repair → Preview → Expor
 
 ## Development Status
 
-**Current Phase**: Foundation/MVP Planning
+**Current Phase**: Release hardening
 
 - ✅ Project structure and documentation
-- ✅ VS Code extension scaffold
+- ✅ VS Code extension panel
 - ✅ Build pipeline configured
-- ⏳ Core agentic logic implementation
-- ⏳ Splunk connector integration
-- ⏳ Webview UI implementation
-- ⏳ Demo scenario validation
+- ✅ Core workflow loop implementation
+- ✅ Splunk MCP and REST connector integration
+- ✅ Webview UI implementation
+- ✅ Walkthrough scenario validation
+- ⏳ App archive/install automation
+- ⏳ Richer generated app validation
 
 ---
 
@@ -280,4 +282,3 @@ Refer to `vsc-extension-quickstart.md` and `docs/VS_CODE_SETUP.md` for detailed 
 - **Product Requirements**: [PRD.md](./PRD.md)
 - **Roadmap**: [ROADMAP.md](./ROADMAP.md)
 - **Architecture**: [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md)
-

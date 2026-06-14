@@ -651,7 +651,7 @@ suite('Extension Test Suite', () => {
 		}
 	});
 
-	test('demo fixture time range rewrites auth queries to all time', () => {
+	test('validation fixture time range rewrites auth queries to all time', () => {
 		const widened = widenDemoFixtureTimeRange(
 			'index=main sourcetype=auth action=failure earliest=-30m latest=now | stats count by country',
 			mockConfig,
@@ -662,13 +662,13 @@ suite('Extension Test Suite', () => {
 		assert.ok(widened.includes('| stats count by country'));
 	});
 
-	test('demo fixture time range leaves unrelated searches untouched', () => {
+	test('validation fixture time range leaves unrelated searches untouched', () => {
 		const untouched = widenDemoFixtureTimeRange('index=_internal earliest=-15m | head 5', mockConfig);
 
 		assert.strictEqual(untouched, 'index=_internal earliest=-15m | head 5');
 	});
 
-	test('demo fixture rewrite parses csv fields before auth filtering', () => {
+	test('validation fixture rewrite parses csv fields before auth filtering', () => {
 		const rewritten = rewriteDemoFixtureSearch(
 			'index=main sourcetype=auth action=failure earliest=0 | stats count by country user_agent',
 			mockConfig,
@@ -679,7 +679,7 @@ suite('Extension Test Suite', () => {
 		assert.ok(rewritten.includes('| stats count by country user_agent'));
 	});
 
-  test('demo fixture rewrite parses complex auth csv fields and risk score', () => {
+  test('validation fixture rewrite parses complex auth csv fields and risk score', () => {
     const rewritten = rewriteDemoFixtureSearch(
       'index=main sourcetype=auth_complex earliest=0 | stats count max(risk_score) as max_risk by user app role',
       mockConfig,
@@ -693,7 +693,7 @@ suite('Extension Test Suite', () => {
     assert.ok(rewritten.includes('| stats count max(risk_score) as max_risk by user app role'));
   });
 
-	test('demo fixture rewrite leaves unrelated searches untouched', () => {
+	test('validation fixture rewrite leaves unrelated searches untouched', () => {
 		const untouched = rewriteDemoFixtureSearch('index=_internal earliest=-15m | head 5', mockConfig);
 
 		assert.strictEqual(untouched, 'index=_internal earliest=-15m | head 5');

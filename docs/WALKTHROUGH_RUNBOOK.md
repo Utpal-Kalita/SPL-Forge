@@ -1,8 +1,8 @@
-# SPL Forge Demo Runbook
+# SPL Forge Walkthrough Runbook
 
-Use this for hackathon recording, judge demo, or internal walkthrough.
+Use this for product walkthroughs, release recordings, or internal validation.
 
-## Demo Objective
+## Walkthrough Objective
 
 Show SPL Forge can:
 
@@ -21,7 +21,7 @@ Show SPL Forge can:
 Create a failed login dashboard by country and user agent for the last 30 minutes. Alert if failed attempts exceed 100 in 5 minutes.
 ```
 
-## Demo Flow
+## Walkthrough Flow
 
 ### 1. Open Context
 
@@ -51,7 +51,7 @@ Use one predictable issue:
 
 ### 5. Show Repair
 
-Demonstrate:
+Walkthroughnstrate:
 
 - schema inspection
 - rewritten SPL
@@ -64,7 +64,7 @@ Preview:
 
 - dashboard layout draft
 - alert definition draft
-- app-ready folder with `app.conf`, dashboard XML, disabled saved search, metadata, and demo sourcetype extraction config
+- app-ready folder with `app.conf`, dashboard XML, disabled saved search, metadata, and walkthrough sourcetype extraction config
 
 ### 7. Publish Path
 
@@ -85,19 +85,19 @@ Click `Publish to Splunk` and show:
 
 Total target: under 2 minutes. Hard cap: 3 minutes.
 
-## Demo Checklist
+## Walkthrough Checklist
 
 - Browser tabs closed
 - Splunk Enterprise free trial instance already running with Developer License applied
 - Splunk session already authenticated
 - Splunk MCP AI Assistant tool or Splunk-hosted model endpoint configured
-- `npm run verify:submission` already passed on the exact repo state being demonstrated
+- `npm run verify:release` already passed on the exact repo state being shown
 - Prompt copied and ready
 - Backup screenshots ready
 - Mock fallback ready
 - No secrets visible on screen
 
-## Judge-Facing Talking Points
+## Walkthrough Talking Points
 
 - Built for Splunk developer productivity
 - Uses execution feedback, not blind text generation
@@ -107,7 +107,7 @@ Total target: under 2 minutes. Hard cap: 3 minutes.
 - Uses Splunk-only model wiring; no third-party model API keys needed
 - Uses live Splunk-hosted model generation and live Splunk query execution during verification
 - Does not claim full app install automation or true separate sub-agents yet
-- Meets hackathon repo requirements with root architecture diagram and open-source license
+- Includes root architecture diagram and open-source license for release readiness
 
 ## Related Docs
 

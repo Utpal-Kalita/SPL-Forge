@@ -1,6 +1,6 @@
 # Splunk Free Trial + Developer License Setup
 
-Use this guide for hackathon and MVP local setup.
+Use this guide for local SPL Forge setup.
 
 Goal: run local Splunk Enterprise instance, then convert trial terms to developer use with Splunk Developer License.
 
@@ -19,7 +19,7 @@ Goal: run local Splunk Enterprise instance, then convert trial terms to develope
 4. Start Splunk and confirm login works.
 5. Request Developer License through Splunk Developer Program.
 6. Apply Developer License to local Splunk instance.
-7. Load sample data for SPL Forge demo and validation.
+7. Load sample data for SPL Forge validation and walkthroughs.
 
 ## Step 1: Create Splunk Account
 
@@ -62,7 +62,7 @@ After startup, verify:
 
 After trial instance works, request Splunk Developer License through Splunk Developer Program.
 
-Hackathon intent:
+Developer license intent:
 
 - free trial gets you initial local install
 - Developer License changes usage agreement to developer use cases
@@ -84,7 +84,7 @@ After applying, re-check:
 - searches run normally
 - management API remains reachable
 
-## Step 6: Load Demo Data
+## Step 6: Load Validation Data
 
 Load authentication or access logs with fields like:
 
@@ -97,7 +97,7 @@ Load authentication or access logs with fields like:
 - `sourcetype`
 - `index`
 
-For MVP demo, set:
+For local validation, set:
 
 - `sourcetype=auth`
 - `index=main`
@@ -152,4 +152,4 @@ SPL_FORGE_SPLUNK_SEARCH_LIMIT=10
 - [`SPLUNK_SETUP.md`](./SPLUNK_SETUP.md)
 - [`SAMPLE_DATA.md`](./SAMPLE_DATA.md)
 - [`VS_CODE_SETUP.md`](./VS_CODE_SETUP.md)
-- [`DEMO_RUNBOOK.md`](./DEMO_RUNBOOK.md)
+- [`WALKTHROUGH_RUNBOOK.md`](./WALKTHROUGH_RUNBOOK.md)

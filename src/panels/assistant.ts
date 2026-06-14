@@ -716,7 +716,7 @@ export function getPanelHtml(input: PanelHtmlInput) {
       <section class="grid two">
         <article class="card">
           <h2>Query Plan</h2>
-          <pre>${escapeHtml(state.lastPlanSummary ?? 'Intent summary will render here after prompt submission.')}</pre>
+          <pre>${escapeHtml(state.lastPlanSummary ?? 'Intent summary will render here after prompt run.')}</pre>
         </article>
 
         <article class="card">
@@ -729,12 +729,12 @@ export function getPanelHtml(input: PanelHtmlInput) {
 
         <article class="card">
           <h2>Parsed SPL</h2>
-          <pre>${escapeHtml(state.lastSpl ?? 'Parsed SPL will render here after prompt submission.')}</pre>
+          <pre>${escapeHtml(state.lastSpl ?? 'Parsed SPL will render here after prompt run.')}</pre>
         </article>
 
         <article class="card">
           <h2>Repair History</h2>
-          <pre>${escapeHtml(state.lastRepairSummary ?? 'Repair history will render here after prompt submission.')}</pre>
+          <pre>${escapeHtml(state.lastRepairSummary ?? 'Repair history will render here after prompt run.')}</pre>
         </article>
       </section>
 
@@ -861,7 +861,7 @@ function getSplunkEndpointLabel(config: ForgeConfig) {
 
 function formatExecutionSummary(execution: SplunkSearchResult | undefined) {
   if (!execution) {
-    return 'Execution summary will render here after prompt submission.';
+    return 'Execution summary will render here after prompt run.';
   }
 
   return [

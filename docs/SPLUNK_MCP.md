@@ -14,7 +14,7 @@ MCP gives SPL Forge a controlled way to:
 - feed execution errors and schema context back into the repair loop
 - keep credentials scoped to MCP client usage
 
-REST remains a fallback path. Mock mode remains available for offline demos and CI-safe tests.
+REST remains a fallback path. Mock mode remains available for offline walkthroughs and CI-safe tests.
 
 ## Current SPL Forge Status
 
@@ -33,7 +33,7 @@ REST remains a fallback path. Mock mode remains available for offline demos and 
 
 ## Recommended Integration Position
 
-For SPL Forge MVP:
+For SPL Forge's current release:
 
 - Use Splunk MCP Server app as the primary integration path.
 - Use REST only for fallback and write-style operations that MCP does not cover yet.
@@ -105,7 +105,7 @@ Token creation requirements:
 | User creates own token | `edit_tokens_own` and `mcp_tool_admin` |
 | Admin creates token for any user | `edit_tokens_all` and `mcp_tool_admin` |
 
-For SPL Forge demos, grant only the minimum role needed to run searches and read metadata.
+For SPL Forge walkthroughs, grant only the minimum role needed to run searches and read metadata.
 
 ## Authentication
 
@@ -209,7 +209,7 @@ Dashboard and alert artifacts are generated separately from the preview SPL.
 
 ### MCP Mode
 
-Best hackathon path:
+Preferred product path:
 
 ```bash
 SPL_FORGE_SPLUNK_MODE=mcp
@@ -253,15 +253,15 @@ SPL_FORGE_SPLUNK_MODE=mock
 Used for:
 
 - deterministic unit tests
-- demos when Splunk is unavailable
+- walkthroughs when Splunk is unavailable
 
-## Local Demo Fixture Behavior
+## Local Fixture Behavior
 
 For `SPL_FORGE_SPLUNK_SOURCE=self_hosted_trial`, SPL Forge handles imported CSV fixture data by:
 
 - rewriting auth queries with `rex field=_raw`
 - filtering out the CSV header row
-- adding `earliest=0` when local demo timestamps are stale
+- adding `earliest=0` when local validation timestamps are stale
 
 This is why the panel can show rows even when a raw dashboard search would otherwise return zero rows.
 
@@ -414,14 +414,14 @@ Dashboard publish needs direct Splunk REST credentials even when search executio
 | `splunk_run_saved_search` | Beta in MCP Server 1.1.x | Future enhancement only. |
 | MCP Server rate limiting | Beta in MCP Server 1.1.x | Admin-controlled; plan for tool errors. |
 | OAuth 2.1 MCP Server | Controlled access | Future enterprise path. |
-| Observability MCP Gateway | Cloud/regional availability | Out of MVP scope. |
+| Observability MCP Gateway | Cloud/regional availability | Outside the current release scope. |
 
-## MVP Checklist
+## Release Checklist
 
-Before demo:
+Before walkthrough or release validation:
 
 - Splunk Enterprise or Cloud available.
-- Developer License applied for local Enterprise demo.
+- Developer License applied for local Enterprise validation.
 - Failed-login CSV fixture imported.
 - Splunk MCP Server app installed.
 - API access enabled.
@@ -440,5 +440,5 @@ Before demo:
 - [`SPLUNK_SETUP.md`](./SPLUNK_SETUP.md)
 - [`FREE_TRIAL_SETUP.md`](./FREE_TRIAL_SETUP.md)
 - [`ARCHITECTURE.md`](./ARCHITECTURE.md)
-- [`DEMO_RUNBOOK.md`](./DEMO_RUNBOOK.md)
+- [`WALKTHROUGH_RUNBOOK.md`](./WALKTHROUGH_RUNBOOK.md)
 - [`PROGRESS.md`](./PROGRESS.md)

@@ -13,7 +13,7 @@ export type SplunkSchemaSummary = {
 const demoSchema: SplunkSchemaSummary = {
 	fields: ['_time', 'action', 'country', 'src', 'user', 'user_agent'],
 	indexes: ['main'],
-	messages: ['Using built-in failed-login demo schema.'],
+	messages: ['Using built-in failed-login validation schema.'],
 	sourcetypes: ['auth'],
 };
 

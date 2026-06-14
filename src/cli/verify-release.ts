@@ -7,7 +7,7 @@ import { executeSplSearch } from '../splunk/execute';
 
 type EnvMap = Record<string, string | undefined>;
 
-const HACKATHON_START_DATE = '2026-05-18';
+const RELEASE_BASELINE_DATE = '2026-05-18';
 const DEFAULT_MODEL_PROMPT = 'Show failed login counts by user for the last 15 minutes.';
 const DEFAULT_VERIFY_SEARCH = 'index=_internal earliest=-15m | head 1';
 
@@ -51,7 +51,7 @@ async function main() {
   }
 
   if (failures.length > 0) {
-    console.log('SPL Forge submission verification FAILED\n');
+    console.log('SPL Forge release verification FAILED\n');
     for (const failure of failures) {
       console.log(`- ${failure}`);
     }
@@ -64,10 +64,10 @@ async function main() {
     process.exit(1);
   }
 
-  console.log('SPL Forge submission verification passed.');
+  console.log('SPL Forge release verification passed.');
   console.log(`- License file present`);
   console.log(`- Architecture diagram present`);
-  console.log(`- Commit history includes work on or after ${HACKATHON_START_DATE}`);
+  console.log(`- Commit history includes work on or after ${RELEASE_BASELINE_DATE}`);
   console.log(`- Git remote is reachable`);
   console.log(`- Splunk model generation succeeded with provider=${config.llmProvider} model=${config.llmModel}`);
   console.log(`- Live Splunk search succeeded in mode=${config.splunkMode}`);
@@ -150,7 +150,7 @@ function checkProviderConfig(config: ForgeConfig, failures: string[]) {
   }
 
   if (config.splunkMode === 'mock') {
-    failures.push('SPL_FORGE_SPLUNK_MODE must be mcp or rest for hackathon verification. Mock mode is not acceptable.');
+    failures.push('SPL_FORGE_SPLUNK_MODE must be mcp or rest for release verification. Mock mode is not acceptable.');
   }
 
   const hasMcpModel = Boolean(config.splunkMcpEndpoint && config.splunkMcpToken);
@@ -178,9 +178,9 @@ function checkFile(repoRoot: string, relativePath: string, failures: string[], m
 }
 
 function checkCommitWindow(repoRoot: string, failures: string[]) {
-  const output = execGit(repoRoot, ['log', '--since', HACKATHON_START_DATE, '--oneline']);
+  const output = execGit(repoRoot, ['log', '--since', RELEASE_BASELINE_DATE, '--oneline']);
   if (!output.trim()) {
-    failures.push(`No commits found on or after ${HACKATHON_START_DATE}.`);
+    failures.push(`No commits found on or after ${RELEASE_BASELINE_DATE}.`);
   }
 }
 

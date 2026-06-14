@@ -1,6 +1,6 @@
 # SPL Forge Architecture
 
-This document summarizes intended MVP architecture from product docs.
+This document summarizes the current architecture from product docs.
 
 ## System Goal
 
@@ -64,7 +64,7 @@ Responsible for:
 - saved search packaging
 - app-ready export preparation
 
-## Recommended MVP Flow
+## Recommended Release Flow
 
 1. User enters prompt in panel.
 2. Agent generates candidate SPL.
@@ -79,8 +79,8 @@ Responsible for:
 - Human approval before risky action
 - Real execution before trust claim
 - Environment-aware repair, not generic guessing
-- Mock-safe demo fallback
-- Narrow MVP, polished flow
+- Mock-safe walkthrough fallback
+- Narrow, polished workflow
 
 ## Suggested Module Layout
 
@@ -157,7 +157,7 @@ src/
 Day 3 currently supports:
 
 - intent parsing for artifact type, breakdowns, focus field, time range, and thresholds
-- schema-aware LLM prompts for the failed-login demo dataset
+- schema-aware LLM prompts for the failed-login validation dataset
 - deterministic mock SPL generation for dashboard, alert, and trend prompts
 - query plan rendering in the panel
 
@@ -245,7 +245,7 @@ Day 6 currently supports:
 
 ### MCP Mode
 
-Best hackathon path. Strong alignment with agentic workflow. Day 4 implementation calls MCP `splunk_get_info` plus `splunk_run_query`, normalizes tool output into panel result preview, and rewrites local CSV demo auth queries into working extraction pipelines when sample data lacks search-time field extraction.
+Preferred product path. Strong alignment with agentic workflow. Day 4 implementation calls MCP `splunk_get_info` plus `splunk_run_query`, normalizes tool output into panel result preview, and rewrites local CSV auth queries into working extraction pipelines when sample data lacks search-time field extraction.
 
 ### REST Fallback
 
@@ -253,7 +253,7 @@ Practical fallback when MCP unavailable. Day 4 implementation posts generated SP
 
 ### Mock Mode
 
-Required for resilient demos and local iteration. Day 4 implementation returns deterministic rows from the failed-login fixture shape.
+Required for resilient walkthroughs and local iteration. Day 4 implementation returns deterministic rows from the failed-login fixture shape.
 
 ## What Success Looks Like
 
@@ -266,4 +266,4 @@ Required for resilient demos and local iteration. Day 4 implementation returns d
 
 - [`PRD.md`](../PRD.md)
 - [`ROADMAP.md`](../ROADMAP.md)
-- [`DEMO_RUNBOOK.md`](./DEMO_RUNBOOK.md)
+- [`WALKTHROUGH_RUNBOOK.md`](./WALKTHROUGH_RUNBOOK.md)

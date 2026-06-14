@@ -1,6 +1,6 @@
-# Sample Data for Day 1
+# Sample Data
 
-Use this fixture for hackathon MVP setup and repeatable demo runs.
+Use this fixture for local setup and repeatable validation runs.
 
 ## Included File
 
@@ -32,7 +32,7 @@ This file supports:
 - privileged actions
 - risk-score filtering
 - app, destination, role, device, and session breakdowns
-- suspicious source-IP and impossible-travel style demos
+- suspicious source-IP and impossible-travel style walkthroughs
 
 ## Import Options
 

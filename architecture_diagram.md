@@ -8,7 +8,7 @@ flowchart LR
     Workflow --> Adapter["Splunk Adapter\nMCP / REST / Mock"]
     Adapter --> MCP["Splunk MCP Server\nsplunk_get_info + splunk_run_query"]
     Adapter --> REST["Splunk REST API\n/services/search/jobs/export"]
-    Adapter --> Mock["Deterministic demo fixture\nfailed_login_auth.csv shape"]
+    Adapter --> Mock["Deterministic validation fixture\nfailed_login_auth.csv shape"]
     MCP --> Splunk["Splunk Enterprise / Cloud"]
     REST --> Splunk
     Splunk --> Adapter
@@ -33,5 +33,5 @@ flowchart LR
 ## AI And Splunk Integration
 
 - AI layer: prompt intent parser, provider-backed SPL generation, deterministic mock fallback, and repair reasoning.
-- Splunk layer: MCP-first query execution with REST fallback and mock mode for reliable demos.
+- Splunk layer: MCP-first query execution with REST fallback and mock mode for reliable walkthroughs.
 - Safety posture: read-only search execution, bounded search limits, no destructive commands, human approval planned before export.

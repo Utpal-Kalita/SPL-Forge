@@ -17,7 +17,7 @@
 
 ## Overview
 
-SPL Forge is working VS Code extension MVP for self-debugging Splunk development. It helps developers, security teams, and operations engineers describe an outcome in natural language and get back validated SPL plus app-ready Splunk artifacts.
+SPL Forge is a working VS Code extension for self-debugging Splunk development. It helps developers, security teams, and operations engineers describe an outcome in natural language and get back validated SPL plus app-ready Splunk artifacts.
 
 Core workflow:
 
@@ -54,11 +54,11 @@ According to PRD, SPL Forge is being designed as:
 
 - VS Code extension with optional companion web experience
 - Practical agentic IDE for Splunk developers and analysts
-- Hackathon-ready MVP focused on one polished end-to-end workflow
+- Focused initial workflow for validated search, dashboard, alert, and app export
 - Foundation for broader AI-native Splunk development operations
 - Self-hosted local development path aligned with Splunk free trial and Developer License flow
 
-Initial demo scenario is centered on failed-login monitoring, where system generates query, detects a live runtime or schema issue, repairs it with schema context, previews results, and exports dashboard and alert package.
+Initial walkthrough scenario is centered on failed-login monitoring, where system generates query, detects a live runtime or schema issue, repairs it with schema context, previews results, and exports dashboard and alert package.
 
 ## Intended Users
 
@@ -66,7 +66,7 @@ Initial demo scenario is centered on failed-login monitoring, where system gener
 - Security analysts creating detection searches and dashboards
 - SRE and DevOps teams building operational monitoring views under time pressure
 - Splunk admins and platform engineers supporting repeatable content creation
-- Development teams who need repeatable local Splunk validation during build and demo work
+- Development teams who need repeatable local Splunk validation during build and walkthrough work
 
 ## Architecture Snapshot
 
@@ -106,14 +106,14 @@ See [`docs/FREE_TRIAL_SETUP.md`](./docs/FREE_TRIAL_SETUP.md) for full Splunk set
 
 ## Current Status
 
-This repository now contains a working hackathon MVP. It includes a VS Code panel, standalone browser dashboard, Splunk-only model adapter, and partial app deployment path. Complete Splunk app install automation is still pending.
+This repository contains a working product implementation. It includes a VS Code panel, a standalone browser dashboard, a working Splunk-hosted-model path, and a partial app deployment path. Complete Splunk app install automation is still pending.
 
 Current repository assets:
 
 - Product requirements in [`PRD.md`](./PRD.md)
 - Delivery roadmap in [`ROADMAP.md`](./ROADMAP.md)
 - Setup guides for VS Code, Splunk, and first-run workflow
-- Supporting docs for architecture, demo flow, and contribution expectations
+- Supporting docs for architecture, walkthrough flow, and contribution expectations
 - Brand banner and repository presentation assets
 - Simple and complex auth sample datasets in `samples/`
 - VS Code extension shell with intent-aware SPL generation and query plan feedback
@@ -124,29 +124,29 @@ Current repository assets:
 - Dashboard plus disabled alert publish path via `npm run publish:app` or the panel Publish to Splunk button
 - Alert saved-search preview generated from threshold prompts
 - Minimal Splunk app folder export via `npm run export:app`
-- Generated app includes `props.conf` CSV field extraction stanzas for `auth` and `auth_complex` demo sourcetypes
+- Generated app includes `props.conf` CSV field extraction stanzas for `auth` and `auth_complex` walkthrough sourcetypes
 - Publish flow reloads dashboard and saved-search REST endpoints after create/update
-- Splunk-only model provider path through configurable MCP AI Assistant tool (`SPL_FORGE_SPLUNK_MODEL_TOOL`) or direct Splunk-hosted model endpoint
+- Working Splunk model provider path through configurable MCP AI Assistant tool (`SPL_FORGE_SPLUNK_MODEL_TOOL`) or direct Splunk-hosted model endpoint
 - Standalone browser dashboard via `npm run dashboard -- --mode mcp` or `npm run dashboard -- --mode rest`
 - Sixteen-prompt smoke verifier via `npm run verify:prompts -- --mode mcp --all --delay-ms 2500`
-- Submission verifier via `npm run verify:submission`
+- Release verifier via `npm run verify:release`
 - Polished VS Code panel flow with query history, error log, Run, Export App, and Publish to Splunk controls
 - Day 9 stability coverage for trend breakdowns, successful-login prompts, source-IP grouping, threshold alerts, unsafe provider output, and complex `auth_complex` risk/MFA/privileged/service-account prompts
-- Root architecture diagram and MIT license for hackathon submission readiness
+- Root architecture diagram and MIT license for release readiness
 
 ## Reality Check
 
-- Splunk Hosted Models: implemented as configurable Splunk MCP AI Assistant tool or direct Splunk model endpoint. Submission mode is intended to use one of these live Splunk paths, not a third-party or mock model.
+- Splunk Hosted Models: implemented as configurable Splunk MCP AI Assistant tool or direct Splunk model endpoint. Release verification is intended to use one of these live Splunk paths, not a third-party or mock model.
 - Standalone web dashboard: implemented as local browser dashboard served by `npm run dashboard`.
 - Complete app deployment: partial. SPL Forge exports an app folder and publishes dashboard plus disabled alert through REST with endpoint reloads. Full app install/reload automation is not claimed.
 - True multi-agent architecture: not implemented. Current runtime is one workflow loop with generation, execution, schema inspection, repair, artifact export, and publish stages.
 
-## Submission Check
+## Release Check
 
-Before recording or submitting, run:
+Before publishing or recording a walkthrough, run:
 
 ```bash
-npm run verify:submission
+npm run verify:release
 ```
 
 This command checks:
@@ -172,11 +172,11 @@ This command checks:
 - [Splunk MCP Server Research](./docs/SPLUNK_MCP.md)
 - [Free Trial Setup](./docs/FREE_TRIAL_SETUP.md)
 - [Architecture](./docs/ARCHITECTURE.md)
-- [Demo Runbook](./docs/DEMO_RUNBOOK.md)
+- [Walkthrough Runbook](./docs/WALKTHROUGH_RUNBOOK.md)
 
 ## Vision
 
-SPL Forge is built around one clear idea: Splunk development should feel more like describing intent and less like manually stitching together query syntax, dashboard configs, and packaging steps. For hackathon and MVP work, repository now assumes a self-hosted Splunk Enterprise free trial upgraded with a Developer License.
+SPL Forge is built around one clear idea: Splunk development should feel more like describing intent and less like manually stitching together query syntax, dashboard configs, and packaging steps. For local product work, the repository assumes a self-hosted Splunk Enterprise free trial upgraded with a Developer License.
 
 Long-term opportunity is AI-native development layer for Splunk that can help teams generate, verify, explain, and operationalize Splunk content with less friction and more trust.
 

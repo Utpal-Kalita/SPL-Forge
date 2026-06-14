@@ -96,7 +96,7 @@ function buildPropsConf() {
 function buildTransformsConf() {
   return [
     '# Reserved for future generated lookup and field-transform stanzas.',
-    '# props.conf carries CSV field extraction for demo sourcetypes today.',
+    '# props.conf carries CSV field extraction for validation sourcetypes today.',
   ].join('\n');
 }
 
@@ -193,7 +193,7 @@ function buildReadme(result: ForgeRunResult) {
     '',
     '## Readiness Notes',
     '',
-    '- Generated app includes `props.conf` CSV extraction stanzas for `auth` and `auth_complex` demo sourcetypes.',
+    '- Generated app includes `props.conf` CSV extraction stanzas for `auth` and `auth_complex` validation sourcetypes.',
     '- REST publish path creates or updates dashboard XML and disabled saved-search alert, then reloads those knowledge-object endpoints.',
     '- Full Splunk app install automation is not claimed here; manual app-folder import remains supported.',
     '- Splunk model generation is configured outside the exported app through MCP AI Assistant tool or Splunk-hosted model endpoint.',

@@ -14,7 +14,7 @@ Install the following before cloning the project:
 - **Node.js LTS** — recommended for VS Code extension development.
 - **npm** — included with Node.js and used for dependency management.
 - **Visual Studio Code** — primary development environment.
-- **Splunk environment** — local Splunk Enterprise, Splunk Cloud access, or a prepared demo/search-head environment.
+- **Splunk environment** — local Splunk Enterprise, Splunk Cloud access, or a prepared walkthrough/search-head environment.
 - **Splunk Enterprise free trial** — recommended local Splunk base before applying Developer License.
 
 Verify the basics:
@@ -59,7 +59,7 @@ SPL-Forge/
 │   ├── VS_CODE_SETUP.md        # VS Code setup guide
 │   ├── SPLUNK_SETUP.md         # Splunk environment setup
 │   ├── ARCHITECTURE.md         # System architecture
-│   └── DEMO_RUNBOOK.md         # Demo scenario walkthrough
+│   └── WALKTHROUGH_RUNBOOK.md         # Product workflow walkthrough
 ├── src/                        # Extension source code
 │   ├── agent/                  # SPL generation and prompt handling
 │   ├── config/                 # Runtime environment loader
@@ -75,7 +75,7 @@ SPL-Forge/
 ├── README.md                   # Main project documentation
 ├── CHANGELOG.md                # Version history
 ├── vsc-extension-quickstart.md # VS Code extension quickstart
-├── ROADMAP.md                  # MVP and future roadmap
+├── ROADMAP.md                  # Release and future roadmap
 └── PRD.md                      # Product requirements
 ```
 
@@ -296,7 +296,7 @@ At a minimum, developers should prepare:
 - Authentication method.
 - App/index/sourcetype names used for testing.
 - Saved searches or sample SPL queries.
-- Demo data or mock events.
+- Validation data or mock events.
 
 Recommended local environment variables:
 
@@ -326,7 +326,7 @@ The VS Code extension should eventually act as the developer-facing control surf
 - MCP server orchestration.
 - Guardrail checks for generated searches.
 - Prompt and runbook-driven troubleshooting.
-- Demo flows documented in `docs/DEMO_RUNBOOK.md`.
+- Walkthrough flows documented in `docs/WALKTHROUGH_RUNBOOK.md`.
 
 Recommended future folders if MCP tooling is added:
 
@@ -334,7 +334,7 @@ Recommended future folders if MCP tooling is added:
 mcp/              # MCP server implementations
 prompts/          # Prompt templates and evaluation prompts
 guardrails/       # SPL validation, safety rules, and policy checks
-examples/         # Demo payloads, saved searches, and sample incidents
+examples/         # Walkthrough payloads, saved searches, and sample incidents
 ```
 
 Until those folders exist, keep MCP-specific implementation notes in `docs/ARCHITECTURE.md` or `docs/PROGRESS.md`.
@@ -370,7 +370,7 @@ npm run compile
 A good pull request should include:
 
 - Clear summary of what changed.
-- Screenshots or demo notes for UI behavior.
+- Screenshots or walkthrough notes for UI behavior.
 - Testing steps.
 - Any Splunk setup assumptions.
 - Related issue or roadmap item.
@@ -481,10 +481,10 @@ Use this checklist when setting up a new machine:
 Read these next:
 
 - `README.md` — project overview.
-- `docs/QUICKSTART.md` — shortest path to a working demo.
+- `docs/QUICKSTART.md` — shortest path to a working walkthrough.
 - `docs/SPLUNK_SETUP.md` — Splunk-specific setup.
 - `docs/ARCHITECTURE.md` — system design.
-- `docs/DEMO_RUNBOOK.md` — demo walkthrough.
+- `docs/WALKTHROUGH_RUNBOOK.md` — product workflow walkthrough.
 - `docs/PROGRESS.md` — current build progress.
-- `ROADMAP.md` — MVP and future direction.
+- `ROADMAP.md` — release and future direction.
 - `PRD.md` — product requirements.

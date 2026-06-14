@@ -5,13 +5,13 @@
 **Document type:** Product Requirements Document  
 **Version:** v1.0  
 **Date:** 2026-05-24  
-**Primary build target:** Splunk Agentic Ops Hackathon 2026  
-**Primary track:** Platform & Developer Experience  
-**Secondary prize angles:** Best Use of Splunk MCP Server, Best Use of Splunk Hosted Models, Best Use of Splunk Developer Tools  
+**Primary build target:** SPL Forge product release  
+**Primary track:** Splunk developer experience  
+**Secondary product angles:** Splunk MCP Server, Splunk Hosted Models, and Splunk developer tooling  
 
 ---
 
-> Implementation status: this PRD includes future/product ambition. Current repository implementation includes a VS Code webview MVP, standalone browser dashboard, Splunk-only model adapter through MCP AI Assistant tool or Splunk-hosted endpoint, MCP/REST/mock Splunk execution, app-folder export, and dashboard/disabled-alert REST publish. Full app install automation and true separate sub-agent runtime are not implemented yet.
+> Implementation status: this PRD includes future/product ambition. Current repository implementation includes a VS Code webview initial release, a standalone browser dashboard, a working Splunk-hosted-model path through MCP AI Assistant tooling or a direct Splunk model endpoint, MCP/REST/mock Splunk execution, app-folder export, and dashboard/disabled-alert REST publish. Full app install automation and a true separate sub-agent runtime are not implemented yet.
 
 ## 1. Executive Summary
 
@@ -25,11 +25,11 @@ User intent → Generate SPL → Execute in Splunk → Read result/error → Ins
 
 This makes SPL Forge more than a chatbot. It behaves like a junior Splunk developer who can write, test, debug, document, and package Splunk work while keeping a human in control.
 
-The MVP is designed to be achievable in 10 days. It will focus on one polished workflow:
+The initial release is designed to be achievable in 10 days. It will focus on one polished workflow:
 
 > “Create a failed-login dashboard by country and user agent, and alert if failed attempts exceed a threshold.”
 
-The MVP should demonstrate that SPL Forge can generate a query, execute it, detect a field mismatch or SPL error, fix itself using live Splunk metadata, show results, and export a basic dashboard or alert configuration.
+The initial release should demonstrate that SPL Forge can generate a query, execute it, detect a field mismatch or SPL error, fix itself using live Splunk metadata, show results, and export a basic dashboard or alert configuration.
 
 ---
 
@@ -100,7 +100,7 @@ The timing is strong because three trends are converging:
 3. **Developer tooling is shifting into the IDE**  
    VS Code is where developers already work. A Splunk-specific agent inside VS Code reduces context switching and makes the product feel practical rather than experimental.
 
-For the hackathon, this is especially relevant because the Platform track focuses on making Splunk easier to create, extend, and automate with. SPL Forge directly targets that goal.
+This is relevant because Splunk teams need faster ways to create, extend, and automate with the platform. SPL Forge directly targets that goal.
 
 ---
 
@@ -134,7 +134,7 @@ For the hackathon, this is especially relevant because the Platform track focuse
 
 ### 5.2 Secondary Users
 
-- Hackathon judges evaluating product originality and feasibility.
+- Technical reviewers evaluating product originality and feasibility.
 - Enterprise leaders evaluating developer productivity gains.
 - Splunk community builders creating reusable templates.
 - New Splunk learners who need guided SPL creation.
@@ -173,9 +173,9 @@ SPL Forge should produce:
 - Make SPL development accessible to non-experts.
 - Improve trust in AI-generated SPL by executing and repairing queries against real Splunk data.
 - Provide a polished VS Code experience that feels like a real developer tool.
-- Demonstrate clear Splunk platform alignment for the hackathon.
+- Walkthroughnstrate clear Splunk platform alignment for the Product.
 
-### 7.2 MVP Goals
+### 7.2 Initial Release Goals
 
 Within 10 days, SPL Forge must:
 
@@ -188,13 +188,13 @@ Within 10 days, SPL Forge must:
 - Repair at least one common failure type, such as wrong field name or sourcetype.
 - Display the final SPL, result preview, and explanation.
 - Export a simple dashboard or saved-search style artifact.
-- Provide a demo-ready flow with sample data.
+- Provide a walkthrough-ready flow with sample data.
 
 ---
 
-## 8. Non-Goals for MVP
+## 8. Non-Goals for Initial Release
 
-The MVP should intentionally avoid overbuilding.
+The initial release should intentionally avoid overbuilding.
 
 The following are not required in the first 10 days:
 
@@ -210,7 +210,7 @@ The following are not required in the first 10 days:
 - Visual drag-and-drop dashboard editing.
 - Marketplace publishing.
 
-The MVP must prove the core loop first: **generate → execute → debug → export**.
+The initial release must prove the core loop first: **generate → execute → debug → export**.
 
 ---
 
@@ -226,25 +226,25 @@ The MVP must prove the core loop first: **generate → execute → debug → exp
    Users should understand what SPL Forge created and why.
 
 4. **Safe by default**  
-   Avoid destructive actions. Prefer read-only searches and export files during MVP.
+   Avoid destructive actions. Prefer read-only searches and export files during initial release.
 
 5. **Schema-aware, not generic**  
    The system should use real Splunk indexes, sourcetypes, and fields whenever possible.
 
 6. **Start narrow, polish deeply**  
-   One excellent demo flow is better than five incomplete flows.
+   One excellent walkthrough flow is better than five incomplete flows.
 
 ---
 
-## 10. MVP Scope — 10 Days
+## 10. Initial Release Scope
 
-### 10.1 MVP Theme
+### 10.1 Initial Release Theme
 
 **Build one polished self-debugging Splunk development workflow inside VS Code.**
 
-### 10.2 MVP Demo Scenario
+### 10.2 Initial Release Walkthrough Scenario
 
-The default demo scenario should be failed-login monitoring.
+The default walkthrough scenario should be failed-login monitoring.
 
 User enters:
 
@@ -264,7 +264,7 @@ SPL Forge should:
 8. Generate dashboard and alert artifacts.
 9. Export a small Splunk app folder.
 
-### 10.3 MVP Deliverables
+### 10.3 Initial Release Deliverables
 
 | Deliverable | Description | Must Have? |
 |---|---|---|
@@ -276,12 +276,12 @@ SPL Forge should:
 | Self-debug loop | Repairs query using error/result context | Yes |
 | Result preview | Shows table or JSON result summary | Yes |
 | Artifact export | Writes dashboard/alert/app files locally | Yes |
-| README + demo script | Explains setup and value | Yes |
+| README + walkthrough script | Explains setup and value | Yes |
 | Full production deploy | Deploy directly into Splunk Cloud | No |
 
-### 10.4 MVP Success Definition
+### 10.4 Initial Release Success Definition
 
-The MVP is successful if a judge can watch a 3-minute demo and clearly see:
+The initial release is successful if a technical reviewer can watch a 3-minute walkthrough and clearly see:
 
 - Natural-language prompt inside VS Code.
 - Generated SPL query.
@@ -293,11 +293,11 @@ The MVP is successful if a judge can watch a 3-minute demo and clearly see:
 
 ---
 
-## 11. Post-MVP Expansion
+## 11. Post-release Expansion
 
 ### Phase 2 — Better Developer Experience
 
-Timeframe: 2–4 weeks after MVP
+Timeframe: 2–4 weeks after initial release
 
 Goals:
 
@@ -437,11 +437,11 @@ Expected LLM output:
 
 **Requirement:** User must be able to configure Splunk connection details.
 
-Supported MVP connection modes:
+Supported initial release connection modes:
 
 1. **MCP mode** for Splunk MCP Server / MCP Gateway.
 2. **REST fallback mode** for direct Splunk management API access.
-3. **Mock mode** for demo reliability if a live environment is unavailable.
+3. **Mock mode** for walkthrough reliability if a live environment is unavailable.
 
 Configuration fields:
 
@@ -473,11 +473,11 @@ Minimum metadata:
 - Field names for a chosen index/sourcetype.
 - Sample event fields if available.
 
-MVP approach:
+initial release approach:
 
 - Use MCP tools if available.
 - Use REST fallback where possible.
-- Use a mock schema file for deterministic hackathon demo if needed.
+- Use a mock schema file for deterministic Product walkthrough if needed.
 
 Example mock schema file:
 
@@ -507,7 +507,7 @@ Execution modes:
 
 - Real Splunk execution through MCP.
 - REST fallback execution.
-- Mock execution for demo mode.
+- Mock execution for walkthrough mode.
 
 Execution result should include:
 
@@ -546,13 +546,13 @@ Repair loop output:
 
 Repair policy:
 
-- Maximum 2 repair attempts for MVP.
-- Ask for user approval before running a repaired query unless demo mode auto-run is enabled.
+- Maximum 2 repair attempts for initial release.
+- Ask for user approval before running a repaired query unless walkthrough mode auto-run is enabled.
 - Stop if query becomes unsafe, too broad, or repeatedly fails.
 
 **Acceptance criteria:**
 
-- A known broken query can be repaired in demo.
+- A known broken query can be repaired in walkthrough.
 - Repair history is visible.
 - User can compare original and repaired SPL.
 
@@ -562,7 +562,7 @@ Repair policy:
 
 **Requirement:** Successful search results must be shown in a readable preview.
 
-MVP preview formats:
+initial release preview formats:
 
 - Table preview.
 - JSON preview.
@@ -580,7 +580,7 @@ MVP preview formats:
 
 **Requirement:** SPL Forge must generate a simple dashboard artifact from a validated SPL query.
 
-MVP dashboard output:
+initial release dashboard output:
 
 - A JSON or XML-like dashboard file.
 - Title.
@@ -589,7 +589,7 @@ MVP dashboard output:
 - Associated SPL query.
 - Visualization type.
 
-MVP file path:
+initial release file path:
 
 ```text
 splunk-app-template/default/data/ui/views/generated_dashboard.xml
@@ -613,7 +613,7 @@ exports/dashboard.generated.json
 
 **Requirement:** SPL Forge must generate an alert configuration when user intent includes a threshold or schedule.
 
-MVP alert output:
+initial release alert output:
 
 - Name.
 - Description.
@@ -644,7 +644,7 @@ alert_threshold = 100
 
 **Requirement:** SPL Forge must export generated artifacts into a local app-like folder structure.
 
-MVP export structure:
+initial release export structure:
 
 ```text
 spl-forge-generated-app/
@@ -686,7 +686,7 @@ Log fields:
 **Acceptance criteria:**
 
 - Log is visible in UI.
-- Log can be saved as JSON for demo proof.
+- Log can be saved as JSON for walkthrough proof.
 - Secrets and tokens are never logged.
 
 ---
@@ -701,7 +701,7 @@ Open VS Code → Open SPL Forge → Configure Splunk → Enter prompt → Genera
 
 ### 13.2 UI Sections
 
-The MVP webview should have five areas:
+The initial release webview should have five areas:
 
 1. **Prompt panel**  
    Natural-language input and example prompts.
@@ -805,7 +805,7 @@ SPL Forge has four main parts:
 
 ## 15. Recommended Tech Stack
 
-### 15.1 MVP Stack
+### 15.1 Initial Release Stack
 
 | Layer | Technology | Reason |
 |---|---|---|
@@ -819,10 +819,10 @@ SPL Forge has four main parts:
 | Testing | Vitest | Fast TS unit tests |
 | Linting | ESLint | Code quality |
 | Secrets | VS Code SecretStorage | Avoid token leakage |
-| Splunk access | MCP first, REST fallback | Reliable demo + real integration path |
-| AI model | Splunk Hosted Models | Aligns directly with hackathon requirements |
+| Splunk access | MCP first, REST fallback | Reliable walkthrough + real integration path |
+| AI model | Splunk Hosted Models | Aligns directly with product requirements |
 
-### 15.2 Optional Post-MVP Stack
+### 15.2 Optional Post-release Stack
 
 | Need | Technology Option |
 |---|---|
@@ -865,7 +865,7 @@ Recommended generator answers:
 ? What's the identifier of your extension? spl-forge
 ? What's the description? Self-debugging agentic IDE for Splunk development
 ? Initialize a git repository? Yes
-? Which bundler to use? esbuild or unbundled for MVP
+? Which bundler to use? esbuild or unbundled for initial release
 ? Which package manager to use? npm
 ```
 
@@ -972,7 +972,7 @@ spl-forge/
 
 ### 16.5 package.json Contribution Points
 
-Example MVP contribution configuration:
+Example initial release contribution configuration:
 
 ```json
 {
@@ -1075,12 +1075,12 @@ SPL Forge should support three development modes:
 
 #### Option A — Mock Mode
 
-Best for first 2–3 days and demo fallback.
+Best for first 2–3 days and walkthrough fallback.
 
 - No live Splunk required.
 - Uses `sample-data/mock-schema.json`.
 - Simulates success/error responses.
-- Allows deterministic demo.
+- Allows deterministic walkthrough.
 
 #### Option B — Local Splunk Enterprise / Trial
 
@@ -1093,7 +1093,7 @@ Best for real execution testing.
 
 #### Option C — Splunk Cloud + MCP
 
-Best for hackathon alignment.
+Best for Product alignment.
 
 - Configure Splunk MCP Server or Gateway.
 - Store MCP endpoint and headers securely.
@@ -1101,7 +1101,7 @@ Best for hackathon alignment.
 
 ### 17.2 Sample Data Plan
 
-For MVP reliability, include sample auth events.
+For initial release reliability, include sample auth events.
 
 Example fields:
 
@@ -1120,7 +1120,7 @@ sourcetype=auth
 fields=user, src_ip, country, user_agent, action, status, app
 ```
 
-### 17.3 MVP Query Examples
+### 17.3 Initial Release Query Examples
 
 Successful target query:
 
@@ -1130,7 +1130,7 @@ index=security sourcetype=auth action=failure earliest=-30m
 | sort - count
 ```
 
-Intentional broken query for demo repair:
+Intentional broken query for walkthrough repair:
 
 ```spl
 index=security sourcetype=auth result=failed earliest=-30m
@@ -1216,7 +1216,7 @@ The fallback connector should implement the same `SplunkConnector` interface so 
 
 ### 19.1 Agent Responsibilities
 
-The MVP should use one orchestrator with multiple internal steps, not many complex agents.
+The initial release should use one orchestrator with multiple internal steps, not many complex agents.
 
 Steps:
 
@@ -1224,7 +1224,7 @@ Steps:
 2. Fetch schema context.
 3. Generate candidate SPL.
 4. Validate LLM output.
-5. Ask user to run or auto-run in demo mode.
+5. Ask user to run or auto-run in walkthrough mode.
 6. Execute query.
 7. Detect success, error, or empty result.
 8. Repair if needed.
@@ -1366,7 +1366,7 @@ interface DashboardInput {
 }
 ```
 
-MVP output:
+initial release output:
 
 - One dashboard file.
 - One panel.
@@ -1388,7 +1388,7 @@ interface AlertInput {
 }
 ```
 
-MVP output:
+initial release output:
 
 - Saved search style config.
 - Threshold condition.
@@ -1432,7 +1432,7 @@ interface SPLForgeSettings {
   defaultLatest?: string;
   modelProvider: "splunk" | "local" | "mock";
   maxRepairAttempts: number;
-  demoMode: boolean;
+  walkthroughMode: boolean;
 }
 ```
 
@@ -1457,7 +1457,7 @@ Never store secrets in:
 
 ## 22. Security Requirements
 
-### 22.1 MVP Security Rules
+### 22.1 Initial Release Security Rules
 
 - Default to read-only searches.
 - Require approval before export or deploy.
@@ -1476,7 +1476,7 @@ Before execution, check:
 - Does it include external calls or suspicious macros?
 - Does it have `earliest`/`latest` bounds?
 
-MVP safety response:
+initial release safety response:
 
 ```text
 This query may be expensive because it searches all indexes without a time range. SPL Forge added earliest=-30m for safe execution.
@@ -1484,7 +1484,7 @@ This query may be expensive because it searches all indexes without a time range
 
 ### 22.3 Enterprise Future Security
 
-Post-MVP security should include:
+Post-release security should include:
 
 - RBAC mapping.
 - Approval workflow.
@@ -1498,7 +1498,7 @@ Post-MVP security should include:
 
 ## 23. Performance Requirements
 
-### MVP Targets
+### Initial Release Targets
 
 | Metric | Target |
 |---|---|
@@ -1507,9 +1507,9 @@ Post-MVP security should include:
 | Search execution | Depends on Splunk, but UI should stream status |
 | Repair loop | <= 2 attempts |
 | Result preview | First 20 rows rendered smoothly |
-| Export | < 5 seconds for MVP app folder |
+| Export | < 5 seconds for initial release app folder |
 
-### Post-MVP Targets
+### Post-release Targets
 
 - Stream agent activity in real time.
 - Cache schema metadata for faster prompts.
@@ -1520,7 +1520,7 @@ Post-MVP security should include:
 
 ## 24. Reliability Requirements
 
-The demo must be resilient even if a live Splunk connection fails.
+The walkthrough must be resilient even if a live Splunk connection fails.
 
 Required reliability safeguards:
 
@@ -1556,9 +1556,9 @@ Test flows:
 4. Generate dashboard artifact.
 5. Export app folder.
 
-### 25.3 Manual Demo Tests
+### 25.3 Manual Walkthrough Tests
 
-Before recording demo, verify:
+Before recording walkthrough, verify:
 
 - VS Code extension launches with F5.
 - SPL Forge panel opens.
@@ -1706,7 +1706,7 @@ Deliverables:
 - Export creates local files.
 - README generated with prompt and final SPL.
 
-### Day 9 — Polish + Demo Reliability
+### Day 9 — Polish + Walkthrough Reliability
 
 Goals:
 
@@ -1718,30 +1718,30 @@ Goals:
 
 Deliverables:
 
-- Demo flow works 3 times in a row.
+- Walkthrough flow works 3 times in a row.
 - README setup instructions complete.
 
-### Day 10 — Submission Assets
+### Day 10 — Release Assets
 
 Goals:
 
-- Record demo video.
+- Record walkthrough video.
 - Finalize PRD, README, roadmap, architecture.
-- Prepare Devpost submission text.
+- Prepare release notes.
 
 Deliverables:
 
 - Working repo.
-- Demo video script.
+- Walkthrough video script.
 - Screenshots.
 - Architecture diagram.
 - Final package.
 
 ---
 
-## 27. Acceptance Criteria for Hackathon MVP
+## 27. Acceptance Criteria for Initial Release
 
-The project is ready to submit when:
+The project is ready for release when:
 
 - [ ] VS Code extension runs locally.
 - [ ] Prompt UI accepts natural language.
@@ -1754,24 +1754,24 @@ The project is ready to submit when:
 - [ ] Local Splunk app folder or zip is exported.
 - [ ] README explains setup clearly.
 - [ ] Architecture diagram is included.
-- [ ] Demo video shows end-to-end value.
+- [ ] Walkthrough video shows end-to-end value.
 
 ---
 
 ## 28. Success Metrics
 
-### MVP Metrics
+### Initial Release Metrics
 
 | Metric | Target |
 |---|---|
-| Demo workflow completion | 100% in live Splunk mode |
+| Walkthrough workflow completion | 100% in live Splunk mode |
 | SPL repair attempts | Query fixed within 2 attempts |
-| Time from prompt to final SPL | Under 60 seconds in demo |
+| Time from prompt to final SPL | Under 60 seconds in walkthrough |
 | Export success | App folder generated every time |
 | Number of polished use cases | 1 primary + 2 optional prompts |
 | Setup clarity | New user can run extension from README |
 
-### Post-MVP Metrics
+### Post-release Metrics
 
 | Metric | Target |
 |---|---|
@@ -1791,23 +1791,23 @@ The project is ready to submit when:
 | MCP access is delayed | Live integration blocked | Build REST fallback |
 | LLM generates invalid JSON | Agent breaks | Use Zod validation and retry prompt |
 | Generated SPL is wrong | Trust issue | Always execute and show repair loop |
-| Scope is too broad | Demo unfinished | Focus on one polished workflow |
+| Scope is too broad | Walkthrough unfinished | Focus on one polished workflow |
 | Splunk setup takes too long | Lost build time | Use sample data and REST fallback early |
 | Dashboard format complexity | Export fails | Generate simple dashboard or JSON first |
-| Security concerns | Judges distrust automation | Human approval, read-only default, audit logs |
-| UI takes too much time | Weak demo | Use simple webview with clear timeline |
+| Security concerns | technical reviewers distrust automation | Human approval, read-only default, audit logs |
+| UI takes too much time | Weak walkthrough | Use simple webview with clear timeline |
 
 ---
 
 ## 30. Open Questions
 
-1. Will the hackathon environment provide Splunk Hosted Models access directly?
+1. Will the target environment provide Splunk Hosted Models access directly?
 2. Which MCP tools are available in the target Splunk MCP Server version?
-3. Should MVP prioritize MCP mode or REST fallback for live demo reliability?
+3. Should initial release prioritize MCP mode or REST fallback for live walkthrough reliability?
 4. Which dashboard format should be primary: Dashboard Studio JSON or classic XML?
 5. Should exported artifacts be import-ready or review-first files?
-6. Will VS Code marketplace packaging be required, or is local extension demo enough?
-7. Which model provider will be safest and cheapest for the demo?
+6. Will VS Code marketplace packaging be required, or is local extension walkthrough enough?
+7. Which model provider will be safest and cheapest for the walkthrough?
 
 ---
 
@@ -1873,7 +1873,7 @@ Free:
 
 - Local VS Code extension.
 - Basic SPL generation.
-- Mock/demo mode.
+- Mock/walkthrough mode.
 - Simple export.
 
 Paid:
@@ -1907,7 +1907,7 @@ Offer:
 
 ---
 
-## 33. Demo Video Script
+## 33. Walkthrough Video Script
 
 ### 0:00–0:20 — Problem
 
@@ -1963,26 +1963,26 @@ SPL Forge does not just generate SPL. It tests, debugs, explains, and packages S
 
 SPL Forge is a productivity layer for one of the most important enterprise data platforms. Its wedge is simple: help users create Splunk content faster. Its moat grows from environment-specific schema awareness, repair history, templates, team workflows, and trust controls.
 
-The MVP is narrow enough to build quickly, but the product can expand into a broader platform for agentic operations development. It can start as a VS Code extension, grow into an enterprise developer tool, and eventually become a marketplace for reusable Splunk automation workflows.
+The initial release is narrow enough to build quickly, but the product can expand into a broader platform for agentic operations development. It can start as a VS Code extension, grow into an enterprise developer tool, and eventually become a marketplace for reusable Splunk automation workflows.
 
 ---
 
 ## 35. Source Notes
 
-This PRD is based on the SPL Forge concept: an AI-native Splunk development IDE that generates SPL, dashboard XML, alert configuration, uses Splunk MCP Server for introspection/execution, uses hosted models for generation, and uses an agent loop for debugging. It is also aligned with the Splunk Agentic Ops Hackathon platform track, which emphasizes developer and platform experiences that make Splunk easier to create, extend, and automate with.
+This PRD is based on the SPL Forge concept: an AI-native Splunk development IDE that generates SPL, dashboard XML, alert configuration, uses Splunk MCP Server for introspection/execution, uses hosted models for generation, and uses an agent loop for debugging. It emphasizes developer and platform experiences that make Splunk easier to create, extend, and automate with.
 
 Useful reference areas for builders:
 
 - VS Code Extension API: extension scaffolding, commands, webviews, and Extension Development Host.
 - Splunk MCP Server / MCP Gateway: MCP client configuration with endpoint, tokens, and headers.
 - Splunk VS Code Extension: existing pattern for Splunk development, .conf support, saved searches, reports, and REST API usage.
-- Splunk Agentic Ops Hackathon: platform track, MCP Server, AI Assistant, Hosted Models, and AI for Splunk Apps.
+- Splunk platform capabilities: MCP Server, AI Assistant, Hosted Models, and AI for Splunk Apps.
 
 ---
 
-## 36. Final MVP Build Recommendation
+## 36. Final Initial Release Build Recommendation
 
-For the hackathon, do not build every feature in this PRD. Build only the golden path:
+For the initial release, do not build every feature in this PRD. Build only the golden path:
 
 ```text
 VS Code prompt → schema-aware SPL generation → Splunk execution → self-repair → result preview → dashboard/alert export

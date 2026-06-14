@@ -1,6 +1,6 @@
 # Splunk Setup
 
-This guide prepares Splunk side for SPL Forge MVP demos and development.
+This guide prepares the Splunk side for SPL Forge local validation and development.
 
 ## Goal
 
@@ -21,7 +21,7 @@ Choose one:
 
 ## Recommended Development Options
 
-Start with [`FREE_TRIAL_SETUP.md`](./FREE_TRIAL_SETUP.md) if you need local Splunk Enterprise for hackathon or MVP work.
+Start with [`FREE_TRIAL_SETUP.md`](./FREE_TRIAL_SETUP.md) if you need local Splunk Enterprise for product development.
 
 ### Option 1: Splunk Enterprise Dev Instance
 
@@ -45,7 +45,7 @@ Best for realistic hosted environment.
 
 ## Minimum Data Needed
 
-For MVP failed-login scenario, ensure logs include:
+For the failed-login validation scenario, ensure logs include:
 
 - timestamp
 - user
@@ -67,7 +67,7 @@ For richer Day 9/Day 10 testing, `samples/complex_auth_security.csv` also includ
 - device
 - session ID
 
-## Suggested Demo Dataset
+## Suggested Validation Dataset
 
 Use authentication or access logs with enough records to support:
 
@@ -89,7 +89,7 @@ If using Splunk MCP Server:
 1. Install and configure MCP server.
 2. Set auth token or approved credential flow.
 3. Verify tools expose search and metadata access.
-4. Confirm IDE client can connect without manual reauth during demo.
+4. Confirm IDE client can connect without manual reauth during walkthrough.
 
 See [`SPLUNK_MCP.md`](./SPLUNK_MCP.md) for current Splunk MCP Server research, required capabilities, token behavior, tool list, and SPL Forge adapter notes.
 
@@ -123,13 +123,13 @@ If you imported `samples/failed_login_auth.csv` with simple oneshot ingest, Splu
 
 SPL Forge now compensates for that in `self_hosted_trial` mode:
 
-- auth demo queries are rewritten with `rex field=_raw ...`
-- complex auth demo queries for `samples/complex_auth_security.csv` are rewritten with `rex field=_raw ...` and `risk_score=tonumber(risk_score)`
+- auth walkthrough queries are rewritten with `rex field=_raw ...`
+- complex auth walkthrough queries for `samples/complex_auth_security.csv` are rewritten with `rex field=_raw ...` and `risk_score=tonumber(risk_score)`
 - header row is filtered out with `where timestamp!="timestamp"`
 - action filters are converted into working `where action="failure"` or `where action="success"`
 - stale prompt windows can auto-retry with `earliest=0`
 
-This means MCP and REST demos can still work on local fixture import without custom props/transforms setup.
+This means MCP and REST walkthroughs can still work on local fixture import without custom props/transforms setup.
 
 For repeatable prompt verification against the real Splunk model plus local Splunk MCP:
 
@@ -184,10 +184,10 @@ It requests JSON output and renders returned rows, fields, messages, and errors 
 
 - Never commit Splunk passwords or tokens
 - Use least-privilege accounts
-- Prefer read-only search capabilities for MVP
-- Avoid destructive or admin-wide write operations in demo
+- Prefer read-only search capabilities during local validation
+- Avoid destructive or admin-wide write operations in walkthrough
 
-## Demo Validation Checklist
+## Walkthrough Validation Checklist
 
 - Can run sample SPL query successfully
 - Can run generated SPL from SPL Forge panel using live Splunk model wiring
@@ -213,24 +213,22 @@ What Splunk environment must support:
 - compute threshold over time window
 - return enough data for chart preview
 
-## Submission Gate
+## Release Verification Gate
 
-Before submitting to the hackathon, confirm:
+Before publishing a release or recording a walkthrough, confirm:
 
 1. `SPL_FORGE_LLM_PROVIDER=splunk`
 2. `SPL_FORGE_SPLUNK_MODE=mcp` or `rest`
 3. Splunk MCP AI Assistant tool or Splunk-hosted model endpoint is reachable
-4. `npm run verify:submission` passes
-2. Reuse same prompt
-3. Show generated SPL
-4. Show simulated failure
-5. Show repair cycle
-6. Show prepared artifact preview
+4. `npm run verify:release` passes
+5. The walkthrough prompt generates SPL
+6. The repair cycle is visible when a query needs adjustment
+7. The artifact preview includes dashboard and alert output
 
 ## Related Docs
 
 - [`FREE_TRIAL_SETUP.md`](./FREE_TRIAL_SETUP.md)
 - [`SPLUNK_MCP.md`](./SPLUNK_MCP.md)
 - [`VS_CODE_SETUP.md`](./VS_CODE_SETUP.md)
-- [`DEMO_RUNBOOK.md`](./DEMO_RUNBOOK.md)
+- [`WALKTHROUGH_RUNBOOK.md`](./WALKTHROUGH_RUNBOOK.md)
 - [`PRD.md`](../PRD.md)

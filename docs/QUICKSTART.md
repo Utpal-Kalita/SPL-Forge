@@ -1,14 +1,14 @@
 # SPL Forge Quickstart
 
-Use this guide if you want fastest path from clone to demo.
+Use this guide if you want fastest path from clone to walkthrough.
 
 ## What This Repository Contains
 
-SPL Forge contains product docs plus a working VS Code extension MVP and standalone browser dashboard for an AI-native Splunk development workspace. It is not production-complete, but Splunk-only model generation, Splunk execution, repair, dashboard/alert artifact generation, app-folder export, and REST publish are implemented.
+SPL Forge contains product docs plus a working VS Code extension and standalone browser dashboard for an AI-native Splunk development workspace. It is not production-complete, but a working Splunk-hosted-model path, Splunk execution, repair, dashboard/alert artifact generation, app-folder export, and REST publish are implemented.
 
 Core docs:
 
-- [`PRD.md`](../PRD.md) for product scope and MVP definition
+- [`PRD.md`](../PRD.md) for product scope and release definition
 - [`ROADMAP.md`](../ROADMAP.md) for phased delivery plan
 - [`VS_CODE_SETUP.md`](./VS_CODE_SETUP.md) for editor environment
 - [`SPLUNK_SETUP.md`](./SPLUNK_SETUP.md) for Splunk-side preparation
@@ -21,9 +21,9 @@ Core docs:
 4. Review [`SPLUNK_SETUP.md`](./SPLUNK_SETUP.md) for MCP or REST integration mode.
 5. Load [`SAMPLE_DATA.md`](./SAMPLE_DATA.md) fixture into Splunk.
 6. Review [`ARCHITECTURE.md`](./ARCHITECTURE.md) before implementation work.
-7. Use [`DEMO_RUNBOOK.md`](./DEMO_RUNBOOK.md) if preparing hackathon walkthrough.
+7. Use [`WALKTHROUGH_RUNBOOK.md`](./WALKTHROUGH_RUNBOOK.md) if preparing a product walkthrough.
 
-## MVP Demo Goal
+## Validation Goal
 
 Target scenario:
 
@@ -43,7 +43,7 @@ Prompt -> Generate SPL -> Run in Splunk -> Detect issue -> Repair -> Preview -> 
 - Product definition
 - Roadmap
 - Setup guidance
-- Demo planning
+- Walkthrough planning
 - Architecture notes
 - VS Code panel for prompt input
 - Splunk MCP AI Assistant tool or Splunk-hosted model endpoint generation path
@@ -56,7 +56,7 @@ Prompt -> Generate SPL -> Run in Splunk -> Detect issue -> Repair -> Preview -> 
 - App folder export with app.conf, props.conf, transforms.conf, dashboard XML, savedsearches.conf, metadata, README, and manifest
 - REST publish for dashboard plus disabled alert, with endpoint reloads
 - Standalone browser dashboard via `npm run dashboard`
-- Submission verifier via `npm run verify:submission`
+- Release verifier via `npm run verify:release`
 
 ## Not Yet Included
 
@@ -67,7 +67,7 @@ Prompt -> Generate SPL -> Run in Splunk -> Detect issue -> Repair -> Preview -> 
 
 1. Add app archive/install automation
 2. Add richer validation for each generated Splunk app file
-3. Split workflow stages into separately observable sub-agents if required for judging narrative
+3. Split workflow stages into separately observable sub-agents when the product needs deeper runtime transparency
 
 ## Need More Context
 

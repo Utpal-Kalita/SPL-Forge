@@ -2,9 +2,9 @@
 
 **SPL FORGE** is an agentic Splunk operations workbench that turns natural-language operational intent into safe, validated, production-ready Splunk assets: SPL searches, correlation rules, dashboards, alerts, runbooks, investigation timelines, and reusable app components.
 
-> Implementation status: this document describes product vision. Current repository implementation includes a VS Code webview MVP, standalone browser dashboard, Splunk-only model adapter through MCP AI Assistant tool or Splunk-hosted endpoint, MCP/REST/mock Splunk execution, app-folder export, and dashboard/disabled-alert REST publish. Full app install automation and true separate sub-agent runtime are not implemented yet.
+> Implementation status: this document describes product vision. Current repository implementation includes a VS Code webview, a standalone browser dashboard, a working Splunk-hosted-model path through MCP AI Assistant tooling or a direct Splunk model endpoint, MCP/REST/mock Splunk execution, app-folder export, and dashboard/disabled-alert REST publish. Full app install automation and a true separate sub-agent runtime are not implemented yet.
 
-The project is designed for the **Splunk Agentic Ops Hackathon** and focuses on developer productivity, observability, security, and platform extensibility by combining **Splunk**, **Splunk MCP Server**, **Splunk AI capabilities**, and a controlled multi-agent workflow.
+The project focuses on developer productivity, observability, security, and platform extensibility by combining **Splunk**, **Splunk MCP Server**, **Splunk AI capabilities**, and a controlled workflow runtime. The current implementation is a single workflow loop, not a true separate multi-agent runtime.
 
 ---
 
@@ -27,7 +27,7 @@ Teams often struggle with:
 
 ## 2. Core Idea
 
-SPL FORGE is a guided agentic system where users describe what they want to monitor, investigate, detect, or automate. The system then uses specialized agents and MCP-connected tools to create verified Splunk artifacts.
+SPL FORGE is a guided agentic system where users describe what they want to monitor, investigate, detect, or automate. In the current repository, one workflow loop uses MCP-connected tools and a Splunk model path to create verified Splunk artifacts. A true specialized-agent runtime remains future-state.
 
 Example user prompts:
 
@@ -139,7 +139,7 @@ The MCP layer provides a standard, controlled interface between the AI agent and
 - Query knowledge objects.
 - Generate context-aware responses.
 
-Authentication is designed around **token-based authentication** for the hackathon implementation. OAuth can be added later as Splunk MCP OAuth support matures.
+Authentication is designed around **token-based authentication** for the current implementation. OAuth can be added later as Splunk MCP OAuth support matures.
 
 ### Stage 6: Result Analysis
 
@@ -592,7 +592,7 @@ notify.send_incident_summary
 
 ## 7. Agent Design
 
-SPL FORGE uses specialized agents instead of one generic AI agent.
+Future architecture direction: SPL FORGE is intended to use specialized agents instead of one generic AI agent. The current repository runtime does not implement these as separate sub-agents yet.
 
 ### 7.1 Intent Agent
 
@@ -824,7 +824,7 @@ These logs can be sent back into Splunk for monitoring SPL FORGE itself.
 
 ## 11. Scalability Plan
 
-SPL FORGE is designed to scale from a hackathon demo to an enterprise product.
+SPL FORGE is designed to scale from a focused local workflow to an enterprise product.
 
 ### 11.1 Stateless API Layer
 
@@ -942,9 +942,9 @@ SPL FORGE can:
 
 ---
 
-## 13. Demo Flow
+## 13. Walkthrough Flow
 
-A strong demo can follow this sequence:
+A strong walkthrough can follow this sequence:
 
 1. Open SPL FORGE.
 2. Ask: `Why did checkout latency spike after the latest deployment?`
@@ -1085,15 +1085,15 @@ It combines:
 - Human-in-the-loop approvals.
 - Dashboard, alert, runbook, and app generation.
 - Splunk-native telemetry and auditability.
-- A path from hackathon prototype to enterprise product.
+- A path from focused release workflow to enterprise product.
 
 The core originality is the **forge model**: every operational artifact is drafted, validated, tested, optimized, explained, and packaged before being used.
 
 ---
 
-## 19. Hackathon Track Alignment
+## 19. Product Alignment
 
-SPL FORGE can fit all three major hackathon tracks:
+SPL FORGE fits three major product areas:
 
 ### Observability
 

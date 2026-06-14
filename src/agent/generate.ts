@@ -37,12 +37,12 @@ export type PromptIntent = {
 };
 
 const sampleSchemaSummary = [
-  'Known demo schema:',
+  'Known validation schema:',
   'index=main',
   'sourcetype=auth',
   'fields=timestamp,user,src,country,user_agent,action,sourcetype,index',
   'failure values use action=failure',
-  'Complex demo schema:',
+  'Complex validation schema:',
   'sourcetype=auth_complex',
   'fields=timestamp,user,src,dest,app,country,user_agent,action,outcome,risk_score,mfa_result,role,device,session_id,sourcetype,index',
   'complex outcome values include success,failure,blocked',
@@ -53,7 +53,7 @@ const generationSystemPrompt = [
   'Return exactly one raw Splunk Processing Language query.',
   'No explanation. No markdown unless unavoidable.',
   'Prefer realistic Splunk field names from provided schema.',
-  'Use index=main sourcetype=auth when prompt matches failed-login demo data.',
+  'Use index=main sourcetype=auth when prompt matches failed-login validation data.',
   'Use action=failure for failed logins.',
   'Prefer stats, timechart, bin, sort, where pipelines over prose.',
   'When user asks for dashboard plus alert, return best primary search query only.',

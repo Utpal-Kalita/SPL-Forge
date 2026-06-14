@@ -325,7 +325,7 @@ function buildSearchAttempts(search: string, config: ForgeConfig): SearchAttempt
   if (widened !== normalized) {
     attempts.push({
       query: widened,
-      reason: 'No rows with prompt time window. Retried with earliest=0 for local demo fixture timestamps.',
+      reason: 'No rows with prompt time window. Retried with earliest=0 for local validation fixture timestamps.',
     });
   }
 
