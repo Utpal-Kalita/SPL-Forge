@@ -159,7 +159,7 @@ SPL_FORGE_SPLUNK_URL=https://localhost:8089
 SPL_FORGE_SPLUNK_ALLOW_SELF_SIGNED=true
 SPL_FORGE_SPLUNK_SOURCE=self_hosted_trial
 SPL_FORGE_SPLUNK_USERNAME=admin
-SPL_FORGE_SPLUNK_PASSWORD=<your-local-password>
+# Set SPL_FORGE_SPLUNK_PASSWORD in .env.local to your local Splunk password.
 ```
 
 REST mode handles search execution and publish operations. SPL generation still needs one of the Splunk model paths below.
@@ -169,7 +169,7 @@ For MCP mode:
 ```bash
 SPL_FORGE_SPLUNK_MODE=mcp
 SPL_FORGE_SPLUNK_MCP_ENDPOINT=https://localhost:8089/services/mcp
-SPL_FORGE_SPLUNK_MCP_TOKEN=<encrypted-mcp-token>
+# Set SPL_FORGE_SPLUNK_MCP_TOKEN in .env.local to the encrypted token from Splunk MCP Server.
 SPL_FORGE_SPLUNK_MCP_ALLOW_SELF_SIGNED=true
 SPL_FORGE_SPLUNK_SOURCE=self_hosted_trial
 ```
@@ -187,8 +187,8 @@ For a direct Splunk-hosted model endpoint instead of MCP AI Assistant tooling, s
 ```bash
 SPL_FORGE_LLM_PROVIDER=splunk
 SPL_FORGE_LLM_MODEL=splunk-hosted-model
-SPL_FORGE_SPLUNK_MODEL_ENDPOINT=https://<your-splunk-model-endpoint>
-SPL_FORGE_SPLUNK_MODEL_TOKEN=<your-splunk-token>
+# Set SPL_FORGE_SPLUNK_MODEL_ENDPOINT in .env.local to the direct model endpoint.
+# Set SPL_FORGE_SPLUNK_MODEL_TOKEN in .env.local to the Splunk token for that endpoint.
 ```
 
 Never commit `.env.local`.
