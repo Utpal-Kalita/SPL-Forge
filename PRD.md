@@ -1597,9 +1597,9 @@ Explain this SPL and suggest a better visualization.
 
 ---
 
-## 26. 10-Day Build Plan
+## 26. Initial Release Build Plan
 
-### Day 1 — Project Setup
+### Milestone 1 — Project Setup
 
 Goals:
 
@@ -1614,7 +1614,7 @@ Deliverables:
 - `SPL Forge: Open Assistant` command works.
 - Empty assistant UI visible.
 
-### Day 2 — UI + Mock Agent
+### Milestone 2 — UI + Mock Agent
 
 Goals:
 
@@ -1628,7 +1628,7 @@ Deliverables:
 - Prompt generates a fake SPL.
 - Timeline shows generate/run/complete steps.
 
-### Day 3 — LLM Integration
+### Milestone 3 — LLM Integration
 
 Goals:
 
@@ -1641,7 +1641,7 @@ Deliverables:
 - Prompt returns parseable SPL JSON.
 - Invalid model output is handled.
 
-### Day 4 — Splunk Connector
+### Milestone 4 — Splunk Connector
 
 Goals:
 
@@ -1654,7 +1654,7 @@ Deliverables:
 - Mock and one real connector path compile.
 - User can select mode.
 
-### Day 5 — Search Execution
+### Milestone 5 — Search Execution
 
 Goals:
 
@@ -1667,7 +1667,7 @@ Deliverables:
 - Generated SPL can run in live Splunk.
 - Result preview table works.
 
-### Day 6 — Repair Loop
+### Milestone 6 — Repair Loop
 
 Goals:
 
@@ -1680,7 +1680,7 @@ Deliverables:
 - Broken query gets repaired using schema context.
 - UI shows before/after SPL.
 
-### Day 7 — Schema Introspection
+### Milestone 7 — Schema Introspection
 
 Goals:
 
@@ -1693,7 +1693,7 @@ Deliverables:
 - UI shows indexes/sourcetypes/fields.
 - Generated queries use available fields.
 
-### Day 8 — Artifact Export
+### Milestone 8 — Artifact Export
 
 Goals:
 
@@ -1706,7 +1706,7 @@ Deliverables:
 - Export creates local files.
 - README generated with prompt and final SPL.
 
-### Day 9 — Polish + Walkthrough Reliability
+### Milestone 9 — Polish + Walkthrough Reliability
 
 Goals:
 
@@ -1721,7 +1721,7 @@ Deliverables:
 - Walkthrough flow works 3 times in a row.
 - README setup instructions complete.
 
-### Day 10 — Release Assets
+### Milestone 10 — Release Assets
 
 Goals:
 

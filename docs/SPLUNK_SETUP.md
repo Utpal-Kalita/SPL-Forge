@@ -56,7 +56,7 @@ For the failed-login validation scenario, ensure logs include:
 - sourcetype
 - index
 
-For richer Day 9/Day 10 testing, `samples/complex_auth_security.csv` also includes:
+For richer validation testing, `samples/complex_auth_security.csv` also includes:
 
 - destination system
 - app name

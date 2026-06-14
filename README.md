@@ -81,28 +81,222 @@ Initial walkthrough scenario is centered on failed-login monitoring, where syste
 | AI layer | Splunk MCP AI Assistant tool or Splunk-hosted model endpoint |
 | Export | Dashboard, alert, saved search, props.conf, metadata, and app-ready folder generation |
 
-## Quick Start
+Full architecture reference: [`architecture_diagram.md`](./architecture_diagram.md).
 
-Fastest path with Splunk Enterprise free trial:
+```mermaid
+flowchart LR
+    User["User in VS Code or Browser"] --> Panel["SPL Forge UI"]
+    Panel --> Workflow["Forge Workflow<br/>Generate -> Execute -> Inspect -> Repair"]
+    Workflow --> Agent["Agent Layer<br/>Intent parser + Splunk model + repair rules"]
+    Workflow --> Adapter["Splunk Adapter<br/>MCP / REST / Mock"]
+    Adapter --> MCP["Splunk MCP Server<br/>splunk_get_info + splunk_run_query"]
+    Adapter --> REST["Splunk REST API<br/>/services/search/jobs/export"]
+    Adapter --> Mock["Validation Fixture<br/>failed_login_auth.csv shape"]
+    MCP --> Splunk["Splunk Enterprise / Cloud"]
+    REST --> Splunk
+    Splunk --> Adapter
+    Mock --> Adapter
+    Adapter --> Schema["Schema Summary<br/>fields, indexes, sourcetypes, messages"]
+    Schema --> Agent
+    Agent --> Workflow
+    Workflow --> Results["Final SPL + repair history + result preview"]
+    Results --> Panel
+    Workflow -.-> Artifacts["Dashboard / Alert / App Export"]
+```
+
+## Run End To End
+
+Use this path to evaluate SPL Forge from a fresh clone through generated SPL, Splunk execution, repair, artifact preview, export, and publish.
+
+### 1. Clone And Install
 
 ```bash
-# 1. Clone and install
 git clone https://github.com/Utpal-Kalita/SPL-Forge SPL-Forge
 cd SPL-Forge
 npm install
-
-# 2. Install Splunk Enterprise free trial and apply Developer License
-# Follow docs/FREE_TRIAL_SETUP.md
-
-# 3. Configure environment
-cp .env.example .env.local
-
-# 4. Launch extension
-npm run watch
-# Then press F5 in VS Code
 ```
 
-See [`docs/FREE_TRIAL_SETUP.md`](./docs/FREE_TRIAL_SETUP.md) for full Splunk setup instructions.
+### 2. Prepare Splunk
+
+Install Splunk Enterprise locally, apply a Developer License, and load the sample auth data.
+
+Setup docs:
+
+- [`docs/FREE_TRIAL_SETUP.md`](./docs/FREE_TRIAL_SETUP.md)
+- [`docs/SPLUNK_SETUP.md`](./docs/SPLUNK_SETUP.md)
+- [`docs/SAMPLE_DATA.md`](./docs/SAMPLE_DATA.md)
+
+Expected local data:
+
+```text
+index=main sourcetype=auth
+index=main sourcetype=auth_complex
+```
+
+Quick Splunk checks:
+
+```spl
+index=main sourcetype=auth | head 10
+```
+
+```spl
+index=main sourcetype=auth action=failure | stats count by country
+```
+
+### 3. Configure SPL Forge
+
+Create local config:
+
+```bash
+cp .env.example .env.local
+```
+
+For local REST mode:
+
+```bash
+SPL_FORGE_SPLUNK_MODE=rest
+SPL_FORGE_SPLUNK_URL=https://localhost:8089
+SPL_FORGE_SPLUNK_ALLOW_SELF_SIGNED=true
+SPL_FORGE_SPLUNK_SOURCE=self_hosted_trial
+SPL_FORGE_SPLUNK_USERNAME=admin
+SPL_FORGE_SPLUNK_PASSWORD=<your-local-password>
+```
+
+REST mode handles search execution and publish operations. SPL generation still needs one of the Splunk model paths below.
+
+For MCP mode:
+
+```bash
+SPL_FORGE_SPLUNK_MODE=mcp
+SPL_FORGE_SPLUNK_MCP_ENDPOINT=https://localhost:8089/services/mcp
+SPL_FORGE_SPLUNK_MCP_TOKEN=<encrypted-mcp-token>
+SPL_FORGE_SPLUNK_MCP_ALLOW_SELF_SIGNED=true
+SPL_FORGE_SPLUNK_SOURCE=self_hosted_trial
+```
+
+For Splunk-hosted model generation through MCP AI Assistant, set:
+
+```bash
+SPL_FORGE_LLM_PROVIDER=splunk
+SPL_FORGE_LLM_MODEL=splunk-hosted-model
+SPL_FORGE_SPLUNK_MODEL_TOOL=saia_generate_spl
+```
+
+For a direct Splunk-hosted model endpoint instead of MCP AI Assistant tooling, set:
+
+```bash
+SPL_FORGE_LLM_PROVIDER=splunk
+SPL_FORGE_LLM_MODEL=splunk-hosted-model
+SPL_FORGE_SPLUNK_MODEL_ENDPOINT=https://<your-splunk-model-endpoint>
+SPL_FORGE_SPLUNK_MODEL_TOKEN=<your-splunk-token>
+```
+
+Never commit `.env.local`.
+
+### 4. Run The Browser Dashboard
+
+This is the fastest way to see the full workflow outside VS Code:
+
+```bash
+npm run dashboard -- --mode rest
+```
+
+or:
+
+```bash
+npm run dashboard -- --mode mcp
+```
+
+Open the printed local URL and use this prompt:
+
+```text
+Create a failed login dashboard by country and user agent for the last 30 minutes. Alert if failed attempts exceed 100 in 5 minutes.
+```
+
+Expected result:
+
+```text
+Prompt -> Generate SPL -> Run in Splunk -> Inspect/Repair -> Preview dashboard and alert -> Export app
+```
+
+### 5. Run The VS Code Extension
+
+```bash
+npm run watch
+```
+
+Then:
+
+1. Open the repo in VS Code.
+2. Press `F5` to launch the Extension Development Host.
+3. Run `SPL Forge: Open Panel` from the Command Palette.
+4. Paste the same failed-login prompt.
+5. Click `Generate + Run SPL`.
+6. Review final SPL, repair history, result preview, dashboard preview, and alert preview.
+
+### 6. Verify The Live Flow
+
+Run prompt verification against live Splunk:
+
+```bash
+npm run verify:prompts -- --mode rest --all --delay-ms 2500
+```
+
+or:
+
+```bash
+npm run verify:prompts -- --mode mcp --all --delay-ms 2500
+```
+
+Run release verification:
+
+```bash
+npm run verify:release
+```
+
+`verify:release` expects live Splunk model generation and live Splunk search execution. Use `mcp` or `rest`, not `mock`.
+
+### 7. Export And Publish Artifacts
+
+Export an app-ready folder:
+
+```bash
+npm run export:app -- --mode rest
+```
+
+or:
+
+```bash
+npm run export:app -- --mode mcp
+```
+
+Publish the generated dashboard and disabled alert to Splunk:
+
+```bash
+npm run publish:app -- --mode rest
+```
+
+or:
+
+```bash
+npm run publish:app -- --mode mcp
+```
+
+Open Splunk Web:
+
+```text
+http://localhost:8000/app/search/failed_login_dashboard
+```
+
+### 8. Offline Smoke Path
+
+Use mock mode only when Splunk is unavailable:
+
+```bash
+npm run dashboard -- --mode mock
+```
+
+Mock mode is useful for UI review, but it is not a live Splunk validation path.
 
 ## Current Status
 
@@ -118,8 +312,8 @@ Current repository assets:
 - Simple and complex auth sample datasets in `samples/`
 - VS Code extension shell with intent-aware SPL generation and query plan feedback
 - MCP/REST Splunk execution path with result preview in the panel
-- Day 5 self-debugging loop that inspects schema after failed or empty execution, repairs common SPL mistakes, and reruns with capped attempts
-- Day 6 Dashboard Studio JSON preview generated from final working SPL for dashboard prompts
+- Self-debugging loop that inspects schema after failed or empty execution, repairs common SPL mistakes, and reruns with capped attempts
+- Dashboard Studio JSON preview generated from final working SPL for dashboard prompts
 - Classic XML dashboard publish path via `npm run publish:dashboard` for Splunk UI verification
 - Dashboard plus disabled alert publish path via `npm run publish:app` or the panel Publish to Splunk button
 - Alert saved-search preview generated from threshold prompts
@@ -131,7 +325,7 @@ Current repository assets:
 - Sixteen-prompt smoke verifier via `npm run verify:prompts -- --mode mcp --all --delay-ms 2500`
 - Release verifier via `npm run verify:release`
 - Polished VS Code panel flow with query history, error log, Run, Export App, and Publish to Splunk controls
-- Day 9 stability coverage for trend breakdowns, successful-login prompts, source-IP grouping, threshold alerts, unsafe provider output, and complex `auth_complex` risk/MFA/privileged/service-account prompts
+- Stability coverage for trend breakdowns, successful-login prompts, source-IP grouping, threshold alerts, unsafe provider output, and complex `auth_complex` risk/MFA/privileged/service-account prompts
 - Root architecture diagram and MIT license for release readiness
 
 ## Reality Check
@@ -165,7 +359,6 @@ This command checks:
 - [Roadmap](./ROADMAP.md)
 - [Progress](./docs/PROGRESS.md)
 - [Quickstart](./docs/QUICKSTART.md)
-- [Day 1 Status](./docs/DAY1_STATUS.md)
 - [VS Code Setup](./docs/VS_CODE_SETUP.md)
 - [Sample Data](./docs/SAMPLE_DATA.md)
 - [Splunk Setup](./docs/SPLUNK_SETUP.md)

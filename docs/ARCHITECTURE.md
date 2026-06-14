@@ -1,269 +1,126 @@
 # SPL Forge Architecture
 
-This document summarizes the current architecture from product docs.
+This document summarizes the current SPL Forge runtime architecture.
 
 ## System Goal
 
-Turn natural-language intent into validated Splunk artifacts inside development workflow.
+Turn natural-language Splunk intent into validated SPL and app-ready artifacts inside a developer workflow.
 
 ## Core Loop
 
 ```text
-User intent -> LLM generation -> Splunk execution -> Error/result inspection -> Repair -> Preview -> Export
+Intent -> Generate SPL -> Execute -> Inspect -> Repair -> Preview -> Export
 ```
 
-## Day 1 Diagram Draft
+## Workflow Diagram
 
 ```mermaid
 flowchart LR
-    U[User Prompt] --> P[VS Code Panel]
-    P --> G[LLM Generate]
-    G --> X[Splunk Adapter]
-    X -->|results or errors| R[Repair Logic]
-    R --> P
-    P --> E[Export Artifacts]
+    User["User in VS Code or Browser"] --> Panel["SPL Forge UI"]
+    Panel --> Workflow["Forge Workflow<br/>Generate -> Execute -> Inspect -> Repair"]
+    Workflow --> Agent["Agent Layer<br/>Intent parser + Splunk model + repair rules"]
+    Workflow --> Adapter["Splunk Adapter<br/>MCP / REST / Mock"]
+    Adapter --> MCP["Splunk MCP Server<br/>splunk_get_info + splunk_run_query"]
+    Adapter --> REST["Splunk REST API<br/>/services/search/jobs/export"]
+    Adapter --> Mock["Validation Fixture<br/>failed_login_auth.csv shape"]
+    MCP --> Splunk["Splunk Enterprise / Cloud"]
+    REST --> Splunk
+    Splunk --> Adapter
+    Mock --> Adapter
+    Adapter --> Schema["Schema Summary<br/>fields, indexes, sourcetypes, messages"]
+    Schema --> Agent
+    Agent --> Workflow
+    Workflow --> Results["Final SPL + repair history + result preview"]
+    Results --> Panel
+    Workflow -.-> Artifacts["Dashboard / Alert / App Export"]
 ```
 
 ## Primary Components
 
-### 1. VS Code Extension Layer
+### VS Code Extension Layer
 
-Responsible for:
+- Command entry through `SPL Forge: Open Panel`
+- Prompt input and workflow controls
+- Query plan, SPL, execution, repair, dashboard, and alert previews
+- Export and publish actions
 
-- command entry
-- prompt UI
-- progress display
-- result preview
-- export actions
+### Browser Dashboard
 
-### 2. Agent Layer
+- Local browser interface served by `npm run dashboard`
+- Uses the same workflow and Splunk execution paths as the extension
+- Useful for quick product walkthroughs without launching Extension Development Host
 
-Responsible for:
+### Agent Layer
 
-- prompt construction
-- SPL generation
-- repair prompts
-- explanation generation
-- artifact drafting
+- Intent parsing for artifact type, breakdowns, focus fields, time ranges, and thresholds
+- Splunk-hosted-model generation through MCP AI Assistant tooling or a direct Splunk model endpoint
+- Deterministic fallback generation for offline validation
+- Repair reasoning driven by execution errors, empty results, and schema context
 
-### 3. Splunk Adapter Layer
+### Splunk Adapter Layer
 
-Responsible for:
+- MCP mode through Splunk MCP Server tools
+- REST mode through Splunk management API
+- Mock mode for offline UI and test validation
+- Shared result shape for fields, rows, messages, errors, and execution summaries
 
-- query execution
-- field and schema inspection
-- environment capability detection
-- MCP or REST mode switching
+### Schema And Repair Layer
 
-### 4. Artifact Layer
+- Index, sourcetype, field, and metadata inspection
+- Deterministic repair rules for common local data issues
+- Time-window retry support for stale fixture timestamps
+- Capped repair attempts with visible repair history
 
-Responsible for:
+### Artifact Layer
 
-- dashboard config generation
-- alert config generation
-- saved search packaging
-- app-ready export preparation
-
-## Recommended Release Flow
-
-1. User enters prompt in panel.
-2. Agent generates candidate SPL.
-3. Adapter runs SPL in Splunk.
-4. If error or empty-result issue, system collects diagnostics.
-5. Agent repairs SPL using diagnostics and metadata.
-6. Final query preview shown to user.
-7. User approves export action.
-
-## Design Principles
-
-- Human approval before risky action
-- Real execution before trust claim
-- Environment-aware repair, not generic guessing
-- Mock-safe walkthrough fallback
-- Narrow, polished workflow
-
-## Suggested Module Layout
-
-```text
-src/
-├─ extension.ts
-├─ config/
-│  └─ env.ts
-├─ agent/
-│  ├─ generate.ts
-│  ├─ repair.ts
-│  └─ explain.ts
-├─ splunk/
-│  ├─ mcp.ts
-│  ├─ rest.ts
-│  ├─ mock.ts
-│  └─ schema.ts
-├─ artifacts/
-│  ├─ dashboard.ts
-│  ├─ alert.ts
-│  └─ package.ts
-└─ panels/
-   └─ assistant.ts
-```
-
-## Current Day 1 Scaffold
-
-```text
-src/
-├─ extension.ts
-├─ panels/
-│  └─ assistant.ts
-└─ test/
-   └─ extension.test.ts
-```
-
-## Current Day 2 Scaffold
-
-```text
-src/
-├─ extension.ts
-├─ agent/
-│  └─ generate.ts
-├─ config/
-│  └─ env.ts
-├─ panels/
-│  └─ assistant.ts
-└─ test/
-   └─ extension.test.ts
-```
-
-Day 2 currently supports:
-
-- prompt entry inside webview panel
-- webview message passing into extension runtime
-- `.env.local`-aware config loading
-- Splunk MCP AI Assistant tool calls or direct Splunk-hosted model endpoint calls
-- raw provider output and parsed SPL rendering in panel
-- raw provider output and parsed SPL rendering in panel
-- output channel logging for prompt/provider/result
-
-## Current Day 3 Scaffold
-
-```text
-src/
-├─ agent/
-│  └─ generate.ts
-├─ panels/
-│  └─ assistant.ts
-└─ test/
-   └─ extension.test.ts
-```
-
-Day 3 currently supports:
-
-- intent parsing for artifact type, breakdowns, focus field, time range, and thresholds
-- schema-aware LLM prompts for the failed-login validation dataset
-- deterministic mock SPL generation for dashboard, alert, and trend prompts
-- query plan rendering in the panel
-
-## Current Day 4 Scaffold
-
-```text
-src/
-├─ config/
-│  └─ env.ts
-├─ splunk/
-│  └─ execute.ts
-├─ extension.ts
-├─ panels/
-│  └─ assistant.ts
-└─ test/
-   └─ extension.test.ts
-```
-
-Day 4 currently supports:
-
-- `mock` execution mode using deterministic failed-login fixture rows
-- `rest` execution mode using Splunk `/services/search/jobs/export`
-- `mcp` execution mode using Splunk MCP Server `splunk_run_query`
-- MCP preflight call through `splunk_get_info`
-- execution summaries, messages, fields, and result previews in the panel
-- runtime config for Splunk MCP endpoint/token, REST URL/credentials, search limit, and self-signed TLS
-- error reporting when REST credentials are missing or Splunk returns an error
-- local self-hosted trial auth-query rewrite for CSV fixture field extraction and stale-timestamp retry
-
-## Current Day 5 Scaffold
-
-```text
-src/
-├─ agent/
-│  ├─ generate.ts
-│  ├─ repair.ts
-│  └─ workflow.ts
-├─ splunk/
-│  ├─ execute.ts
-│  └─ schema.ts
-├─ extension.ts
-├─ panels/
-│  └─ assistant.ts
-└─ test/
-   └─ extension.test.ts
-```
-
-Day 5 currently supports:
-
-- forge workflow orchestration around generate -> execute -> inspect -> repair -> rerun
-- schema inspection summary for fields, indexes, sourcetypes, and probe messages
-- deterministic repair rules for common wrong index, sourcetype, field alias, action value, and time-window failures
-- capped repair attempts before returning final execution state
-- repair history rendering in the VS Code panel and output channel
-- independent unit coverage for repair behavior and workflow success path
-
-## Current Day 6 Scaffold
-
-```text
-src/
-├─ artifacts/
-│  └─ dashboard.ts
-├─ agent/
-│  └─ workflow.ts
-├─ panels/
-│  └─ assistant.ts
-└─ test/
-   └─ extension.test.ts
-```
-
-Day 6 currently supports:
-
-- deterministic Dashboard Studio JSON generation from final working SPL
-- classic Splunk dashboard XML generation for Splunk UI loading
-- visualization selection from prompt intent and result schema (`bar`, `line`, `singlevalue`, or `table`)
-- panel preview for dashboard title, visualization type, fields, and JSON
-- REST publisher CLI for loading generated dashboard into Splunk UI
-- deterministic saved-search alert draft generation from threshold prompts
-- panel preview for alert title, condition, schedule, and savedsearches.conf draft
-- local Splunk app folder export with `app.conf`, dashboard XML, `savedsearches.conf`, metadata, README, and manifest
-- output-channel logging for generated dashboard artifacts
-- unit coverage for dashboard and alert artifact generation plus workflow integration
+- Dashboard Studio JSON preview
+- Classic XML dashboard generation
+- Disabled saved-search alert configuration
+- App-ready folder export with app metadata and search-time extraction stanzas
+- REST publish path for dashboard plus disabled alert
 
 ## Runtime Modes
 
 ### MCP Mode
 
-Preferred product path. Strong alignment with agentic workflow. Day 4 implementation calls MCP `splunk_get_info` plus `splunk_run_query`, normalizes tool output into panel result preview, and rewrites local CSV auth queries into working extraction pipelines when sample data lacks search-time field extraction.
+Preferred product path for agent-friendly Splunk integration.
 
-### REST Fallback
+Used for:
 
-Practical fallback when MCP unavailable. Day 4 implementation posts generated SPL to Splunk search export endpoint.
+- live SPL execution
+- metadata discovery
+- schema-aware repair
+- result preview
+
+### REST Mode
+
+Direct Splunk management API fallback.
+
+Used for:
+
+- local Splunk Enterprise validation
+- search execution through `/services/search/jobs/export`
+- dashboard and saved-search publish operations
 
 ### Mock Mode
 
-Required for resilient walkthroughs and local iteration. Day 4 implementation returns deterministic rows from the failed-login fixture shape.
+Offline path for UI review and CI-safe tests.
 
-## What Success Looks Like
+Mock mode is not a live Splunk validation path.
 
-- Query generated from plain English
-- At least one failure mode detected and repaired
-- Final result preview understandable
-- Export artifact believable and reusable
+## Safety Posture
+
+- Generated searches are bounded by configured row limits.
+- Risky commands are stripped or blocked before execution.
+- Generated alerts are disabled by default.
+- Publish operations write dashboard and disabled alert artifacts only.
+- Full app install automation and production-impacting actions remain out of current scope.
 
 ## Related Docs
 
+- [`README.md`](../README.md)
 - [`PRD.md`](../PRD.md)
 - [`ROADMAP.md`](../ROADMAP.md)
+- [`SPLUNK_SETUP.md`](./SPLUNK_SETUP.md)
+- [`SPLUNK_MCP.md`](./SPLUNK_MCP.md)
 - [`WALKTHROUGH_RUNBOOK.md`](./WALKTHROUGH_RUNBOOK.md)

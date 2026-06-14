@@ -40,7 +40,7 @@ suite('Extension Test Suite', () => {
 		workspaceName: 'SPL-Forge',
 	};
 
-	test('panel html shows day 1 scaffold state', () => {
+	test('panel html shows initial panel state', () => {
 		const html = getPanelHtml({
 			config: mockConfig,
 			cspSource: 'vscode-resource:',

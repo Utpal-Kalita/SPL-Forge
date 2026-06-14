@@ -10,7 +10,7 @@ export type SplunkSchemaSummary = {
 	sourcetypes: string[];
 };
 
-const demoSchema: SplunkSchemaSummary = {
+const validationSchema: SplunkSchemaSummary = {
 	fields: ['_time', 'action', 'country', 'src', 'user', 'user_agent'],
 	indexes: ['main'],
 	messages: ['Using built-in failed-login validation schema.'],
@@ -19,7 +19,7 @@ const demoSchema: SplunkSchemaSummary = {
 
 export async function inspectSplunkSchema(search: string, config: ForgeConfig): Promise<SplunkSchemaSummary> {
 	if (config.splunkMode === 'mock') {
-		return demoSchema;
+		return validationSchema;
 	}
 
 	if (config.splunkMode === 'mcp') {
@@ -34,9 +34,9 @@ export async function inspectSplunkSchema(search: string, config: ForgeConfig): 
 		splunkSource: config.splunkSource === 'self_hosted_trial' ? 'remote' : config.splunkSource,
 	});
 
-	const fields = result.fields.length > 0 ? result.fields : demoSchema.fields;
-	const indexes = [...new Set([index, ...demoSchema.indexes])];
-	const sourcetypes = [...new Set([sourcetype, ...demoSchema.sourcetypes])];
+	const fields = result.fields.length > 0 ? result.fields : validationSchema.fields;
+	const indexes = [...new Set([index, ...validationSchema.indexes])];
+	const sourcetypes = [...new Set([sourcetype, ...validationSchema.sourcetypes])];
 
 	return {
 		fields,
@@ -90,13 +90,13 @@ async function inspectProbeSchema(search: string, config: ForgeConfig): Promise<
 	});
 
 	return {
-		fields: result.fields.length > 0 ? result.fields : demoSchema.fields,
-		indexes: [...new Set([index, ...demoSchema.indexes])],
+		fields: result.fields.length > 0 ? result.fields : validationSchema.fields,
+		indexes: [...new Set([index, ...validationSchema.indexes])],
 		messages: [
 			`Schema probe: ${probeSearch}`,
 			...result.messages,
 		],
-		sourcetypes: [...new Set([sourcetype, ...demoSchema.sourcetypes])],
+		sourcetypes: [...new Set([sourcetype, ...validationSchema.sourcetypes])],
 	};
 }
 

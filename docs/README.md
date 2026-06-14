@@ -18,7 +18,6 @@ Use this index to find setup, architecture, walkthrough, and research notes.
 
 - [`ARCHITECTURE.md`](./ARCHITECTURE.md) - system design and runtime modes
 - [`PROGRESS.md`](./PROGRESS.md) - implementation progress
-- [`DAY1_STATUS.md`](./DAY1_STATUS.md) - initial implementation notes
 - [`WALKTHROUGH_RUNBOOK.md`](./WALKTHROUGH_RUNBOOK.md) - walkthrough script and validation flow
 
 ## Project Context

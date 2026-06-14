@@ -14,7 +14,7 @@ Use this fixture for local setup and repeatable validation runs.
 
 ## Why This Fixture Exists
 
-Roadmap Day 1 requires sample data prepared in Splunk.
+SPL Forge needs repeatable sample data in Splunk for local validation.
 
 This file supports:
 
@@ -24,7 +24,7 @@ This file supports:
 - user agent aggregation
 - simple threshold alert examples
 
-`complex_auth_security.csv` supports richer Day 9/Day 10 scenarios:
+`complex_auth_security.csv` supports richer validation scenarios:
 
 - successful, failed, and blocked login outcomes
 - MFA challenge outcomes
