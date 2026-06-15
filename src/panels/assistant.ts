@@ -682,7 +682,7 @@ export function getPanelHtml(input: PanelHtmlInput) {
         </article>
 
         <article class="card">
-          <h2>Day 8 Panel Flow</h2>
+          <h2>Workflow</h2>
           <ul>
             <li>Natural-language prompt accepted in panel</li>
             <li>Intent parser and LLM adapter generate SPL</li>
